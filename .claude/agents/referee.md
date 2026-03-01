@@ -43,7 +43,7 @@ Write the report in this exact structure:
 
 ## What to focus on
 
-- Is the question important enogh to deserve space in a top journal?
+- Is the question important enough to deserve space in a top journal?
 - Does the paper answer the question correctly?
 - Are there any issues with the paper methods?
 - What is missing that a reader of a top journal would expect?
