@@ -13,19 +13,35 @@ Two complementary security layers:
 | Layer | Controls | Applies To | Enforcement |
 |-------|----------|-----------|-------------|
 | **Permissions** | Which tools Claude can use | All tools | User prompt allow/deny |
-| **Sandboxing** | What Bash commands can access | Bash + child processes | OS-level (bubblewrap on Linux) |
+| **Sandboxing** | What Bash commands can access | **Bash + child processes only** | OS-level (bubblewrap on Linux) |
+
+### Critical distinction: Sandbox does NOT affect WebFetch/WebSearch
+
+The sandbox only restricts **Bash commands and their child processes**. Claude's built-in tools like `WebFetch`, `WebSearch`, `Read`, `Edit`, and `Write` operate **outside the sandbox** and are controlled only by the permissions layer.
+
+This means:
+- **No network sandbox needed** for web browsing — `WebFetch` and `WebSearch` always work
+- **`socat` is only needed** if you want to sandbox network access from Bash commands (e.g., `curl`, `wget`, `pip install`)
+- **Filesystem sandbox** is the main protection: locks Bash to writing only inside your project folder
+- You can safely use `--dangerously-skip-permissions` on your host machine if the filesystem sandbox prevents Bash from touching sensitive files
 
 ## Linux/Ubuntu Setup
 
+**Filesystem sandbox only** (no network sandbox for Bash):
 ```bash
 sudo apt-get update
+sudo apt-get install bubblewrap
+```
+
+**Full sandbox** (filesystem + network restriction on Bash commands):
+```bash
 sudo apt-get install bubblewrap socat
 ```
 
 | Platform | Technology | Status |
 |----------|-----------|--------|
 | macOS | Seatbelt | Works out of the box |
-| Linux | bubblewrap | Requires `bubblewrap` + `socat` |
+| Linux | bubblewrap | Requires `bubblewrap` (+ `socat` for network sandbox) |
 | WSL2 | bubblewrap | Requires installation |
 | WSL1 | N/A | Not supported |
 
@@ -50,7 +66,33 @@ claude --dangerously-skip-permissions
 
 Skips ALL permission prompts. Auto-approves everything.
 
-### NEVER run on host machine. Always use in a container:
+### Two safe approaches:
+
+**Option A: Filesystem sandbox on host (simpler, keeps web access)**
+
+With the sandbox restricting Bash to your project folder, you can run on the host. WebFetch/WebSearch still work for literature search, paper fetching, etc.
+
+```bash
+# Just need bubblewrap installed (no socat, no Docker)
+claude --dangerously-skip-permissions
+```
+
+With this settings.json:
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "mode": "auto-allow",
+    "filesystem": {
+      "allowWrite": ["./"],
+      "denyWrite": ["~/.ssh", "~/.aws", "~/.claude", "//etc", "//root"],
+      "denyRead": ["~/.ssh", "~/.aws"]
+    }
+  }
+}
+```
+
+**Option B: Docker container (maximum isolation, no web unless configured)**
 
 ```bash
 docker run --rm --network none \
@@ -59,10 +101,10 @@ docker run --rm --network none \
   --dangerously-skip-permissions
 ```
 
-### Risks without isolation:
+### Risks without ANY isolation:
 - File modification/deletion without confirmation
 - Irreversible changes
-- Data exfiltration (SSH keys, credentials)
+- Data exfiltration via Bash (SSH keys, credentials)
 - Prompt injection attacks execute without approval
 
 ## Sandbox Configuration
@@ -219,6 +261,49 @@ Some tools are incompatible with sandbox:
 ```
 
 These run outside sandbox with normal permission flow.
+
+## Recommended Setup: AI Research Project
+
+For an AI-assisted research project that needs web search, paper fetching, and code execution but should stay safe:
+
+**Prerequisites (Ubuntu):**
+```bash
+sudo apt-get install bubblewrap
+```
+
+**`.claude/settings.json`** (shared with team via git):
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "mode": "auto-allow",
+    "filesystem": {
+      "allowWrite": ["./"],
+      "denyWrite": ["~/.ssh", "~/.aws", "~/.claude", "//etc", "//root"],
+      "denyRead": ["~/.ssh", "~/.aws"]
+    }
+  }
+}
+```
+
+**Run:**
+```bash
+claude --dangerously-skip-permissions
+```
+
+**What this gives you:**
+- WebSearch and WebFetch work freely (literature search, paper fetching)
+- Bash can only write inside the project folder
+- Bash cannot read SSH keys or AWS credentials
+- All file edits auto-approved (within project)
+- Git works normally (reads ~/.gitconfig, writes inside project)
+- Python/R scripts run fine (write output to project folder)
+
+**What it blocks:**
+- `rm -rf ~/*` — sandbox prevents writes outside project
+- `cat ~/.ssh/id_rsa` — sandbox denies read
+- `pip install --user malware` — writes to ~/.local, blocked
+- Any Bash command touching system files
 
 ## Open Source Sandbox Runtime
 

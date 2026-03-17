@@ -1,0 +1,11 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "mode": "auto-allow",
+    "filesystem": {
+      "allowWrite": ["./"],
+      "denyWrite": ["~/.ssh", "~/.aws", "~/.claude", "//etc", "//root"],
+      "denyRead": ["~/.ssh", "~/.aws"]
+    }
+  }
+}
