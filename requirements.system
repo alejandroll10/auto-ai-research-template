@@ -1,0 +1,6 @@
+# System dependencies (install before using this project)
+# Ubuntu/Debian: sudo apt-get install <package>
+python3>=3.12
+python3-pip
+git
+bubblewrap
