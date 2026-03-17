@@ -4,3 +4,5 @@ python3>=3.12
 python3-pip
 git
 bubblewrap
+# Python package manager: curl -LsSf https://astral.sh/uv/install.sh | sh
+uv
