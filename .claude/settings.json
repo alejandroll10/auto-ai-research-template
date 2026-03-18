@@ -2,6 +2,7 @@
   "sandbox": {
     "enabled": true,
     "mode": "auto-allow",
+    "allowUnsandboxedCommands": false,
     "filesystem": {
       "allowWrite": ["./"],
       "denyWrite": ["~/.ssh", "~/.aws", "~/.claude", "//etc", "//root"],
