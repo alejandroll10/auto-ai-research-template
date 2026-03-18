@@ -8,15 +8,41 @@ The project also produces a **process log** documenting how the autonomous syste
 
 ---
 
-## How to launch
+## How to use
 
-```bash
-claude --dangerously-skip-permissions
+### First time: set up a new project
+
+Open an empty folder in Cursor (or any editor), start Claude Code, and say:
+
+```
+Clone the research template and set up.
 ```
 
-Then say: **"Run the pipeline."**
+This clones `https://github.com/alejandroll10/auto-ai-research-template.git` into the current folder, initializes pipeline state, and creates a git repo. After this, all template files are visible in your editor's file tree.
 
-The system reads this file, checks pipeline state, and continues from where it left off.
+### Run the pipeline
+
+```
+Run the pipeline.
+```
+
+The system reads this file, checks `process_log/pipeline_state.json`, and continues from where it left off. No human input needed after this point.
+
+### Resume after interruption
+
+If the session ends mid-pipeline, start Claude Code again and say "Run the pipeline." The system reads pipeline state and picks up from the last completed stage.
+
+### Watch progress
+
+All output files appear in real time:
+- `output/stage0/` — problem discovery results
+- `output/stage1/` — theory drafts, audits, novelty checks
+- `output/stage2/` — implications
+- `output/stage3/` — self-attack, scorer decisions
+- `paper/sections/` — LaTeX paper sections
+- `process_log/` — full narrative log
+
+Git commits after every stage transition (`git log --oneline` shows the full history).
 
 ---
 
@@ -350,10 +376,14 @@ These rules apply when writing paper drafts.
 
 ## How to start a session
 
-1. Read `process_log/pipeline_state.json`
-2. If state exists: report current stage and continue
-3. If no state exists: initialize state and begin Stage 0
-4. No human confirmation needed — just run
+1. Check if CLAUDE.md exists in the current directory
+   - If NO: user said "clone the template" → clone the repo into current folder, commit, then stop and wait for "Run the pipeline"
+   - If YES: continue below
+2. Read `process_log/pipeline_state.json`
+   - If `status` is `"not_started"`: set to `"running"`, begin Stage 0
+   - If `status` is `"running"`: read `current_stage` and continue from there
+   - If `status` is `"complete"`: report that the pipeline is done
+3. No human confirmation needed — just run
 
 ---
 

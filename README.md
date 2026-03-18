@@ -4,6 +4,16 @@ Autonomous finance theory paper generator. Clone, launch, walk away. The system 
 
 ## Quick start
 
+### Option A: From Cursor (recommended)
+
+1. Create a new empty folder and open it in Cursor
+2. Open the Claude Code terminal
+3. Say: **"Clone the research template and set up."**
+4. Then say: **"Run the pipeline."**
+5. Watch files appear in the file tree as the pipeline runs
+
+### Option B: From terminal
+
 ```bash
 ./setup.sh my-paper
 cd my-paper
