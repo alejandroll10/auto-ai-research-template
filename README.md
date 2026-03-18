@@ -7,10 +7,14 @@ Autonomous finance theory paper generator. Clone, launch, walk away. The system 
 ### Option A: From Cursor (recommended)
 
 1. Create a new empty folder and open it in Cursor
-2. Open the Claude Code terminal
-3. Say: **"Clone the research template and set up."**
-4. Then say: **"Run the pipeline."**
-5. Watch files appear in the file tree as the pipeline runs
+2. Open the Claude Code terminal (`claude --dangerously-skip-permissions`)
+3. Say:
+
+```
+Clone https://github.com/alejandroll10/auto-ai-research-template.git into this folder. Then read CLAUDE.md and run the pipeline.
+```
+
+4. Watch files appear in the file tree as the pipeline runs
 
 ### Option B: From terminal
 
