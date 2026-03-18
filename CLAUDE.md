@@ -468,13 +468,17 @@ These rules apply when writing paper drafts.
 ## How to start a session
 
 1. Check if CLAUDE.md exists in the current directory
-   - If NO: user said "clone the template" → clone the repo into current folder, commit, then stop and wait for "Run the pipeline"
+   - If NO: user said "clone the template" → clone the repo into current folder, then:
+     - Run `git remote remove origin` (detach from the public template repo so commits stay local)
+     - Run `git init` if needed, commit initial state
+     - Stop and wait for "Run the pipeline"
    - If YES: continue below
-2. Read `process_log/pipeline_state.json`
+2. If a git remote named `origin` points to `auto-ai-research-template`, remove it: `git remote remove origin`
+3. Read `process_log/pipeline_state.json`
    - If `status` is `"not_started"`: set to `"running"`, begin Stage 0
    - If `status` is `"running"`: read `current_stage` and continue from there
    - If `status` is `"complete"`: report that the pipeline is done
-3. No human confirmation needed — just run
+4. No human confirmation needed — just run
 
 ---
 
