@@ -1,178 +1,367 @@
-# CLAUDE.md — AI-Assisted Research Project
+# CLAUDE.md — Autonomous Theory Paper Pipeline
 
 ## Purpose
 
-This project produces **two deliverables**:
+This project autonomously produces a **finance theory paper** suitable for submission to a top-3 finance journal (JF, JFE, RFS). The system runs end-to-end with no human intervention after launch. Quality is enforced by adversarial evaluation at every stage.
 
-1. **A research paper** (topic TBD).
-2. **A practical guide on AI-assisted research** (`process_log/guide.md`) — a standalone, tutorial-style document that teaches PhD students how to use AI to produce academic research, built from the real record of how *this* project was done.
-
-Everything we log — discussions, decisions, prompting patterns, dead ends — is raw material for that guide. The guide is the primary pedagogical output; the raw logs in `process_log/` are the supporting evidence.
+The project also produces a **process log** documenting how the autonomous system worked, as a pedagogical record.
 
 ---
 
-## Documentation Protocol
+## How to launch
 
-**Every interaction matters.** But documentation should not interrupt the research workflow. We use a **background scribe agent** to handle all logging.
+```bash
+claude --dangerously-skip-permissions
+```
 
-### How it works
+Then say: **"Run the pipeline."**
 
-1. **We just work.** The main conversation focuses entirely on research — discussing ideas, writing code, making decisions. No pausing to write log entries.
-2. **The scribe runs in the background.** A custom subagent defined in `.claude/agents/scribe.md` handles all documentation. Claude delegates to it at natural breakpoints. It reads the conversation, updates all log files and the narrative guide, and commits to git. Its commits are prefixed with `scribe:` so they're identifiable in `git log`.
-3. **Trigger points:** Claude should invoke the scribe:
-   - After a cluster of decisions or a major discussion
-   - When switching topics or tasks
-   - When the user asks to "log this" or "update the guide"
-   - At the end of a session
-   - Roughly every 15-20 minutes of active work, if nothing else triggers it
-
-### What the scribe documents
-
-| What | Where |
-|------|-------|
-| Conversations & decisions | `process_log/discussions/YYYY-MM-DD.md` |
-| Prompting patterns | `process_log/patterns/YYYY-MM-DD.md` |
-| Research decisions | `process_log/decisions/YYYY-MM-DD.md` |
-| Session summaries | `process_log/sessions/YYYY-MM-DD.md` |
-| Literature & references | `references/references.md` |
-| General guide | `process_log/guide.md` |
-| Project history | `process_log/history.md` |
-
-### Scribe capabilities
-
-The scribe has access to: file read/write, git, and the full conversation context. It runs lean — no web search, no code execution. Just reads context and writes documentation.
-
-It also has **project-level persistent memory** (`.claude/agent-memory/scribe/`) so it remembers conventions and context across sessions.
-
-### Code & Drafts
-
-- All code goes in `code/`. Each script should have a clear header comment.
-- Paper drafts go in `paper/`. The paper uses a master file (`paper/main.tex`) that `\input`s one file per section from `paper/sections/`. Never write the paper as one giant file. Version notes in `paper/revision_notes.md`.
-- **No inline code in bash commands.** Always write Python/R code to a script file first, then run it. This keeps everything reproducible and version-controlled.
-- **Exploratory scripts go in `code/tmp/`.** Use this for one-off checks, data inspection, etc. Promote to `code/` once the logic stabilizes. The `code/tmp/` directory is gitignored.
-- **Never edit `paper/library.bib`** — it is managed externally by Zotero. If a citation is missing, tell the user to add it in Zotero. You may read the file to check for existing entries.
+The system reads this file, checks pipeline state, and continues from where it left off.
 
 ---
 
-## Project Structure
+## Pipeline overview
 
 ```
-project_name/
-├── CLAUDE.md                 # This file — project instructions for Claude
-├── .gitignore
-├── .claude/agents/scribe.md  # Background scribe subagent definition
-│
-├── process_log/              # All documentation
-│   ├── guide.md              # General AI-assisted research manual
-│   ├── history.md            # This project's specific story
-│   ├── discussions/          # What we discussed (YYYY-MM-DD.md per day)
-│   ├── decisions/            # Research choices made (YYYY-MM-DD.md per day)
-│   ├── patterns/             # Prompting techniques (YYYY-MM-DD.md per day)
-│   └── sessions/             # Session summaries (YYYY-MM-DD.md per day)
-│
-├── references/
-│   └── references.md         # Papers, data sources, links
-├── code/                     # All analysis code
-│   ├── download/             # Data download scripts (reproducible)
-│   ├── analysis/             # Empirical analysis scripts
-│   └── tmp/                  # Exploratory throwaway scripts (gitignored)
-├── data/                     # Raw and processed data
-├── paper/                    # Research paper drafts and notes
-│   └── revision_notes.md     # Change log across drafts
-└── output/                   # Figures, tables, results
+Stage 0: Problem Discovery ──→ Gate 0: Problem Viability
+Stage 1: Theory Generation  ──→ Gate 1: Math Audit
+                                 Gate 2: Novelty Check
+Stage 2: Implications       ──→
+Stage 3: Self-Attack         ──→ Gate 3: Scorer Decision
+                                   ├── ADVANCE → Stage 4
+                                   ├── REVISE  → back to Stage 1 (max 2×)
+                                   ├── REWORK  → back to Stage 1 new approach (max 2×)
+                                   └── ABANDON → back to Stage 0 (max 3×)
+Stage 4: Paper Writing       ──→
+Stage 5: Style Check         ──→
+Stage 6: Referee Simulation  ──→ Gate 4: Referee Decision
+                                   ├── Minor/Accept → Done
+                                   ├── Major Revision → back to Stage 4 (max 2×)
+                                   └── Reject → back to Stage 1
 ```
 
 ---
 
-## Workflow Rules
+## Pipeline state
 
-1. **Think out loud.** Claude should explain its reasoning before acting — not just produce output. PhD students need to see the thought process.
-2. **Ask before assuming.** When a decision has multiple reasonable paths, present the options with trade-offs rather than silently picking one.
-3. **Flag uncertainty.** If Claude is unsure about a fact, method, or claim, say so explicitly. Model good epistemic practice.
-4. **Iterate in the open.** Show drafts, get feedback, revise. Don't aim for a perfect first pass — the iteration *is* the lesson.
-5. **Cite sources.** Any empirical claim, stylized fact, or methodological choice should reference specific papers or data.
-6. **No hallucinated references.** Never invent citations. If unsure of a reference, say so and offer to search.
-7. **Keep it reproducible.** Code should be runnable. Data sources should be clearly identified. Steps should be repeatable.
-8. **Never fabricate numbers or results.** If a number, statistic, or empirical result is not computed from actual data or derived from a verified source, mark it explicitly as `[CONJECTURED]` or `[TODO: compute]`. Start drafts with minimal claims and add results incrementally as they are produced. A placeholder is always better than a fabrication.
-9. **Commit compulsively.** After every meaningful change — a new log entry, a code addition, a decision documented — commit to git immediately. Small, frequent commits with clear messages. The git history itself becomes part of the pedagogical record. Don't wait for "a good stopping point"; every atomic piece of progress gets its own commit.
+State is tracked in `process_log/pipeline_state.json`. Read this file at session start. Update it after every stage transition. Commit after every update.
+
+```json
+{
+  "current_stage": "stage_0",
+  "problem_attempt": 1,
+  "theory_attempt": 1,
+  "revision_round": 0,
+  "referee_round": 0,
+  "status": "running",
+  "scores": {},
+  "history": []
+}
+```
 
 ---
 
-## Communication Style
+## Stage 0: Problem Discovery
 
-- Write clearly and directly — as you would in an academic setting.
-- Use precise terminology but explain jargon when first introduced (PhD students at various stages will read this).
-- When presenting research options, use structured comparisons (tables, pros/cons).
-- Keep code comments informative but concise.
+**Agent:** `literature-scout`
+
+1. Choose a domain: asset pricing or corporate finance
+2. Launch literature-scout to search for open questions, puzzles, or gaps
+3. Save results to `output/stage0/literature_map.md`
+4. Write a problem statement to `output/stage0/problem_statement.md`
+5. Commit: `pipeline: stage 0 complete — problem identified`
+
+### Gate 0: Problem Viability
+
+The orchestrator (you) evaluates:
+- Is this question important enough for a top journal?
+- Is there actually a gap?
+- Is it tractable as a pure theory paper?
+
+Score 0-100. If below 50, re-run Stage 0 with different search terms. After 3 failures, pick the best problem and proceed.
+
+---
+
+## Stage 1: Theory Generation
+
+**Agent:** `theory-generator`
+
+1. Read `output/stage0/problem_statement.md` and `output/stage0/literature_map.md`
+2. Choose strategy:
+   - Attempt 1: fresh proposal
+   - Attempt 2+: mutate (if previous attempt had good elements) or fresh with different approach
+3. Launch theory-generator with the problem statement, literature map, and strategy
+4. Save result to `output/stage1/theory_draft_vN.md` (N = attempt number)
+5. Commit: `pipeline: stage 1 — theory v{N} generated`
+
+### Gate 1: Math Audit
+
+**Agent:** `math-auditor`
+
+1. Launch math-auditor on `output/stage1/theory_draft_vN.md`
+2. Save result to `output/stage1/math_audit_vN.md`
+3. If FAIL:
+   - Read the specific errors from the audit
+   - Re-launch theory-generator in **mutate** mode with the draft + audit feedback
+   - Max 3 audit attempts per theory version
+   - If still failing after 3: treat as theory failure, increment theory_attempt
+4. If PASS: proceed to Gate 2
+5. Commit: `pipeline: gate 1 — math audit {PASS/FAIL}`
+
+### Gate 2: Novelty Check
+
+**Agent:** `novelty-checker`
+
+1. Launch novelty-checker on `output/stage1/theory_draft_vN.md`
+2. Save result to `output/stage1/novelty_check_vN.md`
+3. If KNOWN: abandon this theory, return to Stage 1 with new approach
+4. If INCREMENTAL: flag it, proceed with caution (scorer will weigh this)
+5. If NOVEL: proceed to Stage 2
+6. Commit: `pipeline: gate 2 — novelty {NOVEL/INCREMENTAL/KNOWN}`
+
+---
+
+## Stage 2: Implications
+
+**Orchestrator task** (no separate agent needed — you do this)
+
+1. Read the theory draft
+2. Work out:
+   - Testable predictions
+   - Comparative statics
+   - Special cases that recover known results
+   - Economic intuition for each result
+3. Append to the theory draft or write to `output/stage2/implications.md`
+4. Commit: `pipeline: stage 2 — implications developed`
+
+---
+
+## Stage 3: Self-Attack
+
+**Agent:** `self-attacker`
+
+1. Launch self-attacker on the theory draft + implications
+2. Save result to `output/stage3/self_attack_vN.md`
+3. Commit: `pipeline: stage 3 — self-attack complete`
+
+### Gate 3: Scorer Decision
+
+**Agent:** `scorer`
+
+1. Launch scorer with:
+   - Theory draft: `output/stage1/theory_draft_vN.md`
+   - Math audit: `output/stage1/math_audit_vN.md`
+   - Novelty check: `output/stage1/novelty_check_vN.md`
+   - Self-attack: `output/stage3/self_attack_vN.md`
+2. Save result to `output/stage3/scorer_decision_vN.md`
+3. Read the decision:
+
+| Decision | Action |
+|----------|--------|
+| **ADVANCE** (75+) | Proceed to Stage 4 |
+| **REVISE** (55-74) | Return to Stage 1 in mutate mode with scorer feedback. Max 2 revision rounds. |
+| **MAJOR REWORK** (35-54) | Return to Stage 1 with fresh approach + scorer feedback. Max 2 rework rounds. |
+| **ABANDON** (<35) | Increment theory_attempt. Return to Stage 1. After 3 abandons on same problem, return to Stage 0. |
+
+4. Update pipeline_state.json accordingly
+5. Commit: `pipeline: gate 3 — scorer {DECISION} (score: {N})`
+
+---
+
+## Stage 4: Paper Writing
+
+**Agent:** `paper-writer`
+
+1. Launch paper-writer with:
+   - Theory draft (latest version)
+   - Literature map
+   - Scorer assessment
+   - Self-attack report (so the paper preemptively addresses weaknesses)
+2. Paper-writer creates files in `paper/sections/`:
+   - `introduction.tex`
+   - `model.tex`
+   - `results.tex`
+   - `discussion.tex`
+   - `conclusion.tex`
+   - `appendix.tex` (if needed)
+3. Paper-writer updates `paper/main.tex` with `\input` commands
+4. Commit: `pipeline: stage 4 — paper draft written`
+
+---
+
+## Stage 5: Style Check
+
+**Agent:** `style`
+
+1. Launch style agent on the paper
+2. Read the style report
+3. Fix all violations by editing the section files directly
+4. Commit: `pipeline: stage 5 — style violations fixed`
+
+---
+
+## Stage 6: Referee Simulation
+
+**Agent:** `referee`
+
+1. Delete any previous reports in `paper/referee_reports/`
+2. Launch referee agent (fresh context, no knowledge of development process)
+3. Save report to `paper/referee_reports/YYYY-MM-DD_vN.md`
+4. Commit: `pipeline: stage 6 — referee report received`
+
+### Gate 4: Referee Decision
+
+Read the referee's recommendation:
+
+| Recommendation | Action |
+|---------------|--------|
+| **Accept / Minor Revision** | Fix minor comments, commit final version. Pipeline complete. |
+| **Major Revision** | Revise the paper addressing major comments. Re-run Stages 5-6. Max 2 referee rounds. |
+| **Reject** | Read the rejection reasons. If fixable: return to Stage 1 with referee feedback. If fundamental: return to Stage 0. |
+
+Update pipeline_state.json with `"status": "complete"` when done.
+
+Final commit: `pipeline: COMPLETE — paper ready for submission`
+
+---
+
+## Escalation rules (prevent infinite loops)
+
+| Situation | After N failures | Action |
+|-----------|-----------------|--------|
+| Math audit fails | 3 attempts | Abandon this theory version |
+| Theory scored REVISE | 2 rounds | Escalate to MAJOR REWORK |
+| Theory scored MAJOR REWORK | 2 rounds | Escalate to ABANDON |
+| Theory scored ABANDON | 3 theories on same problem | Change the problem (Stage 0) |
+| Problem viability fails | 3 problems | Pick the best scoring problem and proceed anyway |
+| Referee rejects | 2 rejections | Return to Stage 0 with entirely new topic |
+
+---
+
+## File organization
+
+```
+output/
+├── stage0/
+│   ├── problem_statement.md
+│   └── literature_map.md
+├── stage1/
+│   ├── theory_draft_v1.md
+│   ├── theory_draft_v2.md
+│   ├── math_audit_v1.md
+│   ├── math_audit_v2.md
+│   ├── novelty_check_v1.md
+│   └── novelty_check_v2.md
+├── stage2/
+│   └── implications.md
+├── stage3/
+│   ├── self_attack_v1.md
+│   └── scorer_decision_v1.md
+paper/
+├── main.tex
+├── sections/
+│   ├── introduction.tex
+│   ├── model.tex
+│   ├── results.tex
+│   ├── discussion.tex
+│   ├── conclusion.tex
+│   └── appendix.tex
+├── referee_reports/
+│   └── YYYY-MM-DD_v1.md
+process_log/
+├── pipeline_state.json
+├── history.md
+├── sessions/
+├── discussions/
+├── decisions/
+└── patterns/
+```
+
+---
+
+## Commit protocol
+
+Commit after every stage transition. Commit messages use the prefix `pipeline:` so the full history is readable in `git log --oneline`.
+
+The scribe agent runs in the background and commits with `scribe:` prefix for documentation updates.
+
+---
+
+## Domain: Finance Theory
+
+### Asset pricing
+- No-arbitrage / SDF framework as benchmark
+- Risk premia must have an economic explanation
+- Connection to observable objects (factors, portfolios, returns)
+- Key question: what risk is being priced, and why?
+
+### Corporate finance
+- Modigliani-Miller as benchmark (what friction breaks it?)
+- Standard frictions: agency, asymmetric info, incomplete contracts
+- One friction at a time for clarity
+- Key question: what friction matters, and what does it imply?
+
+---
+
+## Scoring criteria (used by scorer agent)
+
+### Hard requirements (binary PASS/FAIL)
+
+| # | Requirement |
+|---|------------|
+| H1 | One clear idea — contribution statable in one sentence |
+| H2 | Well-defined setup — a reader can write down the agents' problem |
+| H3 | Key result is mathematically correct (math audit passed) |
+| H4 | The result is new (novelty check passed) |
+| H5 | Economic mechanism is clear — why the result holds, in economics not algebra |
+
+### Scored dimensions
+
+| Dimension | Weight | Calibration |
+|-----------|--------|-------------|
+| Importance | 30% | CAPM-level = 100, minor extension = 20 |
+| Novelty | 25% | New mechanism = 100, known mechanism in new setting = 40 |
+| Rigor | 20% | Full proof = 100, clear with small gaps = 60, hand-waving = 20 |
+| Parsimony | 15% | One-friction model = 100, kitchen-sink = 20 |
+| Fertility | 10% | Reframes a literature = 100, dead-end result = 20 |
+
+Threshold to advance: 75+
+
+---
 
 ## Paper Writing Style Guide
 
-These rules apply when writing paper drafts, not to logs or conversation.
+These rules apply when writing paper drafts.
 
-- Active voice always. The real enemy is passive voice: not "it is assumed that," "data were constructed," "it can be seen." Search for "is" and "are" to root out passives.
-- "I" is fine on a solo paper. But "I show that X" is just the "that" rule: strike "I show that" and say X. Same for "I derive," "I extend," "I find," "I confirm," "I illustrate." These announce the result instead of stating it. Keep "I" only for genuine real-world restrictions the reader might question: "I assume there are no demand shifts," "I require 120 months of data," "I recommend." Do not "assume" model structure — just state it: "Consumers have power utility," not "I assume consumers have power utility." Save "assume" for things that modify the real world, not for describing a model.
-- When possible, make the object the subject: "Table 5 presents estimates" rather than "I present estimates in Table 5." This is preferred over "I" when natural.
-- Never use the royal "we" (meaning the author alone). "We" is allowed only to mean "you the reader and I": "We can see the pattern in Table 5."
-- Concrete, not abstract. Use normal sentence structure: subject, verb, object.
-- Avoid bold and italics unless absolutely necessary.
-- No bold paragraph starters (e.g., "First,", "Second,").
-- Italics only for: variable names in prose, foreign phrases, or true emphasis.
-- No em-dashes; use commas, colons, periods, or parentheses.
-- Avoid filler adverbs: crucially, critically, importantly, essentially, notably, strikingly.
-- Each sentence should mean what it says. Cut preambles before "that": "It should be noted that X" → "X". "It is easy to show that" → just show it. "Note that" is usually filler. If the point of the sentence is X, say X.
-- Do not use adjectives to describe your own work. Not "striking results," not "very significant," not "very novel." If results merit adjectives, the reader will supply them. Never use double adjectives.
-- Use simple short words. "Use" not "utilize." "Several" not "diverse."
-- Clothe the naked "this." Never write "This shows..." — write "This regression shows..." or "This result shows..." The word "this" must always have a noun after it.
-- Do not write "I leave X for future research." The reader cares about results, not plans.
-- Let the content speak for itself.
+- Active voice always. Passive voice is the enemy.
+- No filler before "that": "It should be noted that X" → "X"
+- No self-congratulatory adjectives (striking, novel, important)
+- Clothe the naked "this" — always follow with a noun
+- No em-dashes; use commas, colons, periods, or parentheses
+- Don't "assume" model structure — state it: "Consumers have power utility"
+- "I" is fine, but "I show that X" → just say X
+- Make the object the subject: "Table 5 presents estimates" not "I present estimates in Table 5"
+- No royal "we" — "we" means "you the reader and I"
+- Simple words: "use" not "utilize," "several" not "diverse"
+- No "I leave X for future research"
+- Let the content speak for itself
 
 ---
 
-## Referee Simulations
+## How to start a session
 
-Use the **referee agent** (`.claude/agents/referee.md`) when the user asks for a referee report. It runs as an Opus agent with no prior knowledge, reads the paper fresh, and writes a top-3-finance / top-5-econ style R1 report. Reports are saved to `paper/referee_reports/YYYY-MM-DD_vN.md`.
-
-**Before launching a referee agent, delete all previous reports in `paper/referee_reports/` and `paper/referee_report_simulated.md` (if it exists).** Each run should start clean. We focus on the latest report only, not on averages or repeated runs.
-
-**Known issue:** The referee agent sometimes ignores save-path instructions from its definition file (see [#7515](https://github.com/anthropics/claude-code/issues/7515)). Always include the save path explicitly in the launch prompt, e.g.: `CRITICAL SAVE INSTRUCTION: Save the report to ONLY ONE file: paper/referee_reports/YYYY-MM-DD_v1.md`.
-
----
-
-## How to Start a New Session
-
-At the start of each working session, Claude should:
-1. Read the latest file in `process_log/sessions/` to recall where we left off.
-2. Briefly state what was last accomplished and propose next steps.
-3. Confirm direction with the user before proceeding.
-
-## Keeping This File Current
-
-This CLAUDE.md starts as a generic template. As the project takes shape, Claude should update it to reflect the specifics — paper title, target journal, key references, section structure, etc. If the project has evolved enough that a section is still generic (e.g., "topic TBD"), propose an update. The goal is that this file always accurately describes the *current* project, not the template it started from.
-
-Similarly, update the **referee agent** (`.claude/agents/referee.md`) to list the actual section files once the paper structure stabilizes. The referee agent should stay generic in tone and evaluation criteria, but its "How to read the paper" section should list the specific `paper/sections/*.tex` files so it reads them in the right order.
+1. Read `process_log/pipeline_state.json`
+2. If state exists: report current stage and continue
+3. If no state exists: initialize state and begin Stage 0
+4. No human confirmation needed — just run
 
 ---
 
-## Pedagogical Deliverables — Two Documents
+## Documentation
 
-### 1. The Guide (`process_log/guide.md`)
+The **scribe** agent runs in the background after each stage, logging:
+- What happened (discussions, decisions)
+- What was tried and failed (dead ends)
+- The full pipeline history (`process_log/history.md`)
 
-A **general, transferable manual** on how to do AI-assisted academic research. A PhD student working on *any* topic should be able to read this and apply the lessons. It covers principles, workflow design, prompting techniques, pitfalls, and best practices — drawn from our experience but not dependent on knowing our specific research topic.
-
-- Written as a standalone document that could be shared independently.
-- Structured by phase: setup, scoping, literature review, data, modelling, writing, revision.
-- Each section distils general lessons and links to the history for concrete examples.
-- Should be useful even to someone who never reads the history.
-
-### 2. The Project History (`process_log/history.md`)
-
-The **specific, detailed record** of how this project unfolded. This is the "DVD commentary" — what we actually discussed, decided, tried, failed at, and revised, in chronological order.
-
-- Written as a narrative, not raw logs (the raw logs in `discussions/`, `decisions/`, etc. are supporting material).
-- A student who wants to see how AI-assisted research *actually plays out* in practice reads this.
-- References the actual prompts, AI responses, code files, and data.
-- Highlights dead ends and course corrections — the messy, real story.
-
-### How they relate
-
-The **guide** says "here's what you should do." The **history** says "here's what we actually did." The guide references the history for worked examples; the history links back to the guide for the general principles behind each decision.
+The scribe's role is pedagogical — recording the process for the AI-assisted research guide.
