@@ -29,6 +29,11 @@ for arg in "$@"; do
     esac
 done
 
+if [ "$NEXT_IS_VARIANT" = "1" ]; then
+    echo "Error: --variant requires a value (finance, macro, finance_llm)"
+    exit 1
+fi
+
 # ── Variant configuration ──
 case "$VARIANT" in
     finance)
@@ -112,7 +117,6 @@ for f in "$CORE" "$DOMAIN_FILE" "$SCORING_FILE"; do
     fi
 done
 
-CLAUDE_MD_OUT="$OUT_DIR/CLAUDE.md"
 if [ "$LOCAL" = "1" ]; then
     CLAUDE_MD_OUT="$OUT_DIR/CLAUDE.md"
 else
@@ -174,7 +178,7 @@ if [ "$VARIANT" = "finance_llm" ] && [ "$LOCAL" = "0" ]; then
     fi
 
     mkdir -p output/stage3b_experiments
-    uv pip install openai python-dotenv -q 2>/dev/null || echo "Note: install openai and python-dotenv manually"
+    uv pip install --system openai python-dotenv -q 2>/dev/null || echo "Note: install openai and python-dotenv manually"
 
     echo "  ✓ LLM experiment extension applied"
 fi
@@ -213,7 +217,7 @@ fi
 # ── Production mode: clean up and commit ──
 echo "Cleaning up template files..."
 rm -rf templates/
-sed -i '/^CLAUDE\.md$/d' .gitignore
+rm -rf extensions/
 echo "  ✓ Template files removed"
 
 git add -A

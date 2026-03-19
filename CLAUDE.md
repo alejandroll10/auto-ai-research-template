@@ -4,7 +4,7 @@
 
 This is the **template repository** for the autonomous research paper pipeline. We are building and iterating on the pipeline infrastructure itself — agents, setup scripts, CLAUDE.md templates, dashboard, etc.
 
-This file is **not tracked in git** (listed in .gitignore). It is for our development work only. The pipeline's CLAUDE.md that end users see is assembled by `setup.sh` from `templates/claude_md/core.md` + variant-specific domain/scoring blocks.
+This file is tracked in git but **overwritten by `setup.sh`** in cloned projects. It is for our development work only. The pipeline's CLAUDE.md that end users see is assembled by `setup.sh` from `templates/claude_md/core.md` + variant-specific domain/scoring blocks.
 
 ## Repository structure
 
@@ -59,7 +59,7 @@ process_log/             # Pipeline state (initial state in template)
 2. Create `templates/domains/{variant}.md` with domain knowledge
 3. Create `templates/scoring/{variant}.md` with scoring calibrations
 4. Add variant config to `setup.sh` (paper type, target journals, domain areas)
-5. Test: `./setup.sh test-project --variant {variant}`
+5. Test: `./setup.sh --variant {variant} --local`
 
 ## Agent classification
 

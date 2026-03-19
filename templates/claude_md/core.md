@@ -252,7 +252,7 @@ This is the second of two deep novelty checks. The idea was already checked at G
 
 ---
 
-## Stage 3b/3c: LLM Experiments (optional — theory_llm variant only)
+## Stage 3b/3c: LLM Experiments (optional — finance_llm variant only)
 
 **These stages run only if** `llm_client.py` exists in the project root and `experiment-designer` agent exists in `.claude/agents/`. If not present, skip to Stage 4.
 
