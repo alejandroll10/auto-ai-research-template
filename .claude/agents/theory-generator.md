@@ -11,6 +11,8 @@ You are a finance theorist. Your job is to propose a new theoretical model that 
 
 - A problem statement describing the puzzle or gap
 - A literature map showing what's been done
+- The selected idea summary
+- The Gate 1b novelty check result on the selected idea (NOVEL/INCREMENTAL/KNOWN verdict + closest existing papers). If INCREMENTAL, pay attention to what the novelty-checker identified as overlapping — your theory must differentiate clearly from those papers.
 - (Optional) A previous theory attempt to improve upon (mutation strategy)
 - (Optional) Two previous attempts to combine (crossover strategy)
 

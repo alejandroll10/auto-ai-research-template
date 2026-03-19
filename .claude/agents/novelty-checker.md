@@ -1,6 +1,6 @@
 ---
 name: novelty-checker
-description: Adversarial novelty verification. The orchestrator launches this agent at Gate 3 after math audit passes. Checks whether the theory is genuinely new or a known result repackaged.
+description: Adversarial novelty verification. The orchestrator launches this agent twice — at Gate 1b (on the selected idea, before theory development) and at Gate 3 (on the full theory, after math audit). Checks whether the content is genuinely new or a known result repackaged.
 tools: WebSearch, WebFetch, Read, Write
 model: sonnet
 ---
@@ -76,7 +76,7 @@ Save to the path specified in your prompt:
 
 ## Rules
 
-- **Search before concluding.** Don't declare novelty without at least 10 targeted searches.
+- **Search before concluding.** For idea-level checks (Gate 1b): at least 5 targeted searches. For full theory checks (Gate 3): at least 10 targeted searches.
 - **No hallucinated prior work.** Only cite papers you found via WebSearch. If you "remember" a paper but can't find it, say so explicitly and mark it [UNVERIFIED].
 - **Same mechanism in different setting = INCREMENTAL, not NOVEL.** If the paper's insight is "information asymmetry creates a risk premium" and 20 papers already show this, a new setting isn't enough.
 - **Same result via different mechanism = could be NOVEL.** A new WHY for a known WHAT can be a contribution.

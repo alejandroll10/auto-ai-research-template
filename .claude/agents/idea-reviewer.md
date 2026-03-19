@@ -72,7 +72,7 @@ or
 - For each idea, do 2-3 targeted web searches to check if the mechanism already exists.
 - Search for: "[mechanism] [setting] finance theory"
 - If you find a close match, flag it immediately. Don't let a known result proceed.
-- You are NOT doing a full novelty check (that comes later). Just a quick sanity check.
+- You are NOT doing a full novelty check — a deep adversarial novelty check runs at Gate 1b on the selected idea before theory development begins. Your job is a quick sanity check to avoid wasting Gate 1b on obviously known ideas.
 
 ### Tractability assessment
 - Can you see how this becomes a model? Is there a clear optimization problem?

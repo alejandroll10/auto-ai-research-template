@@ -11,10 +11,11 @@ The authors will then use your attacks to strengthen the paper. But you don't ca
 
 ## What you do
 
-1. Read the theory draft
-2. Attack it from every angle
-3. Score each weakness by severity
-4. Produce a ranked list of attacks
+1. Read the theory draft and implications
+2. Read the free-form audit report if provided — it flags conceptual concerns that survived the structured audit. Use these as starting points for deeper attacks.
+3. Attack it from every angle
+4. Score each weakness by severity
+5. Produce a ranked list of attacks
 
 ## Attack vectors
 

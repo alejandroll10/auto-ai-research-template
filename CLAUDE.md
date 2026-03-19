@@ -60,14 +60,18 @@ Then open `http://localhost:8000/dashboard.html` in a browser. The dashboard aut
 ```
 Stage 0: Problem Discovery   ──→ Gate 0: Problem Viability
 Stage 1: Idea Generation     ──→ Gate 1: Idea Review (iterates with generator)
-                                   └── ADVANCE → best idea goes to Stage 2
-Stage 2: Theory Development  ──→ Gate 2: Math Audit
-                                   Gate 3: Novelty Check
+                                   └── ADVANCE → best idea selected
+                                Gate 1b: Novelty Check on idea
+                                   ├── KNOWN → kill idea, back to Stage 1
+                                   ├── INCREMENTAL → flag, proceed with caution
+                                   └── NOVEL → proceed to Stage 2
+Stage 2: Theory Development  ──→ Gate 2: Math Audit (structured then free-form)
+                                   Gate 3: Novelty Check on full theory
 Stage 3: Implications        ──→
-Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision
-                                   ├── ADVANCE → Stage 5
-                                   ├── REVISE  → back to Stage 2 (max 2×)
-                                   ├── REWORK  → back to Stage 1 new ideas (max 2×)
+Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-based)
+                                   ├── ADVANCE (75+) → Stage 5
+                                   ├── REVISE  → back to Stage 2 (continue if Δ≥3, else escalate)
+                                   ├── REWORK  → back to Stage 1 (continue if Δ≥3, else escalate)
                                    └── ABANDON → back to Stage 0 (max 3×)
 Stage 5: Paper Writing        ──→
 Stage 6: Style Check          ──→
@@ -153,7 +157,26 @@ Score 0-100. If below 50, re-run Stage 0 with different search terms. After 3 fa
 
 5. After 3 rounds without ADVANCE, pick the highest-scored idea and advance it anyway.
 6. Save the winning idea summary to `output/stage1/selected_idea.md`
-7. Update pipeline_state.json and commit: `pipeline: stage 1 complete — idea selected`
+7. Commit: `artifact: selected idea saved`
+
+### Gate 1b: Novelty Check on Selected Idea
+
+**Agent:** `novelty-checker`
+
+This is the first of two deep novelty checks. It runs on the selected idea *before* investing in theory development.
+
+1. Launch novelty-checker on `output/stage1/selected_idea.md` + `output/stage0/literature_map.md`
+2. Save result to `output/stage1/novelty_check_idea.md`
+3. Read the verdict:
+
+| Verdict | Action |
+|---------|--------|
+| **KNOWN** | Kill this idea. Pick the next-best idea from the current round's sketches (per idea-reviewer rankings) and re-run Gate 1b on it. If no viable ideas remain in the current round, re-run Stage 1 with a new round of idea generation (counts toward the 3-round limit). |
+| **INCREMENTAL** | Flag it. Proceed to Stage 2 but the scorer will weigh this at Gate 4. |
+| **NOVEL** | Proceed to Stage 2. |
+
+4. Commit: `pipeline: gate 1b — novelty check on idea {NOVEL/INCREMENTAL/KNOWN}`
+5. Update pipeline_state.json and commit: `pipeline: stage 1 complete — idea selected and novelty-checked`
 
 ---
 
@@ -169,23 +192,41 @@ Score 0-100. If below 50, re-run Stage 0 with different search terms. After 3 fa
 4. Save result to `output/stage2/theory_draft_vN.md` (N = attempt number)
 5. Commit: `artifact: theory draft v{N}`
 
-### Gate 2: Math Audit
+### Gate 2: Math Audit (structured + free-form)
 
-**Agent:** `math-auditor`
+**Agents:** `math-auditor` then `math-auditor-freeform`
+
+Two audits run sequentially. The structured audit checks every derivation step-by-step. The free-form audit reads the theory as a skeptical reader and catches conceptual issues that step-by-step verification misses. Both must PASS before advancing.
+
+**Step 1: Structured audit**
 
 1. Launch math-auditor on `output/stage2/theory_draft_vN.md`
 2. Save result to `output/stage2/math_audit_vN.md`
-3. If FAIL:
+3. Commit: `artifact: math audit v{N} — {PASS/FAIL}`
+4. If FAIL:
    - Read the specific errors from the audit
    - Re-launch theory-generator in **mutate** mode with the draft + audit feedback
    - Max 3 audit attempts per theory version
    - If still failing after 3: treat as theory failure, increment theory_attempt
-4. If PASS: proceed to Gate 3
-5. Commit: `artifact: math audit v{N} — {PASS/FAIL}`
+5. If PASS: proceed to Step 2
 
-### Gate 3: Novelty Check
+**Step 2: Free-form audit**
+
+1. Launch math-auditor-freeform on `output/stage2/theory_draft_vN.md`
+2. Save result to `output/stage2/freeform_audit_vN.md`
+3. Commit: `artifact: freeform audit v{N} — {PASS/FAIL}`
+4. If FAIL:
+   - Read the concerns from the free-form audit
+   - Re-launch theory-generator in **mutate** mode with the draft + free-form audit feedback
+   - After mutation, re-run **both** audits from Step 1 (the fix may have introduced new algebraic errors)
+   - This counts toward the same max 3 audit attempts per theory version
+5. If PASS: proceed to Gate 3
+
+### Gate 3: Novelty Check on Full Theory
 
 **Agent:** `novelty-checker`
+
+This is the second of two deep novelty checks. The idea was already checked at Gate 1b, but the full theory may overlap with prior work in ways the sketch did not reveal — the mechanism may be novel while the result is not, or the developed model may converge to a known framework.
 
 1. Launch novelty-checker on `output/stage2/theory_draft_vN.md`
 2. Save result to `output/stage2/novelty_check_vN.md`
@@ -238,18 +279,35 @@ If present, read `extensions/theory_llm/STAGES.md` for full instructions. Summar
 
 1. Launch scorer with:
    - Theory draft: `output/stage2/theory_draft_vN.md`
-   - Math audit: `output/stage2/math_audit_vN.md`
-   - Novelty check: `output/stage2/novelty_check_vN.md`
+   - Math audit (structured): `output/stage2/math_audit_vN.md`
+   - Math audit (free-form): `output/stage2/freeform_audit_vN.md`
+   - Novelty check (idea): `output/stage1/novelty_check_idea.md`
+   - Novelty check (theory): `output/stage2/novelty_check_vN.md`
    - Self-attack: `output/stage4/self_attack_vN.md`
 2. Save result to `output/stage4/scorer_decision_vN.md`
-3. Read the decision:
+3. Read the decision using **state-dependent escalation**:
+
+**First scorer evaluation** (no prior score): use band logic.
 
 | Decision | Action |
 |----------|--------|
 | **ADVANCE** (75+) | Proceed to Stage 5 |
-| **REVISE** (55-74) | Return to Stage 2 in mutate mode with scorer feedback. Max 2 revision rounds. |
-| **MAJOR REWORK** (35-54) | Return to Stage 1 to generate new ideas with scorer feedback. Max 2 rework rounds. |
+| **REVISE** (55-74) | Return to Stage 2 in mutate mode with scorer feedback. |
+| **MAJOR REWORK** (35-54) | Return to Stage 1 to generate new ideas with scorer feedback. |
 | **ABANDON** (<35) | Increment theory_attempt. Return to Stage 1. After 3 abandons on same problem, return to Stage 0. |
+
+**Subsequent scorer evaluations** (has prior score): use score trajectory.
+
+| Condition | Action |
+|-----------|--------|
+| Score ≥ 75 | **ADVANCE** — always, regardless of trajectory |
+| Score < 35 | **ABANDON** — always, regardless of trajectory |
+| Delta ≥ 3 points | **CONTINUE** — one more iteration in current band: REVISE returns to Stage 2, MAJOR REWORK returns to Stage 1 (improving, worth continuing) |
+| Delta < 3 points | **ESCALATE** — move up one level: REVISE → MAJOR REWORK (Stage 1) → ABANDON (plateau or decline, not converging) |
+
+**Hard ceiling:** After 4 total scorer evaluations on the same problem, escalate one level regardless of trajectory. This prevents slow-but-never-arriving loops (e.g., +3, +3, +3 but still at 69).
+
+Record all scores in `pipeline_state.json` under `"scores"` so the trajectory can be computed: `"scores": { "v1": 60, "v2": 63, "v3": 67 }`.
 
 4. Update pipeline_state.json accordingly
 5. Commit: `pipeline: gate 4 — scorer {DECISION} (score: {N})`
@@ -313,15 +371,33 @@ Final commit: `pipeline: COMPLETE — paper ready for submission`
 
 ---
 
+## Post-pipeline math audit rule
+
+After the pipeline is complete (`"status": "complete"`), any new or modified proposition, lemma, or corollary in `paper/sections/*.tex` must pass a math audit before being committed. This applies to all post-pipeline edits — referee response fixes, manual revisions, additions requested by co-authors, etc.
+
+**Procedure:**
+1. Write the new/modified content to a temporary file: `output/post_pipeline/pending_audit_N.md`
+2. Launch `math-auditor` on that file
+3. Save result to `output/post_pipeline/audit_result_N.md`
+4. If FAIL: fix the content and re-audit. Do not commit to `paper/sections/` until it passes.
+5. If PASS: commit the content to the paper section file.
+6. Commit format: `paper: post-pipeline edit — [description] (audited)`
+
+**Never commit unaudited mathematical content to paper sections after pipeline completion.** The pipeline's v1 runs showed 3/3 post-pipeline audits failed — this rule exists to prevent that.
+
+---
+
 ## Escalation rules (prevent infinite loops)
 
 | Situation | After N failures | Action |
 |-----------|-----------------|--------|
-| Idea review iterates | 3 rounds | Pick the best idea and advance to Stage 2 |
+| Idea review iterates | 3 rounds | Pick the best idea and advance to Gate 1b |
 | Idea review rejects all | 1 rejection | Return to Stage 0 for a different problem |
+| Idea novelty check (Gate 1b) KNOWN | All ideas from current round exhausted | New round of Stage 1 (counts toward 3-round limit) |
 | Math audit fails | 3 attempts | Abandon this theory version |
-| Theory scored REVISE | 2 rounds | Escalate to MAJOR REWORK |
-| Theory scored MAJOR REWORK | 2 rounds | Escalate to ABANDON |
+| Scorer: delta ≥ 3 | — | Allow one more iteration in current band |
+| Scorer: delta < 3 (plateau/decline) | — | Escalate one level (REVISE → MAJOR REWORK → ABANDON) |
+| Scorer: hard ceiling | 4 total evaluations on same problem | Escalate one level from current band regardless of trajectory (REVISE → MAJOR REWORK → ABANDON) |
 | Theory scored ABANDON | 3 theories on same problem | Change the problem (Stage 0) |
 | Problem viability fails | 3 problems | Pick the best scoring problem and proceed anyway |
 | Referee rejects | 2 rejections | Return to Stage 0 with entirely new topic |
@@ -341,12 +417,15 @@ output/
 │   ├── idea_review_r1.md
 │   ├── idea_sketches_r2.md
 │   ├── idea_review_r2.md
-│   └── selected_idea.md
+│   ├── selected_idea.md
+│   └── novelty_check_idea.md    # overwritten if idea is KNOWN and next-best is checked
 ├── stage2/
 │   ├── theory_draft_v1.md
 │   ├── theory_draft_v2.md
 │   ├── math_audit_v1.md
 │   ├── math_audit_v2.md
+│   ├── freeform_audit_v1.md
+│   ├── freeform_audit_v2.md
 │   ├── novelty_check_v1.md
 │   └── novelty_check_v2.md
 ├── stage3/
@@ -354,6 +433,9 @@ output/
 ├── stage4/
 │   ├── self_attack_v1.md
 │   └── scorer_decision_v1.md
+├── post_pipeline/
+│   ├── pending_audit_1.md
+│   └── audit_result_1.md
 paper/
 ├── main.tex
 ├── sections/
@@ -402,7 +484,7 @@ Examples:
 - `pipeline: stage 0 complete — problem identified`
 - `artifact: theory draft v2 saved`
 - `artifact: math audit v2 — PASS`
-- `pipeline: gate 3 — scorer ADVANCE (score: 78)`
+- `pipeline: gate 4 — scorer ADVANCE (score: 78)`
 - `paper: introduction.tex written`
 - `pipeline: state updated — entering stage 4`
 
