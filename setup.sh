@@ -95,45 +95,35 @@ CORE="templates/claude_md/core.md"
 DOMAIN_FILE="templates/domains/${AGENT_DIR}.md"
 SCORING_FILE="templates/scoring/${AGENT_DIR}.md"
 
-if [ ! -f "$CORE" ]; then
-    echo "Error: $CORE not found"
-    exit 1
-fi
-if [ ! -f "$DOMAIN_FILE" ]; then
-    echo "Error: $DOMAIN_FILE not found"
-    exit 1
-fi
-if [ ! -f "$SCORING_FILE" ]; then
-    echo "Error: $SCORING_FILE not found"
-    exit 1
-fi
+for f in "$CORE" "$DOMAIN_FILE" "$SCORING_FILE"; do
+    if [ ! -f "$f" ]; then
+        echo "Error: $f not found"
+        exit 1
+    fi
+done
 
-# Read domain and scoring content
-DOMAIN_CONTENT=$(cat "$DOMAIN_FILE")
-SCORING_CONTENT=$(cat "$SCORING_FILE")
-
-# Build CLAUDE.md from template
-cp "$CORE" CLAUDE.md
-
-# Replace placeholders — use perl for multi-line replacements
-perl -i -pe "s/\\{\\{PAPER_TYPE\\}\\}/${PAPER_TYPE}/g" CLAUDE.md
-perl -i -pe "s/\\{\\{TARGET_JOURNALS\\}\\}/${TARGET_JOURNALS}/g" CLAUDE.md
-perl -i -pe "s/\\{\\{DOMAIN_AREAS\\}\\}/${DOMAIN_AREAS}/g" CLAUDE.md
-
-# Replace {{DOMAIN}} and {{SCORING}} blocks (multi-line)
-python3 -c "
+# Build CLAUDE.md from template — single Python pass, all replacements
+python3 - "$CORE" "$DOMAIN_FILE" "$SCORING_FILE" "$PAPER_TYPE" "$TARGET_JOURNALS" "$DOMAIN_AREAS" <<'PYEOF'
 import sys
-with open('CLAUDE.md', 'r') as f:
+
+core_path, domain_path, scoring_path, paper_type, target_journals, domain_areas = sys.argv[1:7]
+
+with open(core_path) as f:
     content = f.read()
-with open('$DOMAIN_FILE', 'r') as f:
+with open(domain_path) as f:
     domain = f.read()
-with open('$SCORING_FILE', 'r') as f:
+with open(scoring_path) as f:
     scoring = f.read()
+
+content = content.replace('{{PAPER_TYPE}}', paper_type)
+content = content.replace('{{TARGET_JOURNALS}}', target_journals)
+content = content.replace('{{DOMAIN_AREAS}}', domain_areas)
 content = content.replace('{{DOMAIN}}', domain)
 content = content.replace('{{SCORING}}', scoring)
+
 with open('CLAUDE.md', 'w') as f:
     f.write(content)
-"
+PYEOF
 
 echo "  ✓ CLAUDE.md assembled"
 

@@ -59,25 +59,27 @@ for f in "$CORE" "$DOMAIN_FILE" "$SCORING_FILE"; do
     fi
 done
 
-cp "$CORE" "$OUT_DIR/CLAUDE.md"
+python3 - "$CORE" "$DOMAIN_FILE" "$SCORING_FILE" "$PAPER_TYPE" "$TARGET_JOURNALS" "$DOMAIN_AREAS" "$OUT_DIR/CLAUDE.md" <<'PYEOF'
+import sys
 
-python3 -c "
-with open('$OUT_DIR/CLAUDE.md', 'r') as f:
+core_path, domain_path, scoring_path, paper_type, target_journals, domain_areas, out_path = sys.argv[1:8]
+
+with open(core_path) as f:
     content = f.read()
-with open('$DOMAIN_FILE', 'r') as f:
+with open(domain_path) as f:
     domain = f.read()
-with open('$SCORING_FILE', 'r') as f:
+with open(scoring_path) as f:
     scoring = f.read()
 
-content = content.replace('{{PAPER_TYPE}}', '''$PAPER_TYPE''')
-content = content.replace('{{TARGET_JOURNALS}}', '''$TARGET_JOURNALS''')
-content = content.replace('{{DOMAIN_AREAS}}', '''$DOMAIN_AREAS''')
+content = content.replace('{{PAPER_TYPE}}', paper_type)
+content = content.replace('{{TARGET_JOURNALS}}', target_journals)
+content = content.replace('{{DOMAIN_AREAS}}', domain_areas)
 content = content.replace('{{DOMAIN}}', domain)
 content = content.replace('{{SCORING}}', scoring)
 
-with open('$OUT_DIR/CLAUDE.md', 'w') as f:
+with open(out_path, 'w') as f:
     f.write(content)
-"
+PYEOF
 
 echo "✓ CLAUDE.md assembled"
 
