@@ -1,18 +1,23 @@
 #!/bin/bash
 # Auto AI Research Template — Setup & Launch
-# Usage: ./setup.sh [project-name] [--variant finance|macro|finance_llm]
+# Usage: ./setup.sh [project-name] [--variant finance|macro|finance_llm] [--local]
+#
+# --local  Skip git clone, use templates from this repo directly.
+#          Outputs to test_output/{variant}/ for inspection.
 
 set -e
 
 # ── Parse arguments ──
 PROJECT_NAME=""
 VARIANT="finance"
+LOCAL=0
 
 for arg in "$@"; do
     case "$arg" in
-        --variant)   NEXT_IS_VARIANT=1 ;;
-        --theory-llm) VARIANT="finance_llm" ;;  # legacy flag
-        -*)          echo "Unknown option: $arg"; exit 1 ;;
+        --variant)     NEXT_IS_VARIANT=1 ;;
+        --local)       LOCAL=1 ;;
+        --theory-llm)  VARIANT="finance_llm" ;;  # legacy flag
+        -*)            echo "Unknown option: $arg"; exit 1 ;;
         *)
             if [ "$NEXT_IS_VARIANT" = "1" ]; then
                 VARIANT="$arg"
@@ -23,8 +28,6 @@ for arg in "$@"; do
             ;;
     esac
 done
-
-PROJECT_NAME="${PROJECT_NAME:-my-research-paper}"
 
 # ── Variant configuration ──
 case "$VARIANT" in
@@ -53,47 +56,54 @@ case "$VARIANT" in
         ;;
 esac
 
-# ── Check prerequisites ──
-echo "Checking prerequisites..."
+# ── Resolve paths ──
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-missing=()
+if [ "$LOCAL" = "1" ]; then
+    # Local test mode — no clone, no git, no prereq checks
+    PROJECT_NAME="${PROJECT_NAME:-test_output/$VARIANT}"
+    TEMPLATE_ROOT="$SCRIPT_DIR"
+    OUT_DIR="$SCRIPT_DIR/$PROJECT_NAME"
 
-command -v python3 >/dev/null 2>&1 || missing+=("python3")
-command -v git >/dev/null 2>&1 || missing+=("git")
-command -v claude >/dev/null 2>&1 || missing+=("claude (npm install -g @anthropic-ai/claude-code)")
-command -v uv >/dev/null 2>&1 || missing+=("uv (curl -LsSf https://astral.sh/uv/install.sh | sh)")
+    rm -rf "$OUT_DIR"
+    mkdir -p "$OUT_DIR/agents"
 
-# Check bubblewrap (Linux only)
-if [[ "$(uname)" == "Linux" ]]; then
-    command -v bwrap >/dev/null 2>&1 || missing+=("bubblewrap (sudo apt-get install bubblewrap)")
+    echo "Local test mode: $VARIANT → $OUT_DIR"
+else
+    # Production mode — clone, check prereqs, full setup
+    PROJECT_NAME="${PROJECT_NAME:-my-research-paper}"
+
+    echo "Checking prerequisites..."
+    missing=()
+    command -v python3 >/dev/null 2>&1 || missing+=("python3")
+    command -v git >/dev/null 2>&1 || missing+=("git")
+    command -v claude >/dev/null 2>&1 || missing+=("claude (npm install -g @anthropic-ai/claude-code)")
+    command -v uv >/dev/null 2>&1 || missing+=("uv (curl -LsSf https://astral.sh/uv/install.sh | sh)")
+    if [[ "$(uname)" == "Linux" ]]; then
+        command -v bwrap >/dev/null 2>&1 || missing+=("bubblewrap (sudo apt-get install bubblewrap)")
+    fi
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo "Missing dependencies:"
+        for dep in "${missing[@]}"; do echo "  - $dep"; done
+        exit 1
+    fi
+    echo "All prerequisites found."
+
+    echo "Cloning template into $PROJECT_NAME..."
+    git clone https://github.com/alejandroll10/auto-ai-research-template.git "$PROJECT_NAME"
+    cd "$PROJECT_NAME"
+    git remote remove origin
+
+    TEMPLATE_ROOT="."
+    OUT_DIR="."
 fi
-
-if [ ${#missing[@]} -gt 0 ]; then
-    echo "Missing dependencies:"
-    for dep in "${missing[@]}"; do
-        echo "  - $dep"
-    done
-    echo ""
-    echo "Install them and re-run this script."
-    exit 1
-fi
-
-echo "All prerequisites found."
-
-# ── Clone template ──
-echo "Cloning template into $PROJECT_NAME..."
-git clone https://github.com/alejandroll10/auto-ai-research-template.git "$PROJECT_NAME"
-cd "$PROJECT_NAME"
-
-# Remove template remote, start fresh
-git remote remove origin
 
 # ── Assemble CLAUDE.md ──
 echo "Assembling CLAUDE.md for variant: $VARIANT..."
 
-CORE="templates/claude_md/core.md"
-DOMAIN_FILE="templates/domains/${AGENT_DIR}.md"
-SCORING_FILE="templates/scoring/${AGENT_DIR}.md"
+CORE="$TEMPLATE_ROOT/templates/claude_md/core.md"
+DOMAIN_FILE="$TEMPLATE_ROOT/templates/domains/${AGENT_DIR}.md"
+SCORING_FILE="$TEMPLATE_ROOT/templates/scoring/${AGENT_DIR}.md"
 
 for f in "$CORE" "$DOMAIN_FILE" "$SCORING_FILE"; do
     if [ ! -f "$f" ]; then
@@ -102,11 +112,17 @@ for f in "$CORE" "$DOMAIN_FILE" "$SCORING_FILE"; do
     fi
 done
 
-# Build CLAUDE.md from template — single Python pass, all replacements
-python3 - "$CORE" "$DOMAIN_FILE" "$SCORING_FILE" "$PAPER_TYPE" "$TARGET_JOURNALS" "$DOMAIN_AREAS" <<'PYEOF'
+CLAUDE_MD_OUT="$OUT_DIR/CLAUDE.md"
+if [ "$LOCAL" = "1" ]; then
+    CLAUDE_MD_OUT="$OUT_DIR/CLAUDE.md"
+else
+    CLAUDE_MD_OUT="CLAUDE.md"
+fi
+
+python3 - "$CORE" "$DOMAIN_FILE" "$SCORING_FILE" "$PAPER_TYPE" "$TARGET_JOURNALS" "$DOMAIN_AREAS" "$CLAUDE_MD_OUT" <<'PYEOF'
 import sys
 
-core_path, domain_path, scoring_path, paper_type, target_journals, domain_areas = sys.argv[1:7]
+core_path, domain_path, scoring_path, paper_type, target_journals, domain_areas, out_path = sys.argv[1:8]
 
 with open(core_path) as f:
     content = f.read()
@@ -121,7 +137,7 @@ content = content.replace('{{DOMAIN_AREAS}}', domain_areas)
 content = content.replace('{{DOMAIN}}', domain)
 content = content.replace('{{SCORING}}', scoring)
 
-with open('CLAUDE.md', 'w') as f:
+with open(out_path, 'w') as f:
     f.write(content)
 PYEOF
 
@@ -130,52 +146,76 @@ echo "  ✓ CLAUDE.md assembled"
 # ── Assemble agents ──
 echo "Copying agents..."
 
-# Clear default agents
-rm -f .claude/agents/*.md
+if [ "$LOCAL" = "1" ]; then
+    AGENTS_OUT="$OUT_DIR/agents"
+else
+    AGENTS_OUT=".claude/agents"
+    rm -f "$AGENTS_OUT"/*.md
+fi
 
-# Copy shared agents
-cp templates/agents/shared/*.md .claude/agents/
+cp "$TEMPLATE_ROOT/templates/agents/shared/"*.md "$AGENTS_OUT/"
 
-# Copy variant-specific agents (overrides shared if same name)
-if [ -d "templates/agents/${AGENT_DIR}" ]; then
-    cp templates/agents/${AGENT_DIR}/*.md .claude/agents/
+if [ -d "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}" ]; then
+    cp "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}/"*.md "$AGENTS_OUT/"
 fi
 
 echo "  ✓ Agents copied (shared + ${AGENT_DIR})"
 
 # ── Apply finance_llm extension if needed ──
-if [ "$VARIANT" = "finance_llm" ]; then
+if [ "$VARIANT" = "finance_llm" ] && [ "$LOCAL" = "0" ]; then
     echo "Applying LLM experiment extension..."
 
-    # Copy LLM client
     cp extensions/theory_llm/llm_client.py .
-
-    # Copy experiment agents
     cp extensions/theory_llm/agents/*.md .claude/agents/
 
-    # Create .env placeholder
     if [ ! -f .env ]; then
         echo "# Get API key from https://api.ai.it.ufl.edu" > .env
         echo "UF_API_KEY=your-key-here" >> .env
     fi
 
-    # Create experiment output directory
     mkdir -p output/stage3b_experiments
-
-    # Install Python deps
-    pip install openai python-dotenv -q 2>/dev/null || echo "Note: install openai and python-dotenv manually"
+    uv pip install openai python-dotenv -q 2>/dev/null || echo "Note: install openai and python-dotenv manually"
 
     echo "  ✓ LLM experiment extension applied"
 fi
 
-# ── Clean up template infrastructure ──
+# ── Local mode: summary and exit ──
+if [ "$LOCAL" = "1" ]; then
+    echo ""
+    echo "=== Assembled CLAUDE.md ==="
+    echo "Lines: $(wc -l < "$CLAUDE_MD_OUT")"
+    REMAINING=$(grep -c '{{' "$CLAUDE_MD_OUT" 2>/dev/null || true)
+    REMAINING="${REMAINING:-0}"
+    echo "Placeholders remaining: $REMAINING"
+    echo ""
+    echo "=== Agents ==="
+    ls -1 "$AGENTS_OUT/"
+    echo ""
+    echo "=== First 10 lines ==="
+    head -10 "$CLAUDE_MD_OUT"
+    echo ""
+    echo "=== Domain section ==="
+    grep -A 5 "^## Domain:" "$CLAUDE_MD_OUT" | head -8
+    echo ""
+
+    if [ "$REMAINING" -gt 0 ]; then
+        echo "WARNING: $REMAINING unresolved placeholders:"
+        grep '{{' "$CLAUDE_MD_OUT"
+        exit 1
+    else
+        echo "✓ All placeholders resolved"
+    fi
+    echo ""
+    echo "Output at: $OUT_DIR/"
+    exit 0
+fi
+
+# ── Production mode: clean up and commit ──
 echo "Cleaning up template files..."
 rm -rf templates/
-# Remove .gitignore entry for CLAUDE.md (it's now a real file, not our meta one)
 sed -i '/^CLAUDE\.md$/d' .gitignore
 echo "  ✓ Template files removed"
 
-# ── Commit initial state ──
 git add -A
 git commit -m "setup: initialized ${VARIANT} variant pipeline" -q
 
