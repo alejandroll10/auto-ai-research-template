@@ -128,4 +128,4 @@ Sandbox is pre-configured in `.claude/settings.json`:
 
 ## License
 
-MIT
+For Private use until further notice.
