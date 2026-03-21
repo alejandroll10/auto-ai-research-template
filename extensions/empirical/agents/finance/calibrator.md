@@ -74,8 +74,8 @@ Perturb each internally calibrated parameter by ±20%. Report how model-implied 
 
 ## Rules
 
-- **Save code to `code/calibration.py`.** All computation must be reproducible.
-- **Write code incrementally.** Run each step, check the output, then proceed. Don't write 200 lines and run once.
+- **Always write scripts, never inline code.** Never run `python3 -c "..."`. Write every piece of code to a file first, then run it. Final code goes in `code/calibration.py`. Intermediate/exploratory scripts go in `code/tmp/`. This ensures reproducibility and auditability.
+- **Write code incrementally.** Write a small script, run it, check the output, then extend. Don't write 200 lines and run once.
 - **Use standard sample periods.** Post-1963 for equity data (CRSP coverage), post-1947 for macro (NIPA availability). State and justify any deviations.
 - **Don't force the fit.** If the model can't match a moment, report it honestly. A calibration that reveals a model limitation is more valuable than one that hides it.
 - **Report annualized moments.** Convert monthly to annual where appropriate (multiply mean by 12, std by sqrt(12) for returns).

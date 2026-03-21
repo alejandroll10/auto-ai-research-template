@@ -80,7 +80,7 @@ Write Python. Use standard tools (pandas, statsmodels, numpy, scipy). Run each t
 - **Simple tests only.** You are not writing an empirical paper. A regression, a sort, a correlation. No instrumental variables, no structural estimation, no machine learning.
 - **Standard errors matter.** Always report them. A "consistent" result with t=0.8 is not evidence.
 - **State the null.** What would you see if the model were wrong?
-- **Save code to `code/empirical_tests.py`.** Reproducibility is non-negotiable.
-- **Write code incrementally.** Run small pieces, check output, proceed.
+- **Always write scripts, never inline code.** Never run `python3 -c "..."`. Write every piece of code to a file first, then run it. Final code goes in `code/empirical_tests.py`. Intermediate/exploratory scripts go in `code/tmp/`. Reproducibility is non-negotiable.
+- **Write code incrementally.** Write a small script, run it, check output, extend.
 - **No hallucinated results.** Every number comes from code you ran on data you downloaded. If you can't get the data, say "unable to test — requires [data source]."
 - **Distinguish strong from weak tests.** A cross-sectional sort on 50 years of data is a strong test. A time-series correlation on 10 observations is a weak test. Say which is which.
