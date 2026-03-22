@@ -231,7 +231,9 @@ for ext in "${EXTENSIONS[@]}"; do
             fi
 
             # Copy STAGES.md
-            if [ "$LOCAL" = "0" ]; then
+            if [ "$LOCAL" = "1" ]; then
+                cp "$EXT_ROOT/STAGES.md" "$OUT_DIR/EMPIRICAL_STAGES.md"
+            else
                 cp "$EXT_ROOT/STAGES.md" EMPIRICAL_STAGES.md
             fi
 

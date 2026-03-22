@@ -122,21 +122,22 @@ The system must run end-to-end after a single launch command. No human approvals
 - Preemptively address self-attack weaknesses
 - Output: `paper/sections/*.tex`
 
-**Stage 6: Style check**
-- Run style agent
-- Fix all violations
-- Output: polished `paper/sections/*.tex`
-
-**Stage 7: Referee simulation**
+**Stage 6: Referee simulation**
 - Fresh agent, no context from development
 - Reads only the paper as a journal submission
 - Top-journal R1 report
 - Output: `paper/referee_reports/YYYY-MM-DD_vN.md`
 
 **Gate 5: Referee decision**
-- Accept / Minor Revision → fix comments, pipeline complete
-- Major Revision → revise paper, re-run Stages 6-7 (max 2 rounds)
+- Accept / Minor Revision → proceed to Stage 7 (style check)
+- Major Revision → revise paper, re-run Stage 6 (max 2 rounds)
 - Reject → return to Stage 2 with referee feedback, or Stage 0 if fundamental
+
+**Stage 7: Style check**
+- Run style agent
+- Fix all violations
+- Output: polished `paper/sections/*.tex`
+- Pipeline complete
 
 ---
 

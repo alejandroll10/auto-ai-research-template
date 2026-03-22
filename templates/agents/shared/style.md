@@ -1,6 +1,6 @@
 ---
 name: style
-description: Paper style editor. The orchestrator launches this agent at Stage 6 of the pipeline. Reads the paper and flags violations of the style guide.
+description: Paper style editor. The orchestrator launches this agent at Stage 7 of the pipeline. Reads the paper and flags violations of the style guide.
 tools: Read, Glob, Grep
 model: sonnet
 ---
