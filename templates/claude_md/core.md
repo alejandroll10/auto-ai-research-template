@@ -74,11 +74,11 @@ Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-base
                                    ├── REWORK  → back to Stage 1 (continue if Δ≥3, else escalate)
                                    └── ABANDON → back to Stage 0 (max 3×)
 Stage 5: Paper Writing        ──→
-Stage 6: Style Check          ──→
-Stage 7: Referee Simulation   ──→ Gate 5: Referee Decision
-                                   ├── Minor/Accept → Done
-                                   ├── Major Revision → back to Stage 5 (max 2×)
+Stage 6: Referee Simulation   ──→ Gate 5: Referee Decision
+                                   ├── Minor/Accept → Stage 7
+                                   ├── Major Revision → revise, re-run Stage 6 (max 2×)
                                    └── Reject → back to Stage 1
+Stage 7: Style Check          ──→ Done
 ```
 
 ---
@@ -348,25 +348,14 @@ Record all scores in `pipeline_state.json` under `"scores"` so the trajectory ca
 
 ---
 
-## Stage 6: Style Check
-
-**Agent:** `style`
-
-1. Launch style agent on the paper
-2. Read the style report
-3. Fix all violations by editing the section files directly
-4. Commit: `pipeline: stage 6 — style violations fixed`
-
----
-
-## Stage 7: Referee Simulation
+## Stage 6: Referee Simulation
 
 **Agent:** `referee`
 
 1. Delete any previous reports in `paper/referee_reports/`
 2. Launch referee agent (fresh context, no knowledge of development process)
 3. Save report to `paper/referee_reports/YYYY-MM-DD_vN.md`
-4. Commit: `pipeline: stage 7 — referee report received`
+4. Commit: `pipeline: stage 6 — referee report received`
 
 ### Gate 5: Referee Decision
 
@@ -374,9 +363,21 @@ Read the referee's recommendation:
 
 | Recommendation | Action |
 |---------------|--------|
-| **Accept / Minor Revision** | Fix minor comments, commit final version. Pipeline complete. |
-| **Major Revision** | Revise the paper addressing major comments. Re-run Stages 6-7. Max 2 referee rounds. |
+| **Accept / Minor Revision** | Fix minor comments, proceed to Stage 7 (style check). |
+| **Major Revision** | Revise the paper addressing major comments. Re-run Stage 6. Max 2 referee rounds. |
 | **Reject** | Read the rejection reasons. If fixable: return to Stage 2 with referee feedback. If fundamental: return to Stage 0. |
+
+---
+
+## Stage 7: Style Check
+
+**Agent:** `style`
+
+1. Launch style agent on the paper
+2. Read the style report
+3. Fix all violations by editing the section files directly
+4. Commit: `pipeline: stage 7 — style violations fixed`
+5. Pipeline complete. Final commit: `pipeline: COMPLETE — paper ready for submission`
 
 Update pipeline_state.json with `"status": "complete"` when done.
 
