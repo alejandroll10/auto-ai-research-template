@@ -435,7 +435,7 @@ function findGateResult(state, stageId) {
         return { pass: decision === 'ADVANCE', label: decision };
       }
     }
-    if (stageId === 'stage_7' && event.includes('referee')) {
+    if (stageId === 'stage_6' && event.includes('referee')) {
       const match = event.match(/(accept|minor|major|reject)/i);
       if (match) {
         const decision = match[1].toUpperCase();
@@ -535,8 +535,8 @@ function renderStatus(state) {
       stage_3: 'Implications',
       stage_4: 'Self-Attack & Scoring',
       stage_5: 'Paper Writing',
-      stage_6: 'Style Check',
-      stage_7: 'Referee Simulation',
+      stage_6: 'Referee Simulation',
+      stage_7: 'Style Check',
     };
     label.textContent = stageNames[state.current_stage] || state.current_stage;
   }

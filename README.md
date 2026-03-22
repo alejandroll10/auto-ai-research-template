@@ -72,7 +72,7 @@ The pipeline runs autonomously through these stages:
 ```
 Problem Discovery → Idea Generation (iterates) → Theory Development
 → Math Audit → Novelty Check → Implications → Self-Attack
-→ Scorer Gate → Paper Writing → Style Check → Referee Simulation → Done
+→ Scorer Gate → Paper Writing → Referee Simulation → Style Check → Done
 ```
 
 Each stage has adversarial quality gates. Failed theories get revised, reworked, or abandoned. The system loops until it produces a paper that passes a simulated referee review.
