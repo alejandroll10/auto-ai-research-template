@@ -91,8 +91,8 @@ Score 0-100. If below 50, re-run Stage 0 with different search terms. After 3 fa
 | Context | Ideas per round |
 |---------|----------------|
 | First time entering Stage 1 | 5 |
-| Returning from a failed theory (scorer REWORK/ABANDON) | 7 |
-| Returning from a problem-level failure (Stage 0 re-run) | 5, but explicitly explore different territory |
+| Returning from a failed theory (scorer REWORK/ABANDON) | 10 |
+| Returning from a problem-level failure (Stage 0 re-run) | 10, and explicitly explore different territory |
 
 1. Read `output/stage0/problem_statement.md` and `output/stage0/literature_map.md`
 2. If returning from a failed attempt, also read the previous scorer feedback and/or failed theory to understand what went wrong — instruct the idea-generator to avoid the same failure mode
