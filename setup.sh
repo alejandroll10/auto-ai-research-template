@@ -84,8 +84,10 @@ if [ "$LOCAL" = "1" ]; then
 
     rm -rf "$OUT_DIR"
     mkdir -p "$OUT_DIR/.claude/agents"
-    # Copy settings.json for local test
+    # Copy shared project files
     cp "$SCRIPT_DIR/.claude/settings.json" "$OUT_DIR/.claude/"
+    cp "$SCRIPT_DIR/.gitignore" "$OUT_DIR/"
+    cp "$SCRIPT_DIR/dashboard.html" "$OUT_DIR/"
 
     echo "Local test mode: $VARIANT → $OUT_DIR"
 else
@@ -226,9 +228,12 @@ if [ "$VARIANT" = "finance_llm" ] && [ "$LOCAL" = "0" ]; then
     cp extensions/theory_llm/llm_client.py .
     cp extensions/theory_llm/agents/*.md .claude/agents/
 
-    if [ ! -f .env ]; then
-        echo "# Get API key from https://api.ai.it.ufl.edu" > .env
-        echo "UF_API_KEY=your-key-here" >> .env
+    ENV_FILE="$P/.env"
+    if [ ! -f "$ENV_FILE" ]; then
+        cat > "$ENV_FILE" <<'ENVEOF'
+# Get API key from https://api.ai.it.ufl.edu
+UF_API_KEY=your-key-here
+ENVEOF
     fi
 
     mkdir -p output/stage3b_experiments
@@ -271,13 +276,16 @@ for ext in "${EXTENSIONS[@]}"; do
             mkdir -p "$P/output/stage3b"
 
             # Create .env placeholder for API keys
-            if [ "$LOCAL" = "0" ] && [ ! -f .env ]; then
-                echo "# FRED API key (free): https://fred.stlouisfed.org/docs/api/api_key.html" > .env
-                echo "FRED_API_KEY=your-key-here" >> .env
-                echo "" >> .env
-                echo "# WRDS credentials: https://wrds-www.wharton.upenn.edu/" >> .env
-                echo "WRDS_USER=your-username" >> .env
-                echo "WRDS_PASS=your-password" >> .env
+            ENV_FILE="$P/.env"
+            if [ ! -f "$ENV_FILE" ]; then
+                cat > "$ENV_FILE" <<'ENVEOF'
+# FRED API key (free): https://fred.stlouisfed.org/docs/api/api_key.html
+FRED_API_KEY=your-key-here
+
+# WRDS credentials: https://wrds-www.wharton.upenn.edu/
+WRDS_USER=your-username
+WRDS_PASS=your-password
+ENVEOF
             fi
 
             # Install Python deps
