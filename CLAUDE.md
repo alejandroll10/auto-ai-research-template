@@ -6,6 +6,31 @@ This is the **template repository** for the autonomous research paper pipeline. 
 
 This file is tracked in git but **overwritten by `setup.sh`** in cloned projects. It is for our development work only. The pipeline's CLAUDE.md that end users see is assembled by `setup.sh` from `templates/claude_md/core.md` + variant-specific domain/scoring blocks.
 
+## Setting up a new project
+
+If a user asks to create/set up/start a new research project, run `setup.sh` for them:
+
+```bash
+# Basic finance theory
+./setup.sh <project-name> --variant finance
+
+# Finance theory + empirical data (CRSP, Compustat, FRED, WRDS)
+./setup.sh <project-name> --variant finance --ext empirical
+
+# Macro theory
+./setup.sh <project-name> --variant macro
+
+# Finance theory + LLM experiments
+./setup.sh <project-name> --variant finance_llm
+```
+
+This creates a standalone project folder with assembled CLAUDE.md, agents, and skills. After setup, tell the user to:
+
+1. `cd <project-name>`
+2. Edit `.env` with any required API keys (FRED, WRDS, etc.)
+3. Run `claude --dangerously-skip-permissions`
+4. Say "Run the pipeline."
+
 ## Repository structure
 
 ```

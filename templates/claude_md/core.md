@@ -8,53 +8,6 @@ The project also produces a **process log** documenting how the autonomous syste
 
 ---
 
-## How to use
-
-### First time: set up a new project
-
-Open an empty folder in Cursor (or any editor), start Claude Code, and say:
-
-```
-Clone the research template and set up.
-```
-
-This clones `https://github.com/alejandroll10/auto-ai-research-template.git` into the current folder, initializes pipeline state, and creates a git repo. After this, all template files are visible in your editor's file tree.
-
-### Run the pipeline
-
-```
-Run the pipeline.
-```
-
-The system reads this file, checks `process_log/pipeline_state.json`, and continues from where it left off. No human input needed after this point.
-
-### Resume after interruption
-
-If the session ends mid-pipeline, start Claude Code again and say "Run the pipeline." The system reads pipeline state and picks up from the last completed stage.
-
-### Watch progress
-
-**Dashboard:** Open a terminal in the project folder and run:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000/dashboard.html` in a browser. The dashboard auto-refreshes every 5 seconds, showing the current stage, scores, gate results, and full event history.
-
-**Files:** All output files appear in real time:
-- `output/stage0/` — problem discovery results
-- `output/stage1/` — idea sketches, reviews, selected idea
-- `output/stage2/` — theory drafts, audits, novelty checks
-- `output/stage3/` — implications
-- `output/stage4/` — self-attack, scorer decisions
-- `paper/sections/` — LaTeX paper sections
-- `process_log/` — full narrative log
-
-**Git:** Commits happen compulsively after every action (`git log --oneline` shows the full history).
-
----
-
 ## Pipeline overview
 
 ```
@@ -265,16 +218,13 @@ If present, read `STAGES.md` for full instructions. Summary:
 
 ---
 
-## Stage 3b/3c: Empirical Calibration and Testing (optional — empirical extension)
+## Stage 3b: Empirical Analysis (optional — empirical extension)
 
-**These stages run only if** `calibrator` agent exists in `.claude/agents/` and `.claude/skills/fred/` exists. If not present, skip to Stage 4.
+**This stage runs only if** `empiricist` agent exists in `.claude/agents/` and `.claude/skills/fred/` exists. If not present, skip to Stage 4.
 
-If present, read `EMPIRICAL_STAGES.md` for full instructions. Summary:
-
-1. **Stage 3b: Calibration.** Launch `calibrator` to match model parameters to data moments. Uses data skills (FRED, Ken French, Chen-Zimmerman) to fetch real data. Saves to `output/stage3b/calibration.md` and `code/calibration.py`.
-2. **Stage 3c: Empirical tests.** Launch `empiricist` to test the model's predictions against data. Designs simple tests (regressions, sorts, moment comparisons). Saves to `output/stage3c/empirical_tests.md` and `code/empirical_tests.py`.
-3. Both agents must write all code to files (`code/` for final, `code/tmp/` for scratch). Never run inline `python3 -c`.
-4. After completion: self-attacker (Stage 4) and scorer (Gate 4) receive calibration + empirical results alongside the theory.
+1. **Stage 3b.** Launch `empiricist` on the theory draft + implications. The agent reads the theory, decides what empirical work is appropriate (calibration, portfolio sorts, regressions, descriptive stats, or a combination), fetches data via skills (FRED, Ken French, Chen-Zimmerman, WRDS), and executes it. Saves to `output/stage3b/empirical_analysis.md` and `code/empirical.py`.
+2. All code must be written to files (`code/` for final, `code/tmp/` for scratch). Never run inline `python3 -c`.
+3. After completion: self-attacker (Stage 4) and scorer (Gate 4) receive empirical results alongside the theory.
 
 ---
 
@@ -584,18 +534,11 @@ These rules apply when writing paper drafts.
 
 ## How to start a session
 
-1. Check if CLAUDE.md exists in the current directory
-   - If NO: user said "clone the template" → clone the repo into current folder, then:
-     - Run `git remote remove origin` (detach from the public template repo so commits stay local)
-     - Run `git init` if needed, commit initial state
-     - Stop and wait for "Run the pipeline"
-   - If YES: continue below
-2. If a git remote named `origin` points to `auto-ai-research-template`, remove it: `git remote remove origin`
-3. Read `process_log/pipeline_state.json`
+1. Read `process_log/pipeline_state.json`
    - If `status` is `"not_started"`: set to `"running"`, begin Stage 0
    - If `status` is `"running"`: read `current_stage` and continue from there
    - If `status` is `"complete"`: report that the pipeline is done
-4. No human confirmation needed — just run
+2. No human confirmation needed — just run
 
 ---
 

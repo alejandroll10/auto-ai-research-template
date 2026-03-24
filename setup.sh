@@ -230,30 +230,27 @@ for ext in "${EXTENSIONS[@]}"; do
                 cp "$EXT_ROOT/agents/${AGENT_DIR}/"*.md "$AGENTS_OUT/"
             fi
 
-            # Copy STAGES.md
-            if [ "$LOCAL" = "1" ]; then
-                cp "$EXT_ROOT/STAGES.md" "$OUT_DIR/EMPIRICAL_STAGES.md"
-            else
-                cp "$EXT_ROOT/STAGES.md" EMPIRICAL_STAGES.md
-            fi
-
             # Create output directories
             if [ "$LOCAL" = "1" ]; then
-                mkdir -p "$OUT_DIR/output/stage3b" "$OUT_DIR/output/stage3c" "$OUT_DIR/code/tmp"
+                mkdir -p "$OUT_DIR/output/stage3b" "$OUT_DIR/code/tmp"
             else
-                mkdir -p output/stage3b output/stage3c code/tmp
+                mkdir -p output/stage3b code/tmp
             fi
 
-            # Create .env placeholder for FRED API key
+            # Create .env placeholder for API keys
             if [ "$LOCAL" = "0" ] && [ ! -f .env ]; then
                 echo "# FRED API key (free): https://fred.stlouisfed.org/docs/api/api_key.html" > .env
                 echo "FRED_API_KEY=your-key-here" >> .env
+                echo "" >> .env
+                echo "# WRDS credentials: https://wrds-www.wharton.upenn.edu/" >> .env
+                echo "WRDS_USER=your-username" >> .env
+                echo "WRDS_PASS=your-password" >> .env
             fi
 
             # Install Python deps
             if [ "$LOCAL" = "0" ]; then
-                pip install pandas numpy statsmodels scipy fredapi pandas-datareader python-dotenv -q 2>/dev/null \
-                    || echo "Note: install empirical deps manually: pip install pandas numpy statsmodels scipy fredapi pandas-datareader python-dotenv"
+                pip install pandas numpy statsmodels scipy fredapi pandas-datareader wrds python-dotenv -q 2>/dev/null \
+                    || echo "Note: install empirical deps manually: pip install pandas numpy statsmodels scipy fredapi pandas-datareader wrds python-dotenv"
             fi
 
             echo "  ✓ Empirical extension applied (skills + agents)"

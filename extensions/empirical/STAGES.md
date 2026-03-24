@@ -1,8 +1,8 @@
-# Empirical Extension — Stages 3b/3c
+# Empirical Extension — Stage 3b
 
 ## Overview
 
-This extension adds data-driven calibration and empirical testing to the theory pipeline. It runs after Stage 3a (theoretical implications) and before Stage 4 (self-attack).
+This extension adds data-driven empirical analysis to the theory pipeline. It runs after Stage 3 (implications) and before Stage 4 (self-attack). A single agent decides what empirical work the theory needs and executes it.
 
 ## Prerequisites
 
@@ -15,34 +15,23 @@ Install dependencies:
 pip install pandas numpy statsmodels scipy fredapi pandas-datareader python-dotenv
 ```
 
-## Stage 3b: Calibration
-
-**Agent:** `calibrator`
-
-1. Read the theory draft and implications
-2. Launch calibrator agent
-3. Calibrator identifies target moments, fetches data via skills, solves for parameters
-4. Save results to `output/stage3b/calibration.md`
-5. Save code to `code/calibration.py`
-6. Commit: `artifact: calibration — [N] moments matched`
-
-## Stage 3c: Empirical Tests
+## Stage 3b: Empirical Analysis
 
 **Agent:** `empiricist`
 
-1. Read the theory draft, implications, and calibration results
+1. Read the theory draft, implications, and problem statement
 2. Launch empiricist agent
-3. Empiricist designs simple tests of the model's predictions, fetches data, runs tests
-4. Save results to `output/stage3c/empirical_tests.md`
-5. Save code to `code/empirical_tests.py`
-6. Commit: `artifact: empirical tests — [N] predictions tested`
+3. Empiricist reads the theory, decides what empirical work is appropriate (calibration, tests, portfolio sorts, descriptive stats, or a combination), fetches data via skills, and executes it
+4. Save results to `output/stage3b/empirical_analysis.md`
+5. Save code to `code/empirical.py`
+6. Commit: `artifact: empirical analysis — [brief description]`
 
 ## Integration with pipeline
 
-After Stages 3b/3c complete:
-- Self-attacker (Stage 4) receives calibration + empirical results alongside the theory
+After Stage 3b completes:
+- Self-attacker (Stage 4) receives empirical results alongside the theory
 - Scorer evaluates empirical grounding as part of Fertility dimension
-- Paper-writer includes calibration table and empirical evidence sections
+- Paper-writer includes empirical evidence sections
 
 ## Data skills
 
