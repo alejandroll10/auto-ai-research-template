@@ -1,9 +1,13 @@
-# Data files (large, may be proprietary)
-data/*.csv
-data/*.parquet
-data/*.h5
-data/*.dta
-data/*.xlsx
+# Project directories (created by setup.sh in deployed projects)
+code/
+data/
+output/
+paper/
+process_log/
+references/
+.claude/agents/
+.claude/agent-memory/
+.claude/skills/
 
 # Python
 __pycache__/
@@ -34,6 +38,10 @@ meta_paper/
 
 # Local test output from setup.sh --local
 test_output/
+test_example/
+
+# Scratch
+texput.log
 
 # LaTeX build artifacts
 paper/*.aux

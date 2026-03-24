@@ -84,6 +84,8 @@ if [ "$LOCAL" = "1" ]; then
 
     rm -rf "$OUT_DIR"
     mkdir -p "$OUT_DIR/.claude/agents"
+    # Copy settings.json for local test
+    cp "$SCRIPT_DIR/.claude/settings.json" "$OUT_DIR/.claude/"
 
     echo "Local test mode: $VARIANT → $OUT_DIR"
 else
@@ -182,6 +184,41 @@ fi
 
 echo "  ✓ Agents copied (shared + ${AGENT_DIR})"
 
+# ── Create project directories and initial files ──
+echo "Creating project structure..."
+
+if [ "$LOCAL" = "1" ]; then
+    P="$OUT_DIR"
+else
+    P="."
+fi
+
+mkdir -p "$P/code/analysis" "$P/code/download" "$P/code/tmp"
+mkdir -p "$P/data"
+mkdir -p "$P/output/stage0" "$P/output/stage1" "$P/output/stage2" "$P/output/stage3" "$P/output/stage4" "$P/output/post_pipeline"
+mkdir -p "$P/paper/sections" "$P/paper/referee_reports"
+mkdir -p "$P/process_log/sessions" "$P/process_log/decisions" "$P/process_log/discussions" "$P/process_log/patterns"
+mkdir -p "$P/references"
+
+# Initial pipeline state
+cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
+{
+  "current_stage": "stage_0",
+  "problem_attempt": 1,
+  "idea_round": 0,
+  "theory_attempt": 1,
+  "revision_round": 0,
+  "referee_round": 0,
+  "status": "not_started",
+  "scores": {},
+  "history": []
+}
+JSONEOF
+
+touch "$P/process_log/history.md"
+
+echo "  ✓ Project structure created"
+
 # ── Apply finance_llm extension if needed ──
 if [ "$VARIANT" = "finance_llm" ] && [ "$LOCAL" = "0" ]; then
     echo "Applying LLM experiment extension..."
@@ -230,12 +267,8 @@ for ext in "${EXTENSIONS[@]}"; do
                 cp "$EXT_ROOT/agents/${AGENT_DIR}/"*.md "$AGENTS_OUT/"
             fi
 
-            # Create output directories
-            if [ "$LOCAL" = "1" ]; then
-                mkdir -p "$OUT_DIR/output/stage3b" "$OUT_DIR/code/tmp"
-            else
-                mkdir -p output/stage3b code/tmp
-            fi
+            # Create empirical output directory
+            mkdir -p "$P/output/stage3b"
 
             # Create .env placeholder for API keys
             if [ "$LOCAL" = "0" ] && [ ! -f .env ]; then
