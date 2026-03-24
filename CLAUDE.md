@@ -43,21 +43,18 @@ templates/
 │   ├── finance/         # Finance theory variant agents (idea-generator, scorer, etc.)
 │   └── macro/           # Macro variant agents
 ├── domains/
-│   ├── finance.md       # Domain knowledge block for finance
-│   └── macro.md         # Domain knowledge block for macro
+│   ├── finance.md       # Domain knowledge reference (not injected — for dev reference only)
+│   └── macro.md         # Domain knowledge reference (not injected — for dev reference only)
 ├── scoring/
 │   ├── finance.md       # Scoring calibrations for finance
 │   └── macro.md         # Scoring calibrations for macro
 └── claude_md/
-    └── core.md          # Pipeline orchestrator template (with {{DOMAIN}}, {{SCORING}} placeholders)
+    └── core.md          # Pipeline orchestrator template (with {{SCORING}}, {{PAPER_TYPE}}, etc.)
 
-.claude/agents/          # Currently deployed agents (for the finance variant — legacy, will be assembled by setup.sh)
-extensions/              # Optional extensions (theory_llm, etc.)
+extensions/              # Optional extensions (empirical, theory_llm)
 setup.sh                 # Clones repo, assembles CLAUDE.md + agents for chosen variant
 dashboard.html           # Live progress dashboard
-output/                  # Pipeline output directories (empty in template)
-paper/                   # Paper output directories (empty in template)
-process_log/             # Pipeline state (initial state in template)
+test_scripts/            # Skill verification scripts (removed on deploy)
 ```
 
 ## Supported variants
@@ -82,20 +79,20 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
 2. Reads `--variant` flag (default: `finance`)
 3. Assembles CLAUDE.md:
    - Reads `templates/claude_md/core.md`
-   - Replaces `{{DOMAIN}}` with contents of `templates/domains/{variant}.md`
    - Replaces `{{SCORING}}` with contents of `templates/scoring/{variant}.md`
    - Replaces `{{PAPER_TYPE}}`, `{{TARGET_JOURNALS}}`, `{{DOMAIN_AREAS}}` with variant-specific strings
 4. Copies agents: `templates/agents/shared/*` + `templates/agents/{variant}/*` → `.claude/agents/`
-5. Removes template infrastructure (the `templates/` dir itself) from the cloned project
-6. Detaches from origin, commits initial state
+5. Injects variant context (paper type, journal list, domain) into key agents
+6. Applies extensions (`--ext empirical`, `--ext theory_llm`) — copies skills, agents, creates dirs
+7. Creates project structure (output/, paper/, code/, etc.) and initial pipeline state
+8. Removes template infrastructure, detaches from origin, commits initial state
 
 ## Adding a new variant
 
 1. Create `templates/agents/{variant}/` with variant-specific agents
-2. Create `templates/domains/{variant}.md` with domain knowledge
-3. Create `templates/scoring/{variant}.md` with scoring calibrations
-4. Add variant config to `setup.sh` (paper type, target journals, domain areas)
-5. Test: `./setup.sh --variant {variant} --local`
+2. Create `templates/scoring/{variant}.md` with scoring calibrations
+3. Add variant config to `setup.sh` (paper type, target journals, journal list, domain areas)
+4. Test: `./setup.sh --variant {variant} --local`
 
 ## Agent classification
 

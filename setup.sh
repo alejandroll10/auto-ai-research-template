@@ -194,7 +194,7 @@ VARIANT_BLOCK="
 - **Domain:** ${DOMAIN_AREAS}
 "
 
-for agent in literature-scout novelty-checker referee scorer paper-writer; do
+for agent in literature-scout novelty-checker referee scorer paper-writer style; do
     if [ -f "$AGENTS_OUT/$agent.md" ]; then
         echo "$VARIANT_BLOCK" >> "$AGENTS_OUT/$agent.md"
     fi
