@@ -59,13 +59,13 @@ case "$VARIANT" in
     finance)
         PAPER_TYPE="finance theory paper"
         TARGET_JOURNALS="top-3 finance journal (JF, JFE, RFS)"
-        DOMAIN_AREAS="asset pricing or corporate finance"
+        DOMAIN_AREAS="finance theory — asset pricing, corporate finance, information economics, market design, financial intermediation, or behavioral finance"
         AGENT_DIR="finance"
         ;;
     macro)
         PAPER_TYPE="macroeconomics theory paper"
         TARGET_JOURNALS="top-5 economics journal (AER, Econometrica, QJE, JPE, ReStud) or leading macro field journal (JME, JEDC, AEJ:Macro)"
-        DOMAIN_AREAS="monetary policy, fiscal policy, business cycles, inequality and macro, or expectations"
+        DOMAIN_AREAS="macroeconomics"
         AGENT_DIR="macro"
         ;;
     *)
