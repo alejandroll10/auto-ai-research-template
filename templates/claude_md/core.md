@@ -86,19 +86,29 @@ Score 0-100. If below 50, re-run Stage 0 with different search terms. After 3 fa
 
 **Agents:** `idea-generator` + `idea-reviewer` (iterating)
 
+**How many ideas to generate:** The number of candidates should increase when the pool is weaker — more failed attempts mean more draws are needed to find a good one.
+
+| Context | Ideas per round |
+|---------|----------------|
+| First time entering Stage 1 | 5 |
+| Returning from a failed theory (scorer REWORK/ABANDON) | 7 |
+| Returning from a problem-level failure (Stage 0 re-run) | 5, but explicitly explore different territory |
+
 1. Read `output/stage0/problem_statement.md` and `output/stage0/literature_map.md`
-2. Launch idea-generator to brainstorm 3-5 candidate mechanisms
-3. Save sketches to `output/stage1/idea_sketches_rN.md` (N = round number)
-4. Commit: `artifact: idea sketches round {N}`
+2. If returning from a failed attempt, also read the previous scorer feedback and/or failed theory to understand what went wrong — instruct the idea-generator to avoid the same failure mode
+3. Launch idea-generator to brainstorm candidate mechanisms (see table above for count)
+4. Save sketches to `output/stage1/idea_sketches_rN.md` (N = round number)
+5. Commit: `artifact: idea sketches round {N}`
 
 ### Gate 1: Idea Review
 
 **Agent:** `idea-reviewer`
 
 1. Launch idea-reviewer on the sketches + problem statement + literature map
-2. Save review to `output/stage1/idea_review_rN.md`
-3. Commit: `artifact: idea review round {N}`
-4. Read the decision:
+2. If this is a return visit to Stage 1, also provide the previous scorer feedback so the reviewer knows what to screen against
+3. Save review to `output/stage1/idea_review_rN.md`
+4. Commit: `artifact: idea review round {N}`
+5. Read the decision:
 
 | Decision | Action |
 |----------|--------|
@@ -106,9 +116,9 @@ Score 0-100. If below 50, re-run Stage 0 with different search terms. After 3 fa
 | **ITERATE** | Re-launch idea-generator with the reviewer's feedback. Max 3 rounds of iteration. |
 | **REJECT ALL** | All ideas are weak. Return to Stage 0 for a different problem. |
 
-5. After 3 rounds without ADVANCE, pick the highest-scored idea and advance it anyway.
-6. Save the winning idea summary to `output/stage1/selected_idea.md`
-7. Commit: `artifact: selected idea saved`
+6. After 3 rounds without ADVANCE, pick the highest-scored idea and advance it anyway.
+7. Save the winning idea summary to `output/stage1/selected_idea.md`
+8. Commit: `artifact: selected idea saved`
 
 ### Gate 1b: Novelty Check on Selected Idea
 
