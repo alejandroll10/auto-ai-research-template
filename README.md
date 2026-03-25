@@ -113,6 +113,7 @@ Extensions are additive and combinable — they inject extra agents and skills w
 Stage 0: Problem Discovery   → Gate 0: Problem Viability
 Stage 1: Idea Generation     → Gate 1: Idea Review (iterates)
                                 Gate 1b: Novelty Check on idea
+                                Gate 1c: Idea Prototype (tractability)
 Stage 2: Theory Development  → Gate 2: Math Audit (structured + free-form)
                                 Gate 3: Novelty Check on theory
 Stage 3: Implications
@@ -132,6 +133,7 @@ Each gate is adversarial. Failed theories get revised, reworked, or abandoned. T
 | `literature-scout` | Web search for papers, builds literature map |
 | `idea-generator` | Brainstorms candidate mechanisms |
 | `idea-reviewer` | Evaluates and ranks idea sketches |
+| `idea-prototyper` | Quick math feasibility check before full theory |
 | `theory-generator` | Develops selected idea into full model with proofs |
 | `math-auditor` | Step-by-step derivation verification |
 | `math-auditor-freeform` | Skeptical reader audit |
@@ -143,6 +145,7 @@ Each gate is adversarial. Failed theories get revised, reworked, or abandoned. T
 | `style` | Enforces writing style guide |
 | `scribe` | Background documentation of the process |
 | `empiricist` | Empirical analysis (if `--ext empirical`) |
+| `empirics-auditor` | Verifies empirical code and results (if `--ext empirical`) |
 
 ## Data skills (with `--ext empirical`)
 

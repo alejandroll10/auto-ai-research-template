@@ -98,8 +98,9 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
 
 Agents are either **shared** (identical across variants) or **variant-specific** (different prompts per domain).
 
-**Shared** (domain-agnostic):
-- `literature-scout` — searches any topic
+**Shared** (domain-agnostic, receive variant context via injection):
+- `literature-scout` — searches for papers (variant context provides target journals)
+- `idea-prototyper` — quick math feasibility check
 - `math-auditor` — checks derivations step-by-step
 - `math-auditor-freeform` — reads as skeptical reader
 - `novelty-checker` — searches web for prior work
@@ -107,7 +108,7 @@ Agents are either **shared** (identical across variants) or **variant-specific**
 - `style` — checks writing style
 - `scribe` — documents the process
 
-**Variant-specific** (domain knowledge matters):
+**Variant-specific** (different prompts per domain):
 - `idea-generator` — needs domain-specific brainstorming patterns
 - `idea-reviewer` — needs domain-specific evaluation criteria
 - `theory-generator` — needs domain-specific model structure guidance
@@ -115,6 +116,8 @@ Agents are either **shared** (identical across variants) or **variant-specific**
 - `self-attacker` — needs domain-specific attack vectors
 - `referee` — needs domain-specific journal standards
 
-## Current work
-
-Working on `feature/variant-infrastructure` branch. Goal: refactor the monolithic pipeline into a variant-aware template system, with macro as the first additional variant.
+**Extension agents** (added by `--ext` flags):
+- `empiricist` — empirical analysis (variant-specific, `--ext empirical`)
+- `empirics-auditor` — verifies empirical code/results (shared, `--ext empirical`)
+- `experiment-designer` — LLM experiments (shared, `--ext theory_llm`)
+- `experiment-reviewer` — validates experiment methodology (shared, `--ext theory_llm`)
