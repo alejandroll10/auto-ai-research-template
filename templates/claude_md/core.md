@@ -24,7 +24,10 @@ Stage 1: Idea Generation     ──→ Gate 1: Idea Review (iterates with genera
 Stage 2: Theory Development  ──→ Gate 2: Math Audit (structured then free-form)
                                    Gate 3: Novelty Check on full theory
                                    Gate 3b: Empirical Feasibility (falsify-first, optional)
-Stage 3: Implications        ──→ Stage 3e: Full Empirical Analysis (optional)
+                                      ├── FALSIFIED → back to Stage 1
+                                      └── OK → proceed
+Stage 3: Implications        ──→ Stage 3c/3d: LLM Experiments (optional)
+                                   Stage 3e: Full Empirical Analysis (optional)
 Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-based)
                                    ├── ADVANCE (75+) → Stage 5
                                    ├── REVISE  → back to Stage 2 (continue if Δ≥3, else escalate)
