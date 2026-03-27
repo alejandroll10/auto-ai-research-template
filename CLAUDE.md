@@ -101,6 +101,7 @@ Agents are either **shared** (identical across variants) or **variant-specific**
 **Shared** (domain-agnostic, receive variant context via injection):
 - `literature-scout` — searches for papers (variant context provides target journals)
 - `idea-prototyper` — quick math feasibility check
+- `theory-explorer` — computational verification, calibration, parameter exploration, plots
 - `math-auditor` — checks derivations step-by-step
 - `math-auditor-freeform` — reads as skeptical reader
 - `novelty-checker` — searches web for prior work

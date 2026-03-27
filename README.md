@@ -116,8 +116,10 @@ Stage 1: Idea Generation     → Gate 1: Idea Review (iterates)
                                 Gate 1c: Idea Prototype (tractability)
 Stage 2: Theory Development  → Gate 2: Math Audit (structured + free-form)
                                 Gate 3: Novelty Check on theory
+                                Stage 3a: Theory Exploration (compute, verify, plot)
+                                Gate 3b: Empirical Feasibility (optional)
 Stage 3: Implications
-Stage 3b: Empirical Analysis  (optional, if --ext empirical)
+Stage 3e: Full Empirical Analysis (optional, if --ext empirical)
 Stage 4: Self-Attack          → Gate 4: Scorer Decision
 Stage 5: Paper Writing
 Stage 6: Referee Simulation   → Gate 5: Referee Decision
@@ -138,6 +140,7 @@ Each gate is adversarial. Failed theories get revised, reworked, or abandoned. T
 | `math-auditor` | Step-by-step derivation verification |
 | `math-auditor-freeform` | Skeptical reader audit |
 | `novelty-checker` | Web search to verify result is genuinely new |
+| `theory-explorer` | Computational verification — calibration, parameter space, plots |
 | `self-attacker` | Finds every possible weakness |
 | `scorer` | Quality gate: advance/revise/abandon decisions |
 | `paper-writer` | Assembles LaTeX paper |

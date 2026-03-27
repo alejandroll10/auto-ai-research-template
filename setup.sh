@@ -210,7 +210,7 @@ else
     P="."
 fi
 
-mkdir -p "$P/code/analysis" "$P/code/download" "$P/code/tmp"
+mkdir -p "$P/code/analysis" "$P/code/download" "$P/code/tmp" "$P/code/explore"
 mkdir -p "$P/data"
 mkdir -p "$P/output/stage0" "$P/output/stage1" "$P/output/stage2" "$P/output/stage3" "$P/output/stage4" "$P/output/post_pipeline"
 mkdir -p "$P/paper/sections" "$P/paper/referee_reports"

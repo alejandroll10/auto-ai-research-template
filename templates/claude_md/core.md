@@ -509,9 +509,6 @@ When the core result is correct but thin, the path to a journal paper is through
 ```
 dashboard.html              # Live progress dashboard (serve with python3 -m http.server)
 output/
-├── stage0/
-│   ├── problem_statement.md
-│   └── literature_map.md
 ├── data_inventory.md               # available data sources (written at startup)
 ├── stage0/
 │   ├── problem_statement.md
@@ -519,20 +516,17 @@ output/
 ├── stage1/
 │   ├── idea_sketches_r1.md
 │   ├── idea_review_r1.md
-│   ├── idea_sketches_r2.md
-│   ├── idea_review_r2.md
 │   ├── selected_idea.md
 │   ├── novelty_check_idea.md
 │   └── idea_prototype.md
 ├── stage2/
 │   ├── theory_draft_v1.md
-│   ├── theory_draft_v2.md
 │   ├── math_audit_v1.md
-│   ├── math_audit_v2.md
 │   ├── freeform_audit_v1.md
-│   ├── freeform_audit_v2.md
-│   ├── novelty_check_v1.md
-│   └── novelty_check_v2.md
+│   └── novelty_check_v1.md
+├── stage3a/
+│   ├── exploration.md              # theory exploration report
+│   └── figures/                    # diagnostic plots
 ├── stage3/
 │   └── implications.md
 ├── stage3b/
