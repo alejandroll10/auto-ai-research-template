@@ -252,8 +252,10 @@ Quick falsification check: can this theory be calibrated at all? Do the key empi
 
 **These stages run only if** `llm_client.py` exists in the project root and `experiment-designer` agent exists in `.claude/agents/`. If not present, skip to the next optional stage or Stage 4.
 
-1. **Stage 3c:** Launch `experiment-designer` on the theory draft + implications. The agent identifies predictions testable via LLM calls, designs controlled experiments with ground truth and controls, writes and executes code using `llm_client.py`. Saves to `output/stage3b_experiments/`.
-2. **Stage 3d:** Launch `experiment-reviewer` on the design, code, raw results, and analysis. Evaluates methodology (internal validity, controls, sample size, statistical tests) and interpretation.
+1. **Experiment plan.** Launch `experiment-designer` with instruction: "Write an experiment plan only — do not execute yet." The agent identifies predictions testable via LLM calls and writes `output/stage3b_experiments/experiment_plan.md` with: hypotheses, experimental design, controls, sample sizes, and expected outcomes.
+2. **Review the plan.** Check: does it test the right predictions? Are controls adequate? Is sample size sufficient? If not, provide feedback.
+3. **Execute.** Launch `experiment-designer` with the approved plan. The agent runs experiments using `llm_client.py`. Saves to `output/stage3b_experiments/`.
+4. **Stage 3d:** Launch `experiment-reviewer` on the design, code, raw results, and analysis. Evaluates methodology (internal validity, controls, sample size, statistical tests) and interpretation.
 
 | Decision | Action |
 |----------|--------|
@@ -271,9 +273,11 @@ Quick falsification check: can this theory be calibrated at all? Do the key empi
 
 This is the full empirical analysis — deeper than the feasibility check at Gate 3b. Now that implications are developed, the empiricist can design proper tests, calibrations, and portfolio sorts.
 
-1. Launch `empiricist` on the theory draft + implications + feasibility results (if any). The agent reads the theory, decides what empirical work is appropriate, fetches data via skills (FRED, Ken French, Chen-Zimmerman, WRDS, EDGAR), and executes it. Saves to `output/stage3b/empirical_analysis.md` and `code/empirical.py`.
-2. All code must be written to files (`code/` for final, `code/tmp/` for scratch). Never run inline `python3 -c`.
-3. **Empirics audit.** Launch `empirics-auditor` on the empirical analysis + code + theory draft. The auditor runs the code, verifies results, checks methodology.
+1. **Analysis plan.** Launch `empiricist` with instruction: "Write an analysis plan only — do not execute yet." The empiricist reads the theory, implications, data inventory, and feasibility results, then writes `output/stage3b/empirical_plan.md` describing: what tests to run, what data sources to use (and WHY those sources — reference the data inventory), what the expected results look like, and what would constitute support vs. rejection of the theory.
+2. **Review the plan.** Read the plan. Check: does it use the best available data? (If WRDS is available but the plan uses only CZ portfolios, reject the plan.) Does it test what the theory actually predicts? Is the identification strategy sound? If the plan is wrong, re-launch the empiricist with specific feedback.
+3. **Execute.** Launch `empiricist` with the approved plan. The agent executes the plan, fetches data via skills (FRED, Ken French, Chen-Zimmerman, WRDS, EDGAR), and runs the analysis. Saves to `output/stage3b/empirical_analysis.md` and `code/empirical.py`.
+4. All code must be written to files (`code/` for final, `code/tmp/` for scratch). Never run inline `python3 -c`.
+5. **Empirics audit.** Launch `empirics-auditor` on the empirical analysis + code + theory draft. The auditor runs the code, verifies results, checks methodology.
    - If **PASS**: proceed to Stage 4. Self-attacker and scorer receive empirical results alongside the theory.
    - If **FAIL**: re-launch `empiricist` with the audit feedback. Keep iterating as long as the number of issues is decreasing (the empiricist is making progress). Escalate only if the issue count plateaus or increases across two consecutive attempts.
 4. Commit: `artifact: empirics audit — {PASS/FAIL}`
@@ -334,12 +338,9 @@ Record all scores in `pipeline_state.json` under `"scores"` so the trajectory ca
 
 **Agent:** `paper-writer`
 
-1. Launch paper-writer with:
-   - Theory draft (latest version)
-   - Literature map
-   - Scorer assessment
-   - Self-attack report (so the paper preemptively addresses weaknesses)
-2. Paper-writer creates files in `paper/sections/`:
+1. **Paper outline.** Launch paper-writer with instruction: "Write an outline only — do not write LaTeX yet." Provide: theory draft, literature map, scorer assessment, self-attack report. The paper-writer produces `paper/outline.md` with: section-by-section plan, what goes where, how to address self-attack weaknesses, which results to highlight, target length per section.
+2. **Review the outline.** Check: does it address the self-attack points? Is the positioning against the literature accurate? Is the structure appropriate for the target journal? If not, provide feedback and re-launch.
+3. **Write.** Launch paper-writer with the approved outline + all inputs. Paper-writer creates files in `paper/sections/`:
    - `introduction.tex`
    - `model.tex`
    - `results.tex`
