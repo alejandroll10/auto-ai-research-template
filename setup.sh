@@ -249,13 +249,16 @@ for ext in "${EXTENSIONS[@]}"; do
 
             mkdir -p "$P/output/stage3b_experiments"
 
-            # Add UF API key to .env (append if file exists, create if not)
+            # Add LLM API keys to .env (append if file exists, create if not)
             ENV_FILE="$P/.env"
             if ! grep -q 'UF_API_KEY' "$ENV_FILE" 2>/dev/null; then
                 cat >> "$ENV_FILE" <<'ENVEOF'
 
-# Get API key from https://api.ai.it.ufl.edu
+# LLM experiment backends (set one or both)
+# UF NaviGator (free for UF researchers): https://api.ai.it.ufl.edu
 UF_API_KEY=your-key-here
+# DeepInfra (pay-per-token): https://deepinfra.com
+DEEPINFRA_TOKEN=your-key-here
 ENVEOF
             fi
 

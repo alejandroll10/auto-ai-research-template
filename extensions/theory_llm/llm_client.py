@@ -1,10 +1,13 @@
 """
-LLM client for theory_llm papers. Calls UF NaviGator gpt-oss models.
+LLM client for theory_llm papers. Supports multiple backends:
+  - UF NaviGator (gpt-oss models, free for UF researchers)
+  - DeepInfra (Llama, Qwen, Gemma, etc.)
 
 Setup:
-  1. pip install openai python-dotenv (or: uv add openai python-dotenv)
-  2. Create .env with: UF_API_KEY=your-key-here
-  3. Get key from https://api.ai.it.ufl.edu
+  1. pip install openai python-dotenv
+  2. Create .env with one or both:
+     UF_API_KEY=your-key       # https://api.ai.it.ufl.edu
+     DEEPINFRA_API_KEY=your-key # https://deepinfra.com
 """
 
 import os
@@ -16,8 +19,34 @@ from openai import OpenAI
 
 load_dotenv()
 
-BASE_URL = "https://api.ai.it.ufl.edu/v1"
-DEFAULT_MODEL = "gpt-oss-120b"
+# ── Backend configuration ──
+BACKENDS = {
+    "uf": {
+        "base_url": "https://api.ai.it.ufl.edu/v1",
+        "api_key_env": "UF_API_KEY",
+        "default_model": "gpt-oss-120b",
+        "models": ["gpt-oss-120b", "gpt-oss-20b"],
+    },
+    "deepinfra": {
+        "base_url": "https://api.deepinfra.com/v1/openai",
+        "api_key_env": "DEEPINFRA_TOKEN",
+        "default_model": "Qwen/QwQ-32B",
+        "models": [
+            # Reasoning models
+            "Qwen/QwQ-32B",
+            "deepseek-ai/DeepSeek-R1",
+            "deepseek-ai/DeepSeek-R1-0528",
+            # Large instruction models
+            "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+            "meta-llama/Meta-Llama-3.1-405B-Instruct",
+            "meta-llama/Meta-Llama-3.1-70B-Instruct",
+            "Qwen/Qwen2.5-72B-Instruct",
+            # Smaller / cheaper
+            "meta-llama/Meta-Llama-3.1-8B-Instruct",
+            "google/gemma-2-27b-it",
+        ],
+    },
+}
 
 
 @dataclass
@@ -25,28 +54,76 @@ class LLMResponse:
     content: Optional[str]
     reasoning: Optional[str]
     model: str
+    backend: str
     usage: dict = field(default_factory=dict)
     elapsed: float = 0.0
 
 
-def get_client() -> OpenAI:
-    return OpenAI(
-        base_url=BASE_URL,
-        api_key=os.getenv("UF_API_KEY") or os.getenv("OPENAI_API_KEY"),
+def _detect_backend(model: Optional[str] = None) -> str:
+    """Auto-detect which backend to use based on model name or available keys."""
+    if model:
+        for name, cfg in BACKENDS.items():
+            if model in cfg["models"] or model == cfg["default_model"]:
+                return name
+        # If model contains '/' it's probably DeepInfra (org/model format)
+        if "/" in model:
+            return "deepinfra"
+
+    # Fall back to whichever has a key configured
+    if os.getenv("UF_API_KEY"):
+        return "uf"
+    if os.getenv("DEEPINFRA_API_KEY"):
+        return "deepinfra"
+
+    raise ValueError("No LLM API key found. Set UF_API_KEY or DEEPINFRA_API_KEY in .env")
+
+
+def get_client(backend: Optional[str] = None, model: Optional[str] = None) -> tuple[OpenAI, str]:
+    """Get an OpenAI-compatible client for the specified or auto-detected backend.
+
+    Returns:
+        (client, backend_name)
+    """
+    if backend is None:
+        backend = _detect_backend(model)
+
+    cfg = BACKENDS[backend]
+    api_key = os.getenv(cfg["api_key_env"])
+    if not api_key:
+        raise ValueError(f"Missing {cfg['api_key_env']} in .env for backend '{backend}'")
+
+    client = OpenAI(
+        base_url=cfg["base_url"],
+        api_key=api_key,
         timeout=300.0,
     )
+    return client, backend
 
 
 def call(
     system: str,
     user: str,
-    model: str = DEFAULT_MODEL,
+    model: Optional[str] = None,
+    backend: Optional[str] = None,
     max_tokens: int = 4000,
     temperature: float = 0.7,
     reasoning_effort: str = "medium",
 ) -> LLMResponse:
-    """Call gpt-oss via UF API. Returns content and reasoning separately."""
-    client = get_client()
+    """Call an LLM via the appropriate backend. Returns content and reasoning separately.
+
+    Args:
+        system: System prompt
+        user: User message
+        model: Model name (auto-detects backend if not specified)
+        backend: Force a specific backend ("uf" or "deepinfra")
+        max_tokens: Maximum response tokens
+        temperature: Sampling temperature
+        reasoning_effort: "low", "medium", "high" (UF gpt-oss only)
+    """
+    client, backend_name = get_client(backend, model)
+
+    if model is None:
+        model = BACKENDS[backend_name]["default_model"]
 
     kwargs = {
         "model": model,
@@ -56,8 +133,11 @@ def call(
         ],
         "max_tokens": max_tokens,
         "temperature": temperature,
-        "extra_body": {"reasoning_effort": reasoning_effort},
     }
+
+    # UF gpt-oss supports reasoning_effort
+    if backend_name == "uf":
+        kwargs["extra_body"] = {"reasoning_effort": reasoning_effort}
 
     t0 = time.time()
     completion = client.chat.completions.create(**kwargs)
@@ -76,6 +156,7 @@ def call(
         content=content,
         reasoning=reasoning,
         model=completion.model,
+        backend=backend_name,
         usage={
             "prompt_tokens": completion.usage.prompt_tokens,
             "completion_tokens": completion.usage.completion_tokens,
@@ -85,16 +166,39 @@ def call(
     )
 
 
+def list_models(backend: Optional[str] = None) -> dict:
+    """List available models per backend."""
+    if backend:
+        return {backend: BACKENDS[backend]["models"]}
+    return {name: cfg["models"] for name, cfg in BACKENDS.items()}
+
+
 if __name__ == "__main__":
-    print("Testing UF NaviGator connection...")
-    r = call(
-        system="You are a helpful assistant.",
-        user="Say 'Hello from gpt-oss-120b!' and nothing else.",
-        max_tokens=50,
-        reasoning_effort="low",
-    )
-    print(f"Model: {r.model}")
-    print(f"Content: {r.content}")
-    print(f"Reasoning: {r.reasoning[:200] if r.reasoning else None}")
-    print(f"Usage: {r.usage}")
-    print(f"Time: {r.elapsed:.1f}s")
+    import sys
+
+    # Auto-detect or use CLI arg
+    backend = sys.argv[1] if len(sys.argv) > 1 else None
+
+    try:
+        client, detected = get_client(backend)
+        model = BACKENDS[detected]["default_model"]
+        print(f"Testing {detected} backend with {model}...")
+
+        r = call(
+            system="You are a helpful assistant.",
+            user="Say 'Hello!' and name the model you are.",
+            model=model,
+            backend=detected,
+            max_tokens=100,
+            reasoning_effort="low",
+        )
+        print(f"Backend: {r.backend}")
+        print(f"Model: {r.model}")
+        print(f"Content: {r.content}")
+        if r.reasoning:
+            print(f"Reasoning: {r.reasoning[:200]}")
+        print(f"Usage: {r.usage}")
+        print(f"Time: {r.elapsed:.1f}s")
+    except ValueError as e:
+        print(f"Error: {e}")
+        print("Available backends:", list(BACKENDS.keys()))
