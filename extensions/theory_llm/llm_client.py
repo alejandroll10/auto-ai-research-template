@@ -7,7 +7,7 @@ Setup:
   1. pip install openai python-dotenv
   2. Create .env with one or both:
      UF_API_KEY=your-key       # https://api.ai.it.ufl.edu
-     DEEPINFRA_API_KEY=your-key # https://deepinfra.com
+     DEEPINFRA_TOKEN=your-key # https://deepinfra.com
 """
 
 import os
@@ -77,10 +77,10 @@ def _detect_backend(model: Optional[str] = None) -> str:
     # Fall back to whichever has a key configured
     if os.getenv("UF_API_KEY"):
         return "uf"
-    if os.getenv("DEEPINFRA_API_KEY"):
+    if os.getenv("DEEPINFRA_TOKEN"):
         return "deepinfra"
 
-    raise ValueError("No LLM API key found. Set UF_API_KEY or DEEPINFRA_API_KEY in .env")
+    raise ValueError("No LLM API key found. Set UF_API_KEY or DEEPINFRA_TOKEN in .env")
 
 
 def get_client(backend: Optional[str] = None, model: Optional[str] = None) -> tuple[OpenAI, str]:
