@@ -16,6 +16,16 @@ Concretely:
 - If the scorer finds the current theory is at a ceiling (score plateau), abandon and regenerate rather than continuing to polish.
 - If empirical results contradict the theory, report honestly and revise the theory — don't cherry-pick supportive tests.
 
+## Core principle: surprises are discoveries
+
+When results go against well-formed priors — a comparative static flips sign at calibration, a necessary condition fails in a standard parameterization, or the model generates an unexpected pattern — that is often the most valuable finding. If your priors were based on standard models and standard calibrations, a surprise means the model is revealing something non-obvious. Lean into it.
+
+Concretely:
+- If the theory-explorer finds the result reverses in a plausible parameter region, don't treat it as a failure. Ask: what economic force drives the reversal? That force may be the real contribution.
+- If the empiricist finds the data contradicts the theory's main prediction but confirms an auxiliary prediction, the auxiliary prediction might be the paper.
+- If a "known" mechanism produces an unexpected quantitative result (the effect is 10x larger or smaller than expected), that's a finding worth reporting.
+- The pipeline should never suppress a surprising result to preserve a prior narrative. A clean surprise, honestly reported, is more publishable than a confirmation of the expected.
+
 ---
 
 ## Pipeline overview
