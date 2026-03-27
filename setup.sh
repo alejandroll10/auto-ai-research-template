@@ -237,6 +237,12 @@ touch "$P/process_log/history.md"
 echo "  ✓ Project structure created"
 
 # ── Apply extensions ──
+if [ "$LOCAL" = "1" ]; then
+    SKILLS_OUT="$OUT_DIR/.claude/skills"
+else
+    SKILLS_OUT=".claude/skills"
+fi
+
 for ext in "${EXTENSIONS[@]}"; do
     case "$ext" in
         theory_llm)
@@ -246,6 +252,16 @@ for ext in "${EXTENSIONS[@]}"; do
 
             cp "$EXT_ROOT/llm_client.py" "$P/"
             cp "$EXT_ROOT/agents/"*.md "$AGENTS_OUT/"
+
+            # Copy skills
+            if [ -d "$EXT_ROOT/skills" ]; then
+                mkdir -p "$SKILLS_OUT"
+                for skill_dir in "$EXT_ROOT/skills/"*/; do
+                    skill_name=$(basename "$skill_dir")
+                    mkdir -p "$SKILLS_OUT/$skill_name"
+                    cp "$skill_dir"SKILL.md "$SKILLS_OUT/$skill_name/"
+                done
+            fi
 
             mkdir -p "$P/output/stage3b_experiments"
 
@@ -276,11 +292,6 @@ ENVEOF
             EXT_ROOT="$TEMPLATE_ROOT/extensions/empirical"
 
             # Copy skills
-            if [ "$LOCAL" = "1" ]; then
-                SKILLS_OUT="$OUT_DIR/.claude/skills"
-            else
-                SKILLS_OUT=".claude/skills"
-            fi
             mkdir -p "$SKILLS_OUT"
             for skill_dir in "$EXT_ROOT/skills/"*/; do
                 skill_name=$(basename "$skill_dir")
