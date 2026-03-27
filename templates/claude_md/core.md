@@ -33,7 +33,9 @@ Stage 1: Idea Generation     ──→ Gate 1: Idea Review (iterates with genera
                                    └── TRACTABLE → proceed to Stage 2
 Stage 2: Theory Development  ──→ Gate 2: Math Audit (structured then free-form)
                                    Gate 3: Novelty Check on full theory
-                                   Gate 3a: Computational Sanity Check (compute + plot)
+                                   Stage 3a: Theory Exploration (compute, verify, plot)
+                                      ├── FAILS → back to Stage 2
+                                      └── HOLDS/FRAGILE → proceed
                                    Gate 3b: Empirical Feasibility (falsify-first, optional)
                                       ├── FALSIFIED → back to Stage 1
                                       └── OK → proceed
@@ -227,26 +229,23 @@ This is the second of two deep novelty checks. The idea was already checked at G
 2. Save result to `output/stage2/novelty_check_vN.md`
 3. If KNOWN: abandon this theory, return to Stage 2 with new approach
 4. If INCREMENTAL: flag it, proceed with caution (scorer will weigh this)
-5. If NOVEL: proceed to computational sanity check
+5. If NOVEL: proceed to Stage 3a (theory exploration)
 6. Commit: `artifact: novelty check v{N} — {NOVEL/INCREMENTAL/KNOWN}`
 
-### Gate 3a: Computational Sanity Check
+### Stage 3a: Theory Exploration
 
-**Orchestrator task** — quick computation to verify the theory's claims hold numerically before investing in implications, empirics, or paper writing.
+**Agent:** `theory-explorer`
 
-1. Write a short script (`code/tmp/sanity_check.py` or `.f90` or `.cpp`) that:
-   - Plugs in standard/calibrated parameter values
-   - Computes the key equilibrium object or comparative static from the main proposition
-   - Checks whether the necessary conditions of the main result are satisfied at these parameters
-   - Produces one figure showing the main mechanism at work
-2. Run the script. Save the figure to `output/stage2/sanity_check_figure.png` (or `.pdf`).
-3. Save a brief report to `output/stage2/sanity_check.md`:
-   - Does the claimed effect show up numerically? YES/NO
-   - Are the necessary conditions satisfied at calibration? YES/NO
-   - Any surprises (non-monotonicity, corner solutions, convergence issues)?
-4. If the result does NOT show up numerically at any reasonable parameterization: this is a serious problem. Re-read the proof — either the math has a bug the auditor missed, or the conditions are too restrictive to hold in practice. Consider returning to Stage 2 for a mutate pass.
-5. If YES: proceed. The figure carries forward into the paper.
-6. Commit: `artifact: sanity check — {CONFIRMED/FAILED}`
+Computational exploration of the model — poke it, see what breaks, produce diagnostic plots. This catches results that are mathematically correct but quantitatively zero, conditions that don't hold at calibration, and knife-edge assumptions before investing in implications and paper writing.
+
+1. Launch `theory-explorer` on the theory draft + math audit results + data inventory.
+2. The agent implements the key result computationally, checks it at calibration, explores the parameter space, verifies necessary conditions, and produces diagnostic plots.
+3. Save to `output/stage3a/exploration.md`, code to `code/explore/`, figures to `output/stage3a/figures/`.
+4. Read the verdict:
+   - If main result **holds at calibration and is quantitatively meaningful**: proceed.
+   - If result **doesn't hold** or is **effectively zero** at calibration: return to Stage 2 with the exploration results. The theory-generator needs to know what the computation found.
+   - If result is **fragile** (holds only in a narrow parameter region): flag for the scorer. Proceed but the paper should be honest about this.
+5. Commit: `artifact: theory exploration — {HOLDS/FRAGILE/FAILS}`
 
 ### Gate 3b: Empirical Feasibility (optional — empirical extension, falsify-first)
 
@@ -317,7 +316,7 @@ This is the full empirical analysis — deeper than the feasibility check at Gat
 
 **Agent:** `self-attacker`
 
-1. Launch self-attacker on the theory draft + implications
+1. Launch self-attacker on the theory draft + implications + theory exploration results (if available)
 2. Save result to `output/stage4/self_attack_vN.md`
 3. Commit: `artifact: self-attack v{N}`
 
@@ -329,35 +328,29 @@ This is the full empirical analysis — deeper than the feasibility check at Gat
    - Theory draft: `output/stage2/theory_draft_vN.md`
    - Math audit (structured): `output/stage2/math_audit_vN.md`
    - Math audit (free-form): `output/stage2/freeform_audit_vN.md`
+   - Theory exploration: `output/stage3a/exploration.md` (if available — computational verification and diagnostic plots)
    - Novelty check (idea): `output/stage1/novelty_check_idea.md`
    - Novelty check (theory): `output/stage2/novelty_check_vN.md`
    - Self-attack: `output/stage4/self_attack_vN.md`
 2. Save result to `output/stage4/scorer_decision_vN.md`
 3. Read the decision using **state-dependent escalation**:
 
-**Advance threshold depends on target journal.** Check `pipeline_state.json` for `target_journal` or `paper_constraints.advance_threshold`. If not set, use the default (75).
+**Scoring is absolute** — 80 means top-5 journal quality regardless of target. The advance threshold depends on the target journal tier. Check `pipeline_state.json` for `target_journal` or `paper_constraints.advance_threshold`. Default tiers:
 
-| Target | Advance threshold | Rationale |
-|--------|------------------|-----------|
-| Top-5 econ / Top-3 finance | 75 (default) | Must be exceptional |
-| Field journals (JME, RFS, JFQA, etc.) | 65 | Solid contribution sufficient |
-| Economics Letters / short papers | 60 | One clean result, technically correct |
+| Target tier | Examples | Advance | Revise | Rework | Abandon |
+|-------------|----------|---------|--------|--------|---------|
+| **top-5** | AER, JF, Econometrica, QJE, JPE, ReStud, JFE, RFS | 75+ | 55-74 | 35-54 | <35 |
+| **field** | JME, JFQA, Rev Finance, Management Science, RED | 65+ | 45-64 | 30-44 | <30 |
+| **letters** | Economics Letters, Finance Research Letters | 55+ | 40-54 | 25-39 | <25 |
 
-**First scorer evaluation** (no prior score): use band logic.
-
-| Decision | Action |
-|----------|--------|
-| **ADVANCE** (≥ threshold) | Proceed to Stage 5 |
-| **REVISE** (threshold-20 to threshold-1) | Return to Stage 2 in mutate mode with scorer feedback. |
-| **MAJOR REWORK** (threshold-40 to threshold-21) | Return to Stage 1 to generate new ideas with scorer feedback. |
-| **ABANDON** (<threshold-40) | Increment theory_attempt. Return to Stage 1. After 3 abandons on same problem, return to Stage 0. |
+**First scorer evaluation** (no prior score): use band logic from the table above.
 
 **Subsequent scorer evaluations** (has prior score): use score trajectory.
 
 | Condition | Action |
 |-----------|--------|
-| Score ≥ threshold | **ADVANCE** — always, regardless of trajectory |
-| Score < threshold-40 | **ABANDON** — always, regardless of trajectory |
+| Score ≥ 75 | **ADVANCE** — always, regardless of trajectory |
+| Score < 35 | **ABANDON** — always, regardless of trajectory |
 | Delta ≥ 3 points | **CONTINUE** — one more iteration in current band: REVISE returns to Stage 2, MAJOR REWORK returns to Stage 1 (improving, worth continuing) |
 | Delta < 3 points | **ESCALATE** — move up one level: REVISE → MAJOR REWORK (Stage 1) → ABANDON (plateau or decline, not converging) |
 | Score < 60 on attempt 3+ | **ESCALATE** — regardless of delta. A score below 60 after two revisions suggests a ceiling on this idea. Repair can't fix it; regenerate. |
