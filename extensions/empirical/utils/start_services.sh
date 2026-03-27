@@ -12,7 +12,7 @@ cd "$(dirname "$0")/../.."
 # Load .env (handles values with spaces)
 if [ -f .env ]; then
     while IFS='=' read -r key value; do
-        [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
+        [[ "$key" =~ ^[[:space:]]*# || -z "$key" ]] && continue
         export "$key=$value"
     done < .env
 fi
