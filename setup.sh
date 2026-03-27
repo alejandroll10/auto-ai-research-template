@@ -295,9 +295,11 @@ ENVEOF
                 echo "  ⚠ No empiricist agent for variant '${AGENT_DIR}' — Stage 3b will be skipped at runtime"
             fi
 
-            # Copy utility scripts
+            # Copy utility scripts and startup
             mkdir -p "$P/code/utils"
             cp "$EXT_ROOT/utils/"*.py "$P/code/utils/"
+            cp "$EXT_ROOT/utils/"*.sh "$P/code/utils/" 2>/dev/null || true
+            chmod +x "$P/code/utils/"*.sh 2>/dev/null || true
             touch "$P/code/utils/__init__.py"
 
             # Create empirical output directory
