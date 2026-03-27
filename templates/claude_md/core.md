@@ -191,8 +191,7 @@ Two audits run sequentially. The structured audit checks every derivation step-b
 4. If FAIL:
    - Read the specific errors from the audit
    - Re-launch theory-generator in **mutate** mode with the draft + audit feedback
-   - Max 3 audit attempts per theory version
-   - If still failing after 3: treat as theory failure, increment theory_attempt
+   - Keep iterating as long as the error count is decreasing (making progress). Escalate only if errors plateau or increase across two consecutive attempts — treat as theory failure, increment theory_attempt
 5. If PASS: proceed to Step 2
 
 **Step 2: Free-form audit**
@@ -204,7 +203,7 @@ Two audits run sequentially. The structured audit checks every derivation step-b
    - Read the concerns from the free-form audit
    - Re-launch theory-generator in **mutate** mode with the draft + free-form audit feedback
    - After mutation, re-run **both** audits from Step 1 (the fix may have introduced new algebraic errors)
-   - This counts toward the same max 3 audit attempts per theory version
+   - Same rule: keep iterating while progress is being made, escalate if concerns plateau or increase
 5. If PASS: proceed to Gate 3
 
 ### Gate 3: Novelty Check on Full Theory
@@ -276,7 +275,7 @@ This is the full empirical analysis — deeper than the feasibility check at Gat
 2. All code must be written to files (`code/` for final, `code/tmp/` for scratch). Never run inline `python3 -c`.
 3. **Empirics audit.** Launch `empirics-auditor` on the empirical analysis + code + theory draft. The auditor runs the code, verifies results, checks methodology.
    - If **PASS**: proceed to Stage 4. Self-attacker and scorer receive empirical results alongside the theory.
-   - If **FAIL**: re-launch `empiricist` with the audit feedback. Max 3 audit attempts. After 3 failures, proceed with a note that empirical results are unverified.
+   - If **FAIL**: re-launch `empiricist` with the audit feedback. Keep iterating as long as the number of issues is decreasing (the empiricist is making progress). Escalate only if the issue count plateaus or increases across two consecutive attempts.
 4. Commit: `artifact: empirics audit — {PASS/FAIL}`
 
 ---
