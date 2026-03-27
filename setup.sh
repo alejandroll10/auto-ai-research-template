@@ -324,8 +324,8 @@ ENVEOF
 
             # Install Python deps
             if [ "$LOCAL" = "0" ]; then
-                pip install pandas numpy statsmodels scipy fredapi pandas-datareader wrds edgartools openassetpricing python-dotenv -q 2>/dev/null \
-                    || echo "Note: install empirical deps manually: pip install pandas numpy statsmodels scipy fredapi pandas-datareader wrds edgartools openassetpricing python-dotenv"
+                pip install pandas numpy statsmodels scipy fredapi pandas-datareader wrds edgartools openassetpricing gdown python-dotenv -q 2>/dev/null \
+                    || echo "Note: install empirical deps manually: pip install pandas numpy statsmodels scipy fredapi pandas-datareader wrds edgartools openassetpricing gdown python-dotenv"
             fi
 
             echo "  ✓ Empirical extension applied (skills + agents)"
