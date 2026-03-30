@@ -26,6 +26,17 @@ Concretely:
 - If a "known" mechanism produces an unexpected quantitative result (the effect is 10x larger or smaller than expected), that's a finding worth reporting.
 - The pipeline should never suppress a surprising result to preserve a prior narrative. A clean surprise, honestly reported, is more publishable than a confirmation of the expected.
 
+## Core principle: characterize, don't just prove
+
+For important results, the goal is not just to prove them under specific assumptions — it's to characterize exactly when they hold and when they don't. A result that says "X holds if and only if condition C" is far more valuable than "X holds under assumptions A1-A5."
+
+Concretely:
+- If a result holds under CARA but not CRRA, don't stop there. Find the exact condition on preferences that makes it work (e.g., "holds iff absolute risk aversion is non-increasing" or "holds iff the elasticity of substitution exceeds 1").
+- If the theory-explorer finds the result breaks in some parameter region, characterize the boundary. The "if and only if" condition is often the real theorem.
+- If a general proof fails, find the tightest sufficient condition you can. Then show the condition is necessary by constructing a counterexample when it's violated.
+- A paper with "Proposition: X holds. Corollary: X fails when C is violated, with the following counterexample" is a complete characterization. That is what top journals want.
+- Keep working analytically on the important results until you either prove them generally, find the exact conditions, or establish that they are genuinely non-generic. Don't settle for numerical verification of what should be a theorem.
+
 ---
 
 ## Pipeline overview

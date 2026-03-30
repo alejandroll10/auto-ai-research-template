@@ -81,3 +81,4 @@ A theory draft saved to the path specified in your prompt. Structure:
 - **No hallucinated math.** If you're not sure a derivation is correct, work through it step by step. Show ALL algebra.
 - **Economic content required.** "The FOC gives us equation (3)" is not insight. WHY does the FOC look this way? What economic force is at work?
 - **One clear idea.** If you can't state the contribution in one sentence, the model doesn't know what it is.
+- **Characterize, don't just prove.** For the main result, find the tightest conditions: "X holds if and only if C." If the general result fails, find exactly where and why. Construct counterexamples when conditions are violated. A complete characterization (theorem + converse + counterexample) is the goal.
