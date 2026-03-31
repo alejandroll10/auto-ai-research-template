@@ -398,7 +398,6 @@ rm -rf templates/
 rm -rf extensions/
 rm -rf meta_paper/
 rm -rf test_scripts/
-rm -f setup.sh
 echo "  ✓ Template files removed"
 
 git add -A

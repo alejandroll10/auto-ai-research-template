@@ -26,17 +26,6 @@ Concretely:
 - If a "known" mechanism produces an unexpected quantitative result (the effect is 10x larger or smaller than expected), that's a finding worth reporting.
 - The pipeline should never suppress a surprising result to preserve a prior narrative. A clean surprise, honestly reported, is more publishable than a confirmation of the expected.
 
-## Core principle: characterize, don't just prove
-
-For important results, the goal is not just to prove them under specific assumptions — it's to characterize exactly when they hold and when they don't. A result that says "X holds if and only if condition C" is far more valuable than "X holds under assumptions A1-A5."
-
-Concretely:
-- If a result holds under CARA but not CRRA, don't stop there. Find the exact condition on preferences that makes it work (e.g., "holds iff absolute risk aversion is non-increasing" or "holds iff the elasticity of substitution exceeds 1").
-- If the theory-explorer finds the result breaks in some parameter region, characterize the boundary. The "if and only if" condition is often the real theorem.
-- If a general proof fails, find the tightest sufficient condition you can. Then show the condition is necessary by constructing a counterexample when it's violated.
-- A paper with "Proposition: X holds. Corollary: X fails when C is violated, with the following counterexample" is a complete characterization. That is what top journals want.
-- Keep working analytically on the important results until you either prove them generally, find the exact conditions, or establish that they are genuinely non-generic. Don't settle for numerical verification of what should be a theorem.
-
 ---
 
 ## Pipeline overview
@@ -432,7 +421,11 @@ Read the referee's recommendation:
 2. Read the style report
 3. Fix all violations by editing the section files directly
 4. Commit: `pipeline: stage 7 — style violations fixed`
-5. Update pipeline_state.json with `"status": "complete"`. Final commit: `pipeline: COMPLETE — paper ready for submission`
+5. Pipeline complete. Final commit: `pipeline: COMPLETE — paper ready for submission`
+
+Update pipeline_state.json with `"status": "complete"` when done.
+
+Final commit: `pipeline: COMPLETE — paper ready for submission`
 
 ---
 
@@ -458,15 +451,37 @@ After the pipeline is complete (`"status": "complete"`), any new or modified pro
 
 If the scorer plateaus in the 55-74 range or the referee gives Major Revision with structural concerns (result is fragile, too narrow, or shallow):
 
-### Extension playbook
+### Extension playbook — economically substantive mathematical extensions
 
-When the core result is correct but thin, extend it with mathematically hard, economically interesting analyses that uncover new content the simple model hid. The goal is characterization, not robustness.
+When the core result is correct but thin, the path to a journal paper is through extensions that are both mathematically hard and economically interesting. The goal is not robustness-checking — it's discovering new economic content that the simple model hid. Hard math often delivers surprising insights: a continuous-time formulation reveals a new channel, incomplete markets create an amplification mechanism, learning generates endogenous cycles. The extension should either (a) uncover new economics that changes the story, or (b) introduce a new concept or technique that helps tackle existing puzzles in the literature.
 
-**Extension types:** continuous time (HJB/SDEs), incomplete markets/heterogeneity (Bewley/HANK), learning/incomplete information, general preferences (CRRA/EZ/habits), higher dimensions (N assets, continuum of agents), perturbation/approximation (formal error bounds), dynamic/stochastic, moral hazard/agency, adverse selection, mechanism design, network/contagion.
+| Extension type | Economic question it answers | What makes it hard and valuable |
+|---------------|-----------|-------------|
+| **Continuous time** | How do the dynamics and transition paths work? What are the impulse responses? Does the result hold off steady state? | HJB equations, Kolmogorov forward equations, SDEs. Yields sharper results than discrete time and connects to literatures (intermediary pricing, slow-moving capital) that discrete models cannot reach. Humans avoid the PDE work; the economics is often surprising. |
+| **Incomplete markets / heterogeneity** | Does the result survive when agents face idiosyncratic risk and borrowing constraints? How does the wealth distribution shape the aggregate outcome? | Bewley/Aiyagari/HANK models with analytical results are rare and highly valued. The aggregation problem is genuinely hard. When a result holds with heterogeneity, that's a much stronger paper. |
+| **Learning and incomplete information** | What happens when agents don't observe the state and must learn? Does the result hold under signal extraction? Do beliefs become a state variable? | Bayesian updating in equilibrium creates feedback loops between beliefs and prices. The filtering algebra is hard but the economic content is rich — you get belief-driven dynamics, information cascades, and endogenous uncertainty. |
+| **General preferences** | Is the result an artifact of CARA/log/linear-quadratic, or does it hold for CRRA, Epstein-Zin, habits? Where exactly does it break and why? | Moving beyond tractable preferences requires perturbation methods, envelope arguments, or duality tricks. The economic content is in *why* it breaks — what economic force does the tractable case suppress? A characterization of "holds if and only if [condition]" is a real theorem. |
+| **Higher dimensions** | Does the 2-asset result extend to N assets? The 2-agent result to a continuum? Does the structure of the solution change qualitatively? | N-dimensional results often reveal structure invisible in low dimensions (e.g., factor structure, spanning, aggregation). The algebra is harder but the results are more general and the economic content richer. |
+| **Perturbation and approximation** | When exact results need strong assumptions, how far do they extend? What's the formal error bound? | A bound like "welfare cost deviates by O(σ⁴)" is a theorem, not a robustness check. It tells you which assumptions are load-bearing and which are cosmetic. Addresses referee concerns about fragility with mathematical precision. |
+| **Dynamic / stochastic extensions** | What happens with persistence, regime-switching, time-varying parameters? Does the static intuition survive? | Dynamic models generate testable predictions (forecastability, autocorrelation structure, crisis behavior) that static models cannot. The economics often changes qualitatively — mean-reversion vs. unit root matters for policy. |
+| **Moral hazard / agency** | Does the result change when agents have hidden actions? What if effort is unobservable or risk-taking is private? | Principal-agent structure interacts with market outcomes in non-trivial ways. Incentive constraints reshape equilibrium prices, capital allocation, and welfare. Often generates new policy implications. |
+| **Adverse selection** | What if agents have private information about quality, type, or fundamentals? Does the mechanism survive screening or signaling? | Adverse selection creates market breakdown, pooling, or separation that can overturn competitive results. Rich interaction with market design and regulation. |
+| **Market design / mechanism design** | Can you design a market, contract, or institution that implements the efficient outcome? What's the optimal mechanism given the friction? | Connects theory to practice. Auction design, information disclosure, platform design. Results here have direct policy and institutional implications. |
+| **Network and contagion effects** | What happens when agents are connected through a network (interbank, supply chain, information)? Does the result amplify or dampen? | Network structure creates systemic risk, cascades, and amplification. The math (spectral methods, fixed points on graphs) is hard but reveals when local shocks become aggregate. |
 
-**How to apply:** Identify the specific economic weakness from scorer/self-attack feedback. Pick 1-2 extensions that test whether the channel survives under realistic features. Prove the result or prove it breaks (a counterexample is as valuable as a positive result). Re-run Gate 2 + Gate 4 on extensions.
+### How to apply
 
-**When to extend vs. start over:** Score 55+ with correct core → extend. Score < 35 or core wrong → start over. Novelty KNOWN → start over.
+1. Read the scorer feedback and self-attack report. Identify the specific economic weakness — not "the result is narrow" but "the result only holds under CARA-normal, and the economic channel may depend on the absence of wealth effects."
+2. Pick 1-2 extensions that directly address that economic question. Each extension should answer: "Does the economic channel survive when [realistic feature] is present?"
+3. For each extension: state the economic question, set up the model, prove the result (or prove it breaks — a clean counterexample is as valuable as a positive result). Explain the economics of why.
+4. A paper with a **core result + 2-3 substantive extensions** that map out when the result holds and fails is a characterization. That is a journal paper.
+5. Re-run Gate 2 (math audit) on the new results, then Gate 4 (scorer).
+
+### When to use this vs. starting over
+
+- Score 55+ with correct core result → **Extend.** The economic idea is right, the paper needs more results. Build the characterization.
+- Score < 35 or core result is wrong → **Start over.** Extensions can't fix broken economics.
+- Novelty check KNOWN → **Start over.** Extensions won't create novelty that isn't there.
 
 ---
 
@@ -548,11 +563,44 @@ process_log/
 
 ---
 
-## Commit protocol
+## Commit protocol — COMPULSIVE COMMITS
 
-**Commit after every file write, stage transition, gate decision, and agent output.** Never batch. Update `pipeline_state.json` (including history array with timestamp) before committing stage transitions.
+**Commit early, commit often.** This pipeline runs autonomously and may be interrupted at any time. Every piece of work that hits disk must be committed immediately so progress is never lost and the dashboard stays current.
 
-Prefixes: `pipeline:` (state changes), `artifact:` (agent output), `paper:` (LaTeX), `scribe:` (docs).
+### When to commit
+
+- **After every file write.** If you wrote or updated a file, commit it. Do not batch.
+- **After every stage transition.** Update `pipeline_state.json` first, then commit.
+- **After every gate decision.** The gate result file + updated state = one commit.
+- **After every agent output.** When a subagent returns and you save its output, commit immediately.
+- **After every edit to the paper.** Each section edit gets its own commit.
+- **Before launching a subagent.** If you updated state or wrote input files, commit first so the state on disk matches reality if the session dies mid-agent.
+
+### Commit message format
+
+| Prefix | When |
+|--------|------|
+| `pipeline:` | Stage transitions, gate decisions, pipeline state changes |
+| `artifact:` | Saving agent output (theory drafts, audits, novelty checks, etc.) |
+| `paper:` | Paper section writes and edits |
+| `scribe:` | Documentation updates (scribe agent) |
+
+Examples:
+- `pipeline: stage 0 complete — problem identified`
+- `artifact: theory draft v2 saved`
+- `artifact: math audit v2 — PASS`
+- `pipeline: gate 4 — scorer ADVANCE (score: 78)`
+- `paper: introduction.tex written`
+- `pipeline: state updated — entering stage 4`
+
+### Rules
+
+- **Never batch commits.** One logical action = one commit.
+- **Always update `pipeline_state.json` before committing stage transitions.**
+- **Always update `pipeline_state.json` history array** with a timestamped entry for every event, so the dashboard can display progress.
+- **If in doubt, commit.** An extra commit costs nothing. Lost work costs everything.
+
+The scribe agent runs in the background and commits with `scribe:` prefix for documentation updates.
 
 ---
 
@@ -600,7 +648,24 @@ Before Stage 0, check what data sources are available. This prevents bad assumpt
    - EDGAR: `SEC_EDGAR_NAME` and `SEC_EDGAR_EMAIL` present and not placeholders
    - Ken French: no auth needed (always available)
    - Chen-Zimmerman: no auth needed (always available)
-4. Write results to `output/data_inventory.md` — table of sources, status (✓/✗), and what each provides. Include implications for research design.
+4. Write results to `output/data_inventory.md`:
+
+```markdown
+# Data Inventory
+
+## Available data sources
+| Source | Status | What it provides |
+|--------|--------|-----------------|
+| FRED | ✓ configured | 800K+ macro/financial time series |
+| WRDS | ✓ configured | CRSP (stock returns), Compustat (accounting), IBES (analysts), options, insider trading |
+| EDGAR | ✓ configured | SEC filings (10-K, 10-Q, 8-K, proxy, insider trades) |
+| Ken French | ✓ always available | Factor returns, portfolio sorts, breakpoints |
+| Chen-Zimmerman | ✓ always available | 212 firm-level anomaly signals, portfolio returns |
+
+## Implications for research design
+[List what kinds of empirical work are possible given available data]
+```
+
 5. Start data services:
    ```bash
    bash code/utils/start_services.sh
