@@ -79,6 +79,45 @@ esac
 
 # ── Resolve paths ──
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CLAUDE_DIR_REL=".claude"
+CLAUDE_AGENTS_REL="$CLAUDE_DIR_REL/agents"
+CLAUDE_SKILLS_REL="$CLAUDE_DIR_REL/skills"
+CLAUDE_SETTINGS_REL="$CLAUDE_DIR_REL/settings.json"
+
+copy_skill_dirs() {
+    local src_root="$1"
+    local dest_root="$2"
+
+    [ -d "$src_root" ] || return 0
+    mkdir -p "$dest_root"
+
+    for skill_dir in "$src_root"/*/; do
+        [ -d "$skill_dir" ] || continue
+        local skill_name
+        skill_name=$(basename "$skill_dir")
+        mkdir -p "$dest_root/$skill_name"
+        cp "$skill_dir"SKILL.md "$dest_root/$skill_name/"
+    done
+}
+
+copy_agent_markdown() {
+    local src_dir="$1"
+    local dest_dir="$2"
+
+    [ -d "$src_dir" ] || return 0
+    mkdir -p "$dest_dir"
+    cp "$src_dir/"*.md "$dest_dir/"
+}
+
+assemble_claude_shared_agents() {
+    local template_root="$1"
+    local dest_dir="$2"
+
+    python3 "$template_root/scripts/assemble_claude_agents.py" \
+        --metadata "$template_root/templates/agent_metadata/claude_shared_agents.json" \
+        --bodies-dir "$template_root/templates/agent_bodies/shared" \
+        --output-dir "$dest_dir"
+}
 
 if [ "$LOCAL" = "1" ]; then
     # Local test mode — no clone, no git, no prereq checks
@@ -87,9 +126,10 @@ if [ "$LOCAL" = "1" ]; then
     OUT_DIR="$SCRIPT_DIR/$PROJECT_NAME"
 
     rm -rf "$OUT_DIR"
-    mkdir -p "$OUT_DIR/.claude/agents"
+    mkdir -p "$OUT_DIR/$CLAUDE_AGENTS_REL"
     # Copy shared project files
-    cp "$SCRIPT_DIR/.claude/settings.json" "$OUT_DIR/.claude/"
+    mkdir -p "$OUT_DIR/$CLAUDE_DIR_REL"
+    cp "$SCRIPT_DIR/$CLAUDE_SETTINGS_REL" "$OUT_DIR/$CLAUDE_DIR_REL/"
     cp "$SCRIPT_DIR/.gitignore" "$OUT_DIR/"
     cp "$SCRIPT_DIR/dashboard.html" "$OUT_DIR/"
 
@@ -148,10 +188,10 @@ else
     CLAUDE_MD_OUT="CLAUDE.md"
 fi
 
-python3 - "$CORE" "$RUNTIME_SESSION" "$SCORING_FILE" "$PAPER_TYPE" "$TARGET_JOURNALS" "$DOMAIN_AREAS" "$CLAUDE_MD_OUT" <<'PYEOF'
+python3 - "$CORE" "$RUNTIME_SESSION" "$SCORING_FILE" "$PAPER_TYPE" "$TARGET_JOURNALS" "$DOMAIN_AREAS" "$CLAUDE_MD_OUT" "$CLAUDE_AGENTS_REL" "$CLAUDE_SKILLS_REL" <<'PYEOF'
 import sys
 
-core_path, runtime_session_path, scoring_path, paper_type, target_journals, domain_areas, out_path = sys.argv[1:8]
+core_path, runtime_session_path, scoring_path, paper_type, target_journals, domain_areas, out_path, agent_dir, skill_dir = sys.argv[1:10]
 
 with open(core_path) as f:
     content = f.read()
@@ -164,9 +204,9 @@ content = content.replace('{{RUNTIME_DOC_NAME}}', 'CLAUDE.md')
 content = content.replace('{{PAPER_TYPE}}', paper_type)
 content = content.replace('{{TARGET_JOURNALS}}', target_journals)
 content = content.replace('{{DOMAIN_AREAS}}', domain_areas)
-content = content.replace('{{AGENT_DIR}}', '.claude/agents')
-content = content.replace('{{SKILL_DIR}}', '.claude/skills')
-runtime_session = runtime_session.replace('{{SKILL_DIR}}', '.claude/skills')
+content = content.replace('{{AGENT_DIR}}', agent_dir)
+content = content.replace('{{SKILL_DIR}}', skill_dir)
+runtime_session = runtime_session.replace('{{SKILL_DIR}}', skill_dir)
 content = content.replace('{{RUNTIME_SESSION_GUIDANCE}}', runtime_session)
 content = content.replace('{{SCORING}}', scoring)
 
@@ -180,16 +220,16 @@ echo "  ✓ CLAUDE.md assembled"
 echo "Copying agents..."
 
 if [ "$LOCAL" = "1" ]; then
-    AGENTS_OUT="$OUT_DIR/.claude/agents"
+    AGENTS_OUT="$OUT_DIR/$CLAUDE_AGENTS_REL"
 else
-    AGENTS_OUT=".claude/agents"
+    AGENTS_OUT="$CLAUDE_AGENTS_REL"
     mkdir -p "$AGENTS_OUT"
 fi
 
-cp "$TEMPLATE_ROOT/templates/agents/shared/"*.md "$AGENTS_OUT/"
+assemble_claude_shared_agents "$TEMPLATE_ROOT" "$AGENTS_OUT"
 
 if [ -d "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}" ]; then
-    cp "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}/"*.md "$AGENTS_OUT/"
+    copy_agent_markdown "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}" "$AGENTS_OUT"
 fi
 
 echo "  ✓ Agents copied (shared + ${AGENT_DIR})"
@@ -246,9 +286,9 @@ echo "  ✓ Project structure created"
 
 # ── Apply extensions ──
 if [ "$LOCAL" = "1" ]; then
-    SKILLS_OUT="$OUT_DIR/.claude/skills"
+    SKILLS_OUT="$OUT_DIR/$CLAUDE_SKILLS_REL"
 else
-    SKILLS_OUT=".claude/skills"
+    SKILLS_OUT="$CLAUDE_SKILLS_REL"
 fi
 
 for ext in "${EXTENSIONS[@]}"; do
@@ -259,17 +299,10 @@ for ext in "${EXTENSIONS[@]}"; do
             EXT_ROOT="$TEMPLATE_ROOT/extensions/theory_llm"
 
             cp "$EXT_ROOT/llm_client.py" "$P/"
-            cp "$EXT_ROOT/agents/"*.md "$AGENTS_OUT/"
+            copy_agent_markdown "$EXT_ROOT/agents" "$AGENTS_OUT"
 
             # Copy skills
-            if [ -d "$EXT_ROOT/skills" ]; then
-                mkdir -p "$SKILLS_OUT"
-                for skill_dir in "$EXT_ROOT/skills/"*/; do
-                    skill_name=$(basename "$skill_dir")
-                    mkdir -p "$SKILLS_OUT/$skill_name"
-                    cp "$skill_dir"SKILL.md "$SKILLS_OUT/$skill_name/"
-                done
-            fi
+            copy_skill_dirs "$EXT_ROOT/skills" "$SKILLS_OUT"
 
             mkdir -p "$P/output/stage3b_experiments"
 
@@ -300,19 +333,14 @@ ENVEOF
             EXT_ROOT="$TEMPLATE_ROOT/extensions/empirical"
 
             # Copy skills
-            mkdir -p "$SKILLS_OUT"
-            for skill_dir in "$EXT_ROOT/skills/"*/; do
-                skill_name=$(basename "$skill_dir")
-                mkdir -p "$SKILLS_OUT/$skill_name"
-                cp "$skill_dir"SKILL.md "$SKILLS_OUT/$skill_name/"
-            done
+            copy_skill_dirs "$EXT_ROOT/skills" "$SKILLS_OUT"
 
             # Copy empirical agents (shared + variant-specific)
             if [ -d "$EXT_ROOT/agents/shared" ]; then
-                cp "$EXT_ROOT/agents/shared/"*.md "$AGENTS_OUT/"
+                copy_agent_markdown "$EXT_ROOT/agents/shared" "$AGENTS_OUT"
             fi
             if [ -d "$EXT_ROOT/agents/${AGENT_DIR}" ]; then
-                cp "$EXT_ROOT/agents/${AGENT_DIR}/"*.md "$AGENTS_OUT/"
+                copy_agent_markdown "$EXT_ROOT/agents/${AGENT_DIR}" "$AGENTS_OUT"
             else
                 echo "  ⚠ No empiricist agent for variant '${AGENT_DIR}' — Stage 3b will be skipped at runtime"
             fi
@@ -369,12 +397,12 @@ if [ "$LOCAL" = "1" ]; then
     REMAINING="${REMAINING:-0}"
     echo "Placeholders remaining: $REMAINING"
     echo ""
-    echo "=== Agents (.claude/agents/) ==="
+    echo "=== Agents ($CLAUDE_AGENTS_REL/) ==="
     ls -1 "$AGENTS_OUT/"
-    if [ -d "$OUT_DIR/.claude/skills" ]; then
+    if [ -d "$OUT_DIR/$CLAUDE_SKILLS_REL" ]; then
         echo ""
-        echo "=== Skills (.claude/skills/) ==="
-        ls -1 "$OUT_DIR/.claude/skills/"
+        echo "=== Skills ($CLAUDE_SKILLS_REL/) ==="
+        ls -1 "$OUT_DIR/$CLAUDE_SKILLS_REL/"
     fi
     echo ""
     echo "=== First 10 lines ==="
@@ -426,5 +454,5 @@ echo "Then say: \"Run the pipeline.\""
 echo ""
 echo "Variant: $VARIANT"
 echo "Extensions: ${EXTENSIONS[*]:-none}"
-echo "Sandbox is pre-configured in .claude/settings.json"
+echo "Sandbox is pre-configured in $CLAUDE_SETTINGS_REL"
 echo "(Bash restricted to project folder, web access works freely)"
