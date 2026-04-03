@@ -59,3 +59,5 @@ paper/*.toc
 paper/*.lof
 paper/*.lot
 paper/*-SAVE-ERROR
+codex_inspect/
+local_testing/
