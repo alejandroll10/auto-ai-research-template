@@ -179,22 +179,23 @@ This is the first of two deep novelty checks. It runs on the selected idea *befo
 
 4. Commit: `pipeline: gate 1b — novelty check on idea {NOVEL/INCREMENTAL/KNOWN}`
 
-### Gate 1c: Idea Prototype (tractability check)
+### Gate 1c: Idea Prototype (tractability + surprise check)
 
 **Agent:** `idea-prototyper`
 
-Quick mathematical feasibility check — attempt the key derivation before investing in full theory development. **Always runs** (not optional), because even first-attempt ideas can have hidden tractability issues that the sketch doesn't reveal.
+Quick mathematical feasibility check — attempt the key derivation before investing in full theory development. **Always runs** (not optional), because even first-attempt ideas can have hidden tractability issues that the sketch doesn't reveal. Also performs a **surprise check** on TRACTABLE results: now that the math shows what the result looks like, is it non-obvious?
 
 1. Launch idea-prototyper on `output/stage1/selected_idea.md` + `output/stage0/problem_statement.md`
 2. Save result to `output/stage1/idea_prototype.md`
 3. Read the verdict:
 
-| Verdict | Action |
-|---------|--------|
-| **TRACTABLE** | The main result goes through. Proceed to Stage 2 — pass the prototype to the theory-generator as a head start. |
-| **BLOCKED** | The derivation hit a wall. Read where it got stuck. If fixable: pick the next-best idea from the reviewer's rankings and re-run Gates 1b+1c. If fundamental: return to Stage 1 for a new round. |
+| Verdict | Surprise | Action |
+|---------|----------|--------|
+| **TRACTABLE** | **SURPRISING** or **POTENTIALLY SURPRISING** | Proceed to Stage 2 — pass the prototype to the theory-generator as a head start. |
+| **TRACTABLE** | **OBVIOUS** | Soft kill signal. The idea is tractable but the result confirms what everyone would guess. Proceed to Stage 2, but instruct the theory-generator to find a non-obvious result within the model (unexpected comparative static, interaction effect, parameter regime where the sign flips). If the full theory also scores low on surprise at Gate 4, the idea will not advance. |
+| **BLOCKED** | — | The derivation hit a wall. Read where it got stuck. If fixable: pick the next-best idea from the reviewer's rankings and re-run Gates 1b+1c. If fundamental: return to Stage 1 for a new round. |
 
-4. Commit: `pipeline: gate 1c — idea prototype {TRACTABLE/BLOCKED}`
+4. Commit: `pipeline: gate 1c — idea prototype {TRACTABLE/BLOCKED}, surprise: {SURPRISING/POTENTIALLY SURPRISING/OBVIOUS}`
 5. Update pipeline_state.json and commit: `pipeline: stage 1 complete — idea selected, novelty-checked, and prototyped`
 
 ---

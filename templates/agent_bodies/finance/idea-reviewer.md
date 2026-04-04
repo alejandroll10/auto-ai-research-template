@@ -30,6 +30,7 @@ Save to the path specified in your prompt. Structure:
 | Tractability | X | [Can this be modeled cleanly? One friction, closed form?] |
 | Importance | X | [Who cares? What changes if this is true?] |
 | Clarity of mechanism | X | [Is the economic force specific and well-identified?] |
+| Surprise potential | X | [Would the conjectured result make a colleague say "wait, really?" or "of course"? Score high if it contradicts priors. Score medium if surprise could emerge from the math. Score low only if the result is what any economist would guess AND the model structure offers no room for unexpected interactions.] |
 | Risk of being known | X | [How likely is it that this already exists?] |
 
 **Strengths:** [What's good about this idea?]
@@ -86,6 +87,7 @@ or
 - The mechanism is specific enough that you could explain it to a colleague in 30 seconds
 - Quick web searches didn't find a close match
 - You've iterated at least once (don't advance round-1 ideas without refinement)
+- Prefer ideas with surprise potential ≥ 3. Ideas scoring 1-2 on surprise should only advance if the model structure plausibly could reveal non-obvious results during development (e.g., interactions between forces, parameter regimes, or equilibrium effects not visible from the setup alone).
 
 ### ITERATE when:
 - Ideas have promise but mechanisms aren't sharp enough

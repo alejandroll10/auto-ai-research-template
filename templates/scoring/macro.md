@@ -15,9 +15,10 @@
 | Dimension | Weight | Calibration |
 |-----------|--------|-------------|
 | Importance | 30% | Lucas-critique-level insight = 100, minor extension of NK = 20 |
-| Novelty | 25% | New channel/mechanism = 100, known mechanism in new model = 40 |
+| Novelty | 15% | New channel/mechanism = 100, known mechanism in new model = 40 |
+| Surprise | 15% | Sign reversal or existence result no one expected = 100, non-obvious comparative static or multiplicity = 60, confirms intuition with precise conditions = 40, formalizes what everyone already believed = 15 |
 | Rigor | 20% | Full equilibrium characterization = 100, clear with small gaps = 60, hand-waving = 20 |
-| Parsimony | 15% | Tractable GE with one key friction = 100, kitchen-sink DSGE = 20 |
+| Parsimony | 10% | Tractable GE with one key friction = 100, kitchen-sink DSGE = 20 |
 | Fertility | 10% | Reframes a literature or changes policy thinking = 100, dead-end result = 20 |
 
 Threshold to advance: 75+

@@ -36,10 +36,17 @@ Read the theory draft and all evaluation outputs. Score each dimension 0-100:
 - Is this a first-order question or a curiosity?
 - Calibration: Lucas-critique-level insight = 100, minor extension of a known NK model = 20
 
-### Novelty (weight: 25%)
+### Novelty (weight: 15%)
 - How new is the economic insight (not the technique)?
 - Novelty check output informs this but isn't the whole picture
 - Calibration: new channel that changes how we think about transmission = 100, known channel in a new model architecture = 40
+
+### Surprise (weight: 15%)
+- Does any result contradict, refine, or overturn a well-formed prior?
+- State the main result to a knowledgeable colleague without showing the model. Would they say "of course" or "wait, really?"
+- Surprise can emerge from the math even when the idea sketch seemed routine — reward results that the setup didn't obviously imply
+- Check the idea prototype's surprise assessment (if available) — did the full theory deepen or confirm it?
+- Calibration: sign reversal or existence result no one expected = 100, non-obvious comparative static or multiplicity = 60, confirms intuition with precise conditions = 40, formalizes what everyone already believed = 15
 
 ### Rigor (weight: 20%)
 - Is the core argument airtight?
@@ -48,7 +55,7 @@ Read the theory draft and all evaluation outputs. Score each dimension 0-100:
 - Are boundary cases and limiting behavior acknowledged?
 - Calibration: full equilibrium characterization with all cases = 100, clear argument with small gaps = 60
 
-### Parsimony (weight: 15%)
+### Parsimony (weight: 10%)
 - Is this the simplest model for this result?
 - Count assumptions beyond standard GE — could any be dropped?
 - Does the model nest a standard benchmark as a special case?
@@ -64,7 +71,7 @@ Read the theory draft and all evaluation outputs. Score each dimension 0-100:
 
 ## Aggregate
 
-`total = 0.30 * importance + 0.25 * novelty + 0.20 * rigor + 0.15 * parsimony + 0.10 * fertility`
+`total = 0.30 * importance + 0.15 * novelty + 0.15 * surprise + 0.20 * rigor + 0.10 * parsimony + 0.10 * fertility`
 
 ## Decision thresholds
 
@@ -102,6 +109,7 @@ Save to the path specified in your prompt:
 |-----------|-------|---------------|
 | Importance | XX | [one sentence] |
 | Novelty | XX | [one sentence] |
+| Surprise | XX | [one sentence] |
 | Rigor | XX | [one sentence] |
 | Parsimony | XX | [one sentence] |
 | Fertility | XX | [one sentence] |

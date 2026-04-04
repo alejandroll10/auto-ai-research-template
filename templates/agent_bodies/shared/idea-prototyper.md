@@ -38,6 +38,21 @@ Save to the path specified in your prompt. Structure:
 - Difficulty of full theory: [Easy / Moderate / Hard — and why]
 - What the theory-generator should watch out for: [any subtleties discovered]
 
+### Surprise check (required for TRACTABLE verdicts)
+
+Now that you can see what the result looks like, answer honestly:
+
+**Would this result make a knowledgeable colleague say "wait, really?" or "of course, what else would you expect?"**
+
+- State the main result in plain language (no math).
+- Identify whether the sign, magnitude, existence, or mechanism of the result is non-obvious.
+- Score: SURPRISING / POTENTIALLY SURPRISING / OBVIOUS
+  - **SURPRISING**: The result contradicts a well-formed prior, or reveals an unexpected interaction. (Example: "manipulation noise creates a positive externality on non-manipulators" — not what you'd guess.)
+  - **POTENTIALLY SURPRISING**: The result isn't obvious from the setup, but surprise may deepen as the theory develops. The math revealed structure not visible in the idea sketch. (Example: "the threshold has a closed form that depends on X in a non-monotone way.")
+  - **OBVIOUS**: The result is exactly what any economist would guess before seeing the model. The model confirms intuition without refining it. (Example: "firms divest dirty assets when ESG pressure is high enough.")
+
+**If OBVIOUS**: Flag this clearly. The orchestrator should treat this as a soft kill signal — the idea may still proceed, but the theory-generator must be instructed to find a non-obvious result within the model (an unexpected comparative static, an interaction effect, a parameter regime where the sign flips). If the full theory also scores low on surprise at Gate 4, this idea will not advance.
+
 ### If BLOCKED:
 - Where it got stuck: [specific step and why]
 - Nature of the block: [algebraic dead end / missing assumption / result doesn't hold / needs different approach]
