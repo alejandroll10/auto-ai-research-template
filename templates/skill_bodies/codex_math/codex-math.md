@@ -135,12 +135,16 @@ Result saved to `output/codex_explorations/`.
 
 ## Sandbox limitations
 
-Codex runs sandboxed. It **cannot read files** and **cannot reliably write to the workspace**. The scripts handle this by:
-1. Extracting content from files before calling Codex (via `extract_block.sh`)
-2. Piping content into the prompt
-3. Capturing output via `-o /tmp/...` and saving it afterward
+Codex runs in a strict sandbox. **All shell commands fail** — `cat`, `sed`, `grep`, `python`, file writes, everything. Codex cannot read any file on disk and cannot write any file. It is a pure reasoning engine that receives text in and returns text out.
 
-You do not need to worry about this — the scripts handle the piping. Just call the scripts with the right arguments.
+The `-o /tmp/file.txt` flag works because the *Codex CLI* (running outside the sandbox) captures Codex's final message. Codex itself never touches the filesystem.
+
+**The scripts handle all of this.** They:
+1. Extract content from files before calling Codex (via `extract_block.sh`)
+2. Pipe the content into the prompt as inline text
+3. Capture Codex's response via `-o` and save it to the output directory
+
+**Do not ask Codex to read files, write files, or run code.** It will try, fail silently or with `bwrap` errors, and waste tokens. If you need Codex to analyze something, extract it first and pass it as text in the prompt.
 
 ## Dual audit pattern
 
