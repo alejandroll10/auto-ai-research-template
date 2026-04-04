@@ -2,14 +2,20 @@
 
 ## Goal
 
-Finish modularizing the Claude path before adding any Codex-specific support.
+Finish modularizing the currently implemented Claude runtime path before adding support for additional runtimes.
 
 Current principle:
 - preserve generated Claude output exactly
 - move shared logic out of `setup.sh`
 - separate runtime-specific packaging from shared content
+- treat agents, skills, utilities, and workflow logic as shared capabilities, even if Claude is the only implemented runtime today
 
 ## Current status
+
+Interpretation:
+- the research workflow content is not Claude-specific in principle
+- it is only packaged for Claude right now because Claude is the only implemented runtime
+- future runtimes should reuse the same shared capabilities and content, with runtime-specific adapters handling packaging
 
 Completed:
 - `CLAUDE.md` assembly split into:
@@ -62,27 +68,30 @@ Verified:
 - committed and pushed:
   - `72ac58c` (`Modularize Claude skill assembly`)
   - `62ddb52` (`Modularize Claude variant agents`)
+  - `643621d` (`Modularize Claude extension agents`)
 
 Not done yet:
-- extension installer refactor out of the main `setup.sh` case block
+- none for the current Claude runtime packaging path
+
+Not started yet:
+- runtime packaging support beyond Claude
 
 ## Recommended next steps
 
-### 1. Refactor extension installation out of `setup.sh`
+### 1. Add support for additional runtimes
 
 Current status:
-- `setup.sh` still owns:
-  - extension copy logic
-  - env bootstrapping
-  - dependency install hooks
+- the currently implemented Claude runtime path is modularized end to end
+- shared capabilities and content are now separated from most runtime packaging concerns
 
 Recommended structure:
-- `scripts/apply_extension_empirical.py` or shell helper
-- `scripts/apply_extension_theory_llm.py` or shell helper
+- keep shared capabilities in reusable metadata/body/utils layers
+- add runtime-specific adapters for each new runtime
+- avoid duplicating shared content across runtimes
 
 Goal:
-- make `setup.sh` mostly orchestration
-- make extension behavior testable in isolation
+- implement a second runtime without disturbing Claude parity
+- prove the architecture supports multiple runtimes cleanly
 
 ## Constraints
 
@@ -111,5 +120,5 @@ diff -u codex_inspect/CLAUDE.md test_output/refactor_compare/CLAUDE.md
 
 ## Suggested order for the next session
 
-1. shrink `setup.sh` by moving extension logic into scripts
-2. only then begin Codex support
+1. commit the extension-installer extraction
+2. add support for an additional runtime using the shared capability layer

@@ -354,106 +354,24 @@ for ext in "${EXTENSIONS[@]}"; do
     case "$ext" in
         theory_llm)
             echo "Applying LLM experiment extension..."
-
-            EXT_ROOT="$TEMPLATE_ROOT/extensions/theory_llm"
-
-            cp "$EXT_ROOT/llm_client.py" "$P/"
-            assemble_claude_agents_from_parts \
+            bash "$TEMPLATE_ROOT/scripts/apply_extension_theory_llm.sh" \
                 "$TEMPLATE_ROOT" \
-                "$EXT_ROOT/agent_metadata/agents.json" \
-                "$EXT_ROOT/agent_bodies" \
-                "$AGENTS_OUT"
-
-            assemble_claude_skills \
-                "$TEMPLATE_ROOT" \
-                "$TEMPLATE_ROOT/templates/skill_metadata/claude_theory_llm_skills.json" \
-                "$TEMPLATE_ROOT/templates/skill_bodies/theory_llm" \
-                "$SKILLS_OUT"
-
-            mkdir -p "$P/output/stage3b_experiments"
-
-            # Add LLM API keys to .env (append if file exists, create if not)
-            ENV_FILE="$P/.env"
-            if ! grep -q 'UF_API_KEY' "$ENV_FILE" 2>/dev/null; then
-                cat >> "$ENV_FILE" <<'ENVEOF'
-
-# LLM experiment backends (set one or both)
-# UF NaviGator (free for UF researchers): https://api.ai.it.ufl.edu
-UF_API_KEY=your-key-here
-# DeepInfra (pay-per-token): https://deepinfra.com
-DEEPINFRA_TOKEN=your-key-here
-ENVEOF
-            fi
-
-            # Install Python deps
-            if [ "$LOCAL" = "0" ]; then
-                uv pip install openai python-dotenv -q 2>/dev/null \
-                    || echo "Note: install deps manually: uv pip install openai python-dotenv"
-            fi
+                "$P" \
+                "$AGENTS_OUT" \
+                "$SKILLS_OUT" \
+                "$LOCAL"
 
             echo "  ✓ LLM experiment extension applied"
             ;;
         empirical)
             echo "Applying empirical extension..."
-
-            EXT_ROOT="$TEMPLATE_ROOT/extensions/empirical"
-
-            assemble_claude_skills \
+            bash "$TEMPLATE_ROOT/scripts/apply_extension_empirical.sh" \
                 "$TEMPLATE_ROOT" \
-                "$TEMPLATE_ROOT/templates/skill_metadata/claude_empirical_skills.json" \
-                "$TEMPLATE_ROOT/templates/skill_bodies/empirical" \
-                "$SKILLS_OUT"
-
-            # Assemble empirical agents (shared + variant-specific)
-            if [ -f "$EXT_ROOT/agent_metadata/shared_agents.json" ]; then
-                assemble_claude_agents_from_parts \
-                    "$TEMPLATE_ROOT" \
-                    "$EXT_ROOT/agent_metadata/shared_agents.json" \
-                    "$EXT_ROOT/agent_bodies/shared" \
-                    "$AGENTS_OUT"
-            fi
-            if [ -f "$EXT_ROOT/agent_metadata/${AGENT_DIR}_agents.json" ]; then
-                assemble_claude_agents_from_parts \
-                    "$TEMPLATE_ROOT" \
-                    "$EXT_ROOT/agent_metadata/${AGENT_DIR}_agents.json" \
-                    "$EXT_ROOT/agent_bodies/${AGENT_DIR}" \
-                    "$AGENTS_OUT"
-            else
-                echo "  ⚠ No empiricist agent for variant '${AGENT_DIR}' — Stage 3b will be skipped at runtime"
-            fi
-
-            # Copy utility scripts and startup
-            mkdir -p "$P/code/utils"
-            cp "$EXT_ROOT/utils/"*.py "$P/code/utils/"
-            cp "$EXT_ROOT/utils/"*.sh "$P/code/utils/" 2>/dev/null || true
-            chmod +x "$P/code/utils/"*.sh 2>/dev/null || true
-            touch "$P/code/utils/__init__.py"
-
-            # Create empirical output directory
-            mkdir -p "$P/output/stage3b"
-
-            # Add API keys to .env (append if file exists)
-            ENV_FILE="$P/.env"
-            if ! grep -q 'FRED_API_KEY' "$ENV_FILE" 2>/dev/null; then
-                cat >> "$ENV_FILE" <<'ENVEOF'
-# FRED API key (free): https://fred.stlouisfed.org/docs/api/api_key.html
-FRED_API_KEY=your-key-here
-
-# WRDS credentials: https://wrds-www.wharton.upenn.edu/
-WRDS_USER=your-username
-WRDS_PASS=your-password
-
-# SEC EDGAR identity (required, no API key needed)
-SEC_EDGAR_NAME=Your Name
-SEC_EDGAR_EMAIL=your@email.edu
-ENVEOF
-            fi
-
-            # Install Python deps
-            if [ "$LOCAL" = "0" ]; then
-                uv pip install pandas numpy statsmodels scipy fredapi pandas-datareader wrds edgartools openassetpricing gdown python-dotenv -q 2>/dev/null \
-                    || echo "Note: install empirical deps manually: uv pip install pandas numpy statsmodels scipy fredapi pandas-datareader wrds edgartools openassetpricing gdown python-dotenv"
-            fi
+                "$P" \
+                "$AGENTS_OUT" \
+                "$SKILLS_OUT" \
+                "$AGENT_DIR" \
+                "$LOCAL"
 
             echo "  ✓ Empirical extension applied (skills + agents)"
             ;;
