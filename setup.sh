@@ -305,6 +305,38 @@ touch "$P/process_log/history.md"
 
 echo "  ✓ Project structure created"
 
+# ── Assemble core skills ──
+echo "Assembling core skills..."
+
+if [ "$LOCAL" = "1" ]; then
+    SKILLS_OUT="$OUT_DIR/$CLAUDE_SKILLS_REL"
+else
+    SKILLS_OUT="$CLAUDE_SKILLS_REL"
+fi
+
+# Codex math skill (available for all variants)
+assemble_claude_skills \
+    "$TEMPLATE_ROOT" \
+    "$TEMPLATE_ROOT/templates/skill_metadata/claude_codex_math_skills.json" \
+    "$TEMPLATE_ROOT/templates/skill_bodies/codex_math" \
+    "$SKILLS_OUT"
+
+# Copy codex-math utility scripts
+mkdir -p "$P/code/utils/codex_math"
+cp "$TEMPLATE_ROOT/templates/utils/codex_math/"*.sh "$P/code/utils/codex_math/"
+chmod +x "$P/code/utils/codex_math/"*.sh
+
+# Create codex output directories
+mkdir -p "$P/output/codex_audits" "$P/output/codex_proofs" "$P/output/codex_explorations"
+
+# Check for codex CLI (optional dependency — warn, don't fail)
+if ! command -v codex >/dev/null 2>&1; then
+    echo "  ⚠ codex CLI not found. Install with: npm install -g @openai/codex"
+    echo "  ⚠ The codex-math skill will not work until codex is installed."
+fi
+
+echo "  ✓ Core skills assembled"
+
 # ── Apply extensions ──
 if [ "$LOCAL" = "1" ]; then
     SKILLS_OUT="$OUT_DIR/$CLAUDE_SKILLS_REL"
