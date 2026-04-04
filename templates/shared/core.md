@@ -226,6 +226,7 @@ Two audits run sequentially. The structured audit checks every derivation step-b
 3. Commit: `artifact: math audit v{N} — {PASS/FAIL}`
 4. If FAIL:
    - Read the specific errors from the audit
+   - If the auditor flagged a **load-bearing conjecture** (unproved claim that other results depend on): instruct the theory-generator to use `code/utils/codex_math/` (explore mode for proof strategies, write mode for proof attempts) before weakening the claim. Codex is an erratic genius — its output must be independently verified before incorporation.
    - Re-launch theory-generator in **mutate** mode with the draft + audit feedback
    - Keep iterating as long as the error count is decreasing (making progress). Escalate only if errors plateau or increase across two consecutive attempts — treat as theory failure, increment theory_attempt
 5. If PASS: proceed to Step 2
