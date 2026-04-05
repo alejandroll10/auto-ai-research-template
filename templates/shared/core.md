@@ -256,7 +256,7 @@ This is the second of two deep novelty checks. The idea was already checked at G
 1. Launch novelty-checker on `output/stage2/theory_draft_vN.md`
 2. Save result to `output/stage2/novelty_check_vN.md`
 3. If KNOWN: abandon this theory, return to Stage 2 with new approach
-4. If INCREMENTAL: flag it, proceed with caution (scorer will weigh this)
+4. If INCREMENTAL: return to Stage 2 with novelty feedback. The theory must be reworked to deliver a result the literature does not already contain. Do not proceed to Stage 3a with an INCREMENTAL verdict — the scorer will hard-fail H4 on INCREMENTAL.
 5. If NOVEL: proceed to Stage 3a (theory exploration)
 6. Commit: `artifact: novelty check v{N} — {NOVEL/INCREMENTAL/KNOWN}`
 

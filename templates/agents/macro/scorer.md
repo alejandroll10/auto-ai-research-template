@@ -18,7 +18,7 @@ You will be pointed to files containing:
 | H1 | **One clear idea** | Can you state the contribution in one sentence from the theory draft? |
 | H2 | **Setup is well-defined** | Could a reader write down the equilibrium? Are agents' problems specified, market clearing stated, equilibrium concept defined? |
 | H3 | **Key result is correct** | Both math audits passed (structured AND free-form) |
-| H4 | **The result is new** | Novelty check returned NOVEL or strong INCREMENTAL |
+| H4 | **The result is new** | Novelty check returned NOVEL. INCREMENTAL is a FAIL — the paper must deliver a result the literature does not already contain or straightforwardly imply. Do not rationalize INCREMENTAL as "strong enough." |
 | H5 | **Economic channel is clear** | The draft explains WHY the result holds in terms of economic forces — not just algebra. A macro seminar audience would understand the mechanism. |
 
 If ANY hard requirement fails → score is 0, decision is ABANDON or REVISE depending on what failed.
