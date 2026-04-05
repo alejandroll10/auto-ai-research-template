@@ -99,6 +99,8 @@ Initial state (created by setup.sh):
 }
 ```
 
+When `--seed` is used, setup.sh also adds `"seeded": true` and sets `"current_stage": "gate_1b"`.
+
 When you start the pipeline, set `"status": "running"` and begin appending to the history array.
 
 **History array:** Append a `{ "timestamp": "ISO-8601", "event": "description" }` entry for every pipeline event. This feeds the dashboard. Use `date -u +%Y-%m-%dT%H:%M:%SZ` to get the timestamp. Never truncate or clear the history array.
@@ -484,6 +486,7 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 | Idea review iterates | 5 rounds | Pick the best idea and advance to Gate 1b |
 | Idea review rejects all | 1 rejection | Return to Stage 0 for a different problem |
 | Idea novelty check (Gate 1b) KNOWN | All ideas from current round exhausted | New round of Stage 1 (counts toward 5-round limit) |
+| Gate 3 novelty INCREMENTAL | 3 rework attempts at Stage 2 | Abandon this idea, return to Stage 1 for a new one |
 | Math audit fails | 3 attempts | Abandon this theory version |
 | Scorer: delta ≥ 3 | — | Allow one more iteration in current band |
 | Scorer: delta < 3 (plateau/decline) | — | Escalate one level (REVISE → MAJOR REWORK → ABANDON) |

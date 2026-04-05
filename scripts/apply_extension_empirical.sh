@@ -8,6 +8,10 @@ CODEX_AGENTS_OUT="$4"
 SKILLS_OUT="$5"
 AGENT_DIR="$6"
 LOCAL="$7"
+MODEL_OVERRIDE_ARG=()
+if [ -n "$8" ]; then
+    MODEL_OVERRIDE_ARG=(--model-override "$8")
+fi
 
 EXT_ROOT="$TEMPLATE_ROOT/extensions/empirical"
 
@@ -20,7 +24,8 @@ if [ -f "$EXT_ROOT/agent_metadata/shared_agents.json" ]; then
     python3 "$TEMPLATE_ROOT/scripts/assemble_claude_agents.py" \
         --metadata "$EXT_ROOT/agent_metadata/shared_agents.json" \
         --bodies-dir "$EXT_ROOT/agent_bodies/shared" \
-        --output-dir "$AGENTS_OUT"
+        --output-dir "$AGENTS_OUT" \
+        "${MODEL_OVERRIDE_ARG[@]}"
 
     python3 "$TEMPLATE_ROOT/scripts/assemble_codex_subagents.py" \
         --metadata "$EXT_ROOT/agent_metadata/shared_agents.json" \
@@ -32,7 +37,8 @@ if [ -f "$EXT_ROOT/agent_metadata/${AGENT_DIR}_agents.json" ]; then
     python3 "$TEMPLATE_ROOT/scripts/assemble_claude_agents.py" \
         --metadata "$EXT_ROOT/agent_metadata/${AGENT_DIR}_agents.json" \
         --bodies-dir "$EXT_ROOT/agent_bodies/${AGENT_DIR}" \
-        --output-dir "$AGENTS_OUT"
+        --output-dir "$AGENTS_OUT" \
+        "${MODEL_OVERRIDE_ARG[@]}"
 
     python3 "$TEMPLATE_ROOT/scripts/assemble_codex_subagents.py" \
         --metadata "$EXT_ROOT/agent_metadata/${AGENT_DIR}_agents.json" \

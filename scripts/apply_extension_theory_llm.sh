@@ -7,6 +7,10 @@ AGENTS_OUT="$3"
 CODEX_AGENTS_OUT="$4"
 SKILLS_OUT="$5"
 LOCAL="$6"
+MODEL_OVERRIDE_ARG=()
+if [ -n "$7" ]; then
+    MODEL_OVERRIDE_ARG=(--model-override "$7")
+fi
 
 EXT_ROOT="$TEMPLATE_ROOT/extensions/theory_llm"
 
@@ -15,7 +19,8 @@ cp "$EXT_ROOT/llm_client.py" "$PROJECT_ROOT/"
 python3 "$TEMPLATE_ROOT/scripts/assemble_claude_agents.py" \
     --metadata "$EXT_ROOT/agent_metadata/agents.json" \
     --bodies-dir "$EXT_ROOT/agent_bodies" \
-    --output-dir "$AGENTS_OUT"
+    --output-dir "$AGENTS_OUT" \
+    "${MODEL_OVERRIDE_ARG[@]}"
 
 python3 "$TEMPLATE_ROOT/scripts/assemble_codex_subagents.py" \
     --metadata "$EXT_ROOT/agent_metadata/agents.json" \

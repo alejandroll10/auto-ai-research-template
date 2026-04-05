@@ -380,7 +380,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
 {
   "current_stage": "gate_1b",
   "problem_attempt": 1,
-  "idea_round": 1,
+  "idea_round": 0,
   "theory_attempt": 1,
   "revision_round": 0,
   "referee_round": 0,
@@ -474,13 +474,16 @@ for ext in "${EXTENSIONS[@]}"; do
     case "$ext" in
         theory_llm)
             echo "Applying LLM experiment extension..."
+            LIGHT_MODEL=""
+            if [ "$LIGHT" = "1" ]; then LIGHT_MODEL="sonnet"; fi
             bash "$TEMPLATE_ROOT/scripts/apply_extension_theory_llm.sh" \
                 "$TEMPLATE_ROOT" \
                 "$P" \
                 "$AGENTS_OUT" \
                 "$CODEX_AGENTS_OUT" \
                 "$SKILLS_OUT" \
-                "$LOCAL"
+                "$LOCAL" \
+                "$LIGHT_MODEL"
 
             python3 "$TEMPLATE_ROOT/scripts/assemble_codex_skills.py" \
                 --metadata "$TEMPLATE_ROOT/templates/skill_metadata/theory_llm_skills.json" \
@@ -491,6 +494,8 @@ for ext in "${EXTENSIONS[@]}"; do
             ;;
         empirical)
             echo "Applying empirical extension..."
+            LIGHT_MODEL=""
+            if [ "$LIGHT" = "1" ]; then LIGHT_MODEL="sonnet"; fi
             bash "$TEMPLATE_ROOT/scripts/apply_extension_empirical.sh" \
                 "$TEMPLATE_ROOT" \
                 "$P" \
@@ -498,7 +503,8 @@ for ext in "${EXTENSIONS[@]}"; do
                 "$CODEX_AGENTS_OUT" \
                 "$SKILLS_OUT" \
                 "$AGENT_DIR" \
-                "$LOCAL"
+                "$LOCAL" \
+                "$LIGHT_MODEL"
 
             python3 "$TEMPLATE_ROOT/scripts/assemble_codex_skills.py" \
                 --metadata "$TEMPLATE_ROOT/templates/skill_metadata/empirical_skills.json" \
