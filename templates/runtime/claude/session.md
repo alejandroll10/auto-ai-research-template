@@ -36,10 +36,8 @@ Subagents can hang indefinitely — there are no built-in timeouts. To prevent s
 
 1. **Launch web-dependent agents in the background.** Agents that use WebSearch or WebFetch (`literature-scout`, `novelty-checker`) should be launched with `run_in_background: true`. Continue with any independent work while they run.
 
-2. **Monitor every 5 minutes.** After launching a background agent, check its output file after 5 minutes. If the file is empty or hasn't grown since your last check, the agent has likely hung. Re-launch it with the same prompt.
+2. **Monitor every 5 minutes.** After launching a background agent, check its output file after 5 minutes. If the file is empty or hasn't grown since your last check, check a couple more times every 5 minutes to see if it's hanging. Re-launch it with the same prompt.
 
-3. **Prefer incremental-writing agents.** Agents like `literature-scout` are designed to write after every search round. Use the output file as a heartbeat — if content stops appearing, the agent is stuck.
+3. **Non-web agents can run in foreground.** Agents that don't use WebSearch (`math-auditor`, `theory-generator`, `scorer`, `self-attacker`, `paper-writer`) rarely hang. Launch these in the foreground as normal.
 
-4. **Non-web agents can run in foreground.** Agents that don't use WebSearch (`math-auditor`, `theory-generator`, `scorer`, `self-attacker`, `paper-writer`) rarely hang. Launch these in the foreground as normal.
-
-5. **Parallel agent launches.** When the pipeline calls for multiple independent agents (e.g., structured math audit + free-form math audit), launch them in parallel as background agents. Check both when done. Do not serialize independent work.
+4. **Parallel agent launches.** When the pipeline calls for multiple independent agents (e.g., structured math audit + free-form math audit), launch them in parallel as background agents. Check both when done. Do not serialize independent work.
