@@ -1,5 +1,7 @@
 # {{RUNTIME_DOC_NAME}} — Autonomous Theory Paper Pipeline
 
+{{RUNTIME_DISCIPLINE}}
+
 ## Purpose
 
 This project autonomously produces a **{{PAPER_TYPE}}** suitable for submission to a {{TARGET_JOURNALS}}. The system runs end-to-end with no human intervention after launch. Quality is enforced by adversarial evaluation at every stage.
@@ -100,6 +102,8 @@ Initial state (created by setup.sh):
 When you start the pipeline, set `"status": "running"` and begin appending to the history array.
 
 **History array:** Append a `{ "timestamp": "ISO-8601", "event": "description" }` entry for every pipeline event. This feeds the dashboard. Use `date -u +%Y-%m-%dT%H:%M:%SZ` to get the timestamp. Never truncate or clear the history array.
+
+{{SEED_OVERRIDE}}
 
 ---
 
@@ -498,6 +502,11 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 dashboard.html              # Live progress dashboard (serve with python3 -m http.server)
 output/
 ├── data_inventory.md               # available data sources (written at startup)
+├── seed/                           # (--seed mode only)
+│   ├── user_idea.md                # original seed file provided by user
+│   ├── novelty_concern.md          # written if Gate 1b flags the idea as KNOWN
+│   ├── prototype_blockage.md       # written if Gate 1c is BLOCKED
+│   └── abandon_report.md           # written if pipeline cannot develop the idea
 ├── stage0/
 │   ├── problem_statement.md
 │   └── literature_map.md

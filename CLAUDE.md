@@ -25,6 +25,12 @@ If a user asks to create/set up/start a new research project, run `setup.sh` for
 
 # Combine extensions
 ./setup.sh <project-name> --variant finance --ext empirical --ext theory_llm
+
+# Seeded idea (skip Stages 0-1, start at Gate 1b)
+./setup.sh <project-name> --variant finance --seed /path/to/idea.md
+
+# Seeded idea + empirical
+./setup.sh <project-name> --variant finance --seed /path/to/idea.md --ext empirical
 ```
 
 This creates a standalone project folder with assembled CLAUDE.md, agents, and skills. After setup, tell the user to:
@@ -39,7 +45,8 @@ This creates a standalone project folder with assembled CLAUDE.md, agents, and s
 ```
 templates/
 ├── shared/
-│   └── core.md              # Runtime-agnostic pipeline orchestrator template
+│   ├── core.md              # Runtime-agnostic pipeline orchestrator template
+│   └── seed.md              # Seeded-idea override block (injected when --seed is used)
 ├── runtime/
 │   └── claude/
 │       └── session.md       # Claude-specific session guidance (injected as {{RUNTIME_SESSION_GUIDANCE}})
@@ -119,6 +126,7 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
    - Reads `templates/shared/core.md` (runtime-agnostic orchestrator)
    - Injects `templates/runtime/claude/session.md` as `{{RUNTIME_SESSION_GUIDANCE}}`
    - Injects `templates/scoring/{variant}.md` as `{{SCORING}}`
+   - If `--seed`: injects `templates/shared/seed.md` as `{{SEED_OVERRIDE}}`; otherwise replaces with empty string
    - Replaces `{{PAPER_TYPE}}`, `{{TARGET_JOURNALS}}`, `{{DOMAIN_AREAS}}`, `{{RUNTIME_DOC_NAME}}`, `{{AGENT_DIR}}`, `{{SKILL_DIR}}`
 4. Assembles agents from metadata + prompt bodies:
    - Shared: `agent_metadata/claude_shared_agents.json` + `agent_bodies/shared/*.md`
@@ -127,6 +135,7 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
    - Codex custom agents are assembled from the same inputs into `.codex/agents/*.toml`
 5. Injects variant context (paper type, journal list, domain) into key agents
 6. Creates project structure (output/, paper/, code/, etc.) and initial pipeline state
+   - If `--seed`: copies seed file to `output/seed/user_idea.md`, sets `pipeline_state.json` to start at `gate_1b` with `"seeded": true`
 7. Installs core Python deps (sympy, matplotlib) via `uv pip install`
 8. Assembles core skills:
    - Claude skills into `.claude/skills/`

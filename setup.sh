@@ -1,10 +1,12 @@
 #!/bin/bash
 # Auto AI Research Template — Setup & Launch
-# Usage: ./setup.sh [project-name] [--variant finance|macro] [--ext empirical|theory_llm] [--local]
+# Usage: ./setup.sh [project-name] [--variant finance|macro] [--ext empirical|theory_llm] [--seed <file>] [--local]
 #
 # --local  Skip git clone, use templates from this repo directly.
 #          Outputs to test_output/{variant}/ for inspection.
 # --ext    Add an extension (can be repeated). Available: empirical, theory_llm
+# --seed   Provide a pre-developed idea (file path). Pipeline starts at Gate 1b
+#          instead of Stage 0, and never silently abandons the seeded idea.
 #
 # Legacy: --variant finance_llm is shorthand for --variant finance --ext theory_llm
 
@@ -16,12 +18,15 @@ VARIANT="finance"
 LOCAL=0
 NEXT_IS_VARIANT=0
 NEXT_IS_EXT=0
+NEXT_IS_SEED=0
+SEED_FILE=""
 EXTENSIONS=()
 
 for arg in "$@"; do
     case "$arg" in
         --variant)     NEXT_IS_VARIANT=1 ;;
         --ext)         NEXT_IS_EXT=1 ;;
+        --seed)        NEXT_IS_SEED=1 ;;
         --local)       LOCAL=1 ;;
         --theory-llm)  VARIANT="finance_llm" ;;  # legacy flag
         -*)            echo "Unknown option: $arg"; exit 1 ;;
@@ -32,6 +37,9 @@ for arg in "$@"; do
             elif [ "$NEXT_IS_EXT" = "1" ]; then
                 EXTENSIONS+=("$arg")
                 NEXT_IS_EXT=0
+            elif [ "$NEXT_IS_SEED" = "1" ]; then
+                SEED_FILE="$arg"
+                NEXT_IS_SEED=0
             else
                 PROJECT_NAME="$arg"
             fi
@@ -45,6 +53,14 @@ if [ "$NEXT_IS_VARIANT" = "1" ]; then
 fi
 if [ "$NEXT_IS_EXT" = "1" ]; then
     echo "Error: --ext requires a value (empirical, theory_llm)"
+    exit 1
+fi
+if [ "$NEXT_IS_SEED" = "1" ]; then
+    echo "Error: --seed requires a file path"
+    exit 1
+fi
+if [ -n "$SEED_FILE" ] && [ ! -f "$SEED_FILE" ]; then
+    echo "Error: seed file not found: $SEED_FILE"
     exit 1
 fi
 
@@ -209,6 +225,11 @@ else
         exit 1
     fi
 
+    # Resolve seed file to absolute path before cd
+    if [ -n "$SEED_FILE" ]; then
+        SEED_FILE="$(cd "$(dirname "$SEED_FILE")" && pwd)/$(basename "$SEED_FILE")"
+    fi
+
     echo "Cloning template into $PROJECT_NAME..."
     git clone https://github.com/alejandroll10/auto-ai-research-template.git "$PROJECT_NAME"
     cd "$PROJECT_NAME"
@@ -240,6 +261,11 @@ else
     AGENTS_MD_OUT="AGENTS.md"
 fi
 
+SEED_ARGS=()
+if [ -n "$SEED_FILE" ]; then
+    SEED_ARGS=(--seed-block "$TEMPLATE_ROOT/templates/shared/seed.md")
+fi
+
 python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --core "$CORE" \
     --session "$RUNTIME_SESSION" \
@@ -250,7 +276,10 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --doc-name "CLAUDE.md" \
     --agent-dir "$CLAUDE_AGENTS_REL" \
     --skill-dir "$CLAUDE_SKILLS_REL" \
+    "${SEED_ARGS[@]}" \
     --output "$CLAUDE_MD_OUT"
+
+CODEX_DISCIPLINE="$TEMPLATE_ROOT/templates/runtime/codex/session.md"
 
 python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --core "$CORE" \
@@ -262,6 +291,8 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --doc-name "AGENTS.md" \
     --agent-dir "$CODEX_AGENTS_REL" \
     --skill-dir "$CODEX_SKILLS_REL" \
+    --discipline "$CODEX_DISCIPLINE" \
+    "${SEED_ARGS[@]}" \
     --output "$AGENTS_MD_OUT"
 
 echo "  ✓ Runtime docs assembled (CLAUDE.md + AGENTS.md)"
@@ -320,7 +351,30 @@ mkdir -p "$P/paper/sections" "$P/paper/referee_reports"
 mkdir -p "$P/process_log/sessions" "$P/process_log/decisions" "$P/process_log/discussions" "$P/process_log/patterns"
 mkdir -p "$P/references"
 
+# Copy seed file if provided
+if [ -n "$SEED_FILE" ]; then
+    mkdir -p "$P/output/seed"
+    cp "$SEED_FILE" "$P/output/seed/user_idea.md"
+    echo "  ✓ Seed idea copied to output/seed/user_idea.md"
+fi
+
 # Initial pipeline state
+if [ -n "$SEED_FILE" ]; then
+cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
+{
+  "current_stage": "gate_1b",
+  "problem_attempt": 1,
+  "idea_round": 0,
+  "theory_attempt": 1,
+  "revision_round": 0,
+  "referee_round": 0,
+  "status": "not_started",
+  "seeded": true,
+  "scores": {},
+  "history": []
+}
+JSONEOF
+else
 cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
 {
   "current_stage": "stage_0",
@@ -334,6 +388,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "history": []
 }
 JSONEOF
+fi
 
 touch "$P/process_log/history.md"
 
@@ -536,5 +591,9 @@ echo "Then say: \"Run the pipeline.\""
 echo ""
 echo "Variant: $VARIANT"
 echo "Extensions: ${EXTENSIONS[*]:-none}"
+if [ -n "$SEED_FILE" ]; then
+    echo "Seed: $(basename "$SEED_FILE") → output/seed/user_idea.md"
+    echo "Pipeline will start at Gate 1b (novelty check on seeded idea)"
+fi
 echo "Sandbox is pre-configured in $CLAUDE_SETTINGS_REL"
 echo "(Bash restricted to project folder, web access works freely)"
