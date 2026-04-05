@@ -29,3 +29,17 @@ Before Stage 0, check what data sources are available. This prevents bad assumpt
 6. Commit: `pipeline: data inventory complete`
 
 **CRITICAL:** All downstream agents must read `output/data_inventory.md` when making decisions about empirical feasibility. The idea-generator and idea-reviewer must know what data is available so they design ideas that USE available data, not work around imagined limitations. Never assume a data source is unavailable without checking the inventory.
+
+### Agent launch and monitoring
+
+Subagents can hang indefinitely — there are no built-in timeouts. To prevent silent stalls:
+
+1. **Launch web-dependent agents in the background.** Agents that use WebSearch or WebFetch (`literature-scout`, `novelty-checker`) should be launched with `run_in_background: true`. Continue with any independent work while they run.
+
+2. **Monitor every 5 minutes.** After launching a background agent, check its output file after 5 minutes. If the file is empty or hasn't grown since your last check, the agent has likely hung. Re-launch it with the same prompt.
+
+3. **Prefer incremental-writing agents.** Agents like `literature-scout` are designed to write after every search round. Use the output file as a heartbeat — if content stops appearing, the agent is stuck.
+
+4. **Non-web agents can run in foreground.** Agents that don't use WebSearch (`math-auditor`, `theory-generator`, `scorer`, `self-attacker`, `paper-writer`) rarely hang. Launch these in the foreground as normal.
+
+5. **Parallel agent launches.** When the pipeline calls for multiple independent agents (e.g., structured math audit + free-form math audit), launch them in parallel as background agents. Check both when done. Do not serialize independent work.
