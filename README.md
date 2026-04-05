@@ -83,7 +83,7 @@ Codex:
 
 ```bash
 cd my-paper
-codex --ask-for-approval never
+codex --sandbox danger-full-access --ask-for-approval never
 ```
 
 Then say: **"Run the pipeline."**
@@ -217,7 +217,7 @@ my-paper/
 ## Runtime notes
 
 - Claude Code launch: `claude --dangerously-skip-permissions`
-- Codex launch: `codex --ask-for-approval never`
+- Codex launch: `codex --sandbox danger-full-access --ask-for-approval never`
 - Codex custom agents inherit the parent session's approval and sandbox policy unless explicitly overridden in agent config.
 
 ## Safety

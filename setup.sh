@@ -504,7 +504,14 @@ rm -rf templates/
 rm -rf extensions/
 rm -rf meta_paper/
 rm -rf test_scripts/
+rm -rf scripts/
+rm -rf codex_inspect/
+rm -rf test_output/
 rm -f setup.sh
+rm -f README.md
+rm -f CLAUDE_REFACTOR_PLAN.md
+rm -f requirements.system
+rm -f texput.log
 echo "  ✓ Template files removed"
 
 git add -A
@@ -523,7 +530,7 @@ echo "Claude:"
 echo "  claude --dangerously-skip-permissions"
 echo ""
 echo "Codex:"
-echo "  codex --ask-for-approval never"
+echo "  codex --sandbox danger-full-access --ask-for-approval never"
 echo ""
 echo "Then say: \"Run the pipeline.\""
 echo ""
