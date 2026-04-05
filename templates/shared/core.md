@@ -383,7 +383,7 @@ This is the full empirical analysis — deeper than the feasibility check at Gat
 | Delta < 3 points | **ESCALATE** — move up one level: REVISE → MAJOR REWORK → ABANDON (plateau, not converging) |
 | Score < (advance threshold + 5) on attempt 3+ | **ESCALATE** — regardless of delta. Still below the bar after two revisions suggests a ceiling. Regenerate. |
 
-**Hard ceiling:** After 4 total scorer evaluations on the same problem, escalate one level regardless of trajectory. This prevents slow-but-never-arriving loops (e.g., +3, +3, +3 but still at 69).
+**Hard ceiling:** After 8 total scorer evaluations on the same problem, escalate one level regardless of trajectory. This prevents slow-but-never-arriving loops while still leaving room for extensions to land.
 
 Record all scores in `process_log/pipeline_state.json` under `"scores"` so the trajectory can be computed: `"scores": { "v1": 60, "v2": 63, "v3": 67 }`.
 
@@ -487,7 +487,7 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 | Math audit fails | 3 attempts | Abandon this theory version |
 | Scorer: delta ≥ 3 | — | Allow one more iteration in current band |
 | Scorer: delta < 3 (plateau/decline) | — | Escalate one level (REVISE → MAJOR REWORK → ABANDON) |
-| Scorer: hard ceiling | 4 total evaluations on same problem | If score ≥ 55: switch to extension playbook. If score < 55: escalate one level. |
+| Scorer: hard ceiling | 8 total evaluations on same problem | If score ≥ 55: switch to extension playbook. If score < 55: escalate one level. |
 | Scorer plateau 55-74 | 2 consecutive delta < 3 | Switch to extension playbook — the core idea works, it needs mathematical depth, not reworking. |
 | Theory scored ABANDON | 5 theories on same problem | Change the problem (Stage 0) |
 | Problem viability fails | 5 problems | Pick the best scoring problem and proceed anyway |
