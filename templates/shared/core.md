@@ -73,7 +73,7 @@ Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-base
 Stage 5: Paper Writing        ──→
 Stage 6: Referee Simulation   ──→ Gate 5: Referee Decision
                                    ├── Minor/Accept → Stage 7
-                                   ├── Major Revision → revise, re-run Stage 6 (max 2×)
+                                   ├── Major Revision → revise, re-run Stage 6 (max 10×)
                                    └── Reject → back to Stage 1
 Stage 7: Style Check          ──→ Done
 ```
@@ -124,7 +124,7 @@ The orchestrator (you) evaluates:
 - Is there actually a gap?
 - Is it tractable as a pure theory paper?
 
-Score 0-100. If below 50, re-run Stage 0 with different search terms. After 3 failures, pick the best problem and proceed.
+Score 0-100. If below 50, re-run Stage 0 with different search terms. After 5 failures, pick the best problem and proceed.
 
 ---
 
@@ -159,10 +159,10 @@ Score 0-100. If below 50, re-run Stage 0 with different search terms. After 3 fa
 | Decision | Action |
 |----------|--------|
 | **ADVANCE** | Best idea identified. Proceed to Stage 2 with the reviewer's instructions for theory development. |
-| **ITERATE** | Re-launch idea-generator with the reviewer's feedback. Max 3 rounds of iteration. |
+| **ITERATE** | Re-launch idea-generator with the reviewer's feedback. Max 5 rounds of iteration. |
 | **REJECT ALL** | All ideas are weak. Return to Stage 0 for a different problem. |
 
-6. After 3 rounds without ADVANCE, pick the highest-scored idea and advance it anyway.
+6. After 5 rounds without ADVANCE, pick the highest-scored idea and advance it anyway.
 7. Save the winning idea summary to `output/stage1/selected_idea.md`
 8. Commit: `artifact: selected idea saved`
 
@@ -178,7 +178,7 @@ This is the first of two deep novelty checks. It runs on the selected idea *befo
 
 | Verdict | Action |
 |---------|--------|
-| **KNOWN** | Kill this idea. Pick the next-best idea from the current round's sketches (per idea-reviewer rankings) and re-run Gates 1b + 1c on it. If no viable ideas remain, re-run Stage 1 with a new round (counts toward the 3-round total cap on Stage 1 iterations). |
+| **KNOWN** | Kill this idea. Pick the next-best idea from the current round's sketches (per idea-reviewer rankings) and re-run Gates 1b + 1c on it. If no viable ideas remain, re-run Stage 1 with a new round (counts toward the 5-round total cap on Stage 1 iterations). |
 | **INCREMENTAL** | Flag it. Proceed to Gate 1c, then Stage 2. The scorer will weigh the INCREMENTAL flag at Gate 4. |
 | **NOVEL** | Proceed to Gate 1c. |
 
@@ -426,7 +426,7 @@ Read the referee's recommendation:
 | Recommendation | Action |
 |---------------|--------|
 | **Accept / Minor Revision** | Fix minor comments, proceed to Stage 7 (style check). |
-| **Major Revision** | Revise the paper addressing major comments. Re-run Stage 6. Max 2 referee rounds. |
+| **Major Revision** | Revise the paper addressing major comments. Re-run Stage 6. Max 10 referee rounds. Be patient: as long as each round surfaces at least one genuinely new issue that wasn't in the previous report, the process is working. Only escalate if the referee is repeating the same concerns with no new substance. |
 | **Reject** | Read the rejection reasons. If fixable: return to Stage 2 with referee feedback. If fundamental: return to Stage 0. |
 
 ---
@@ -481,17 +481,17 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 
 | Situation | After N failures | Action |
 |-----------|-----------------|--------|
-| Idea review iterates | 3 rounds | Pick the best idea and advance to Gate 1b |
+| Idea review iterates | 5 rounds | Pick the best idea and advance to Gate 1b |
 | Idea review rejects all | 1 rejection | Return to Stage 0 for a different problem |
-| Idea novelty check (Gate 1b) KNOWN | All ideas from current round exhausted | New round of Stage 1 (counts toward 3-round limit) |
+| Idea novelty check (Gate 1b) KNOWN | All ideas from current round exhausted | New round of Stage 1 (counts toward 5-round limit) |
 | Math audit fails | 3 attempts | Abandon this theory version |
 | Scorer: delta ≥ 3 | — | Allow one more iteration in current band |
 | Scorer: delta < 3 (plateau/decline) | — | Escalate one level (REVISE → MAJOR REWORK → ABANDON) |
 | Scorer: hard ceiling | 4 total evaluations on same problem | If score ≥ 55: switch to extension playbook. If score < 55: escalate one level. |
 | Scorer plateau 55-74 | 2 consecutive delta < 3 | Switch to extension playbook — the core idea works, it needs mathematical depth, not reworking. |
-| Theory scored ABANDON | 3 theories on same problem | Change the problem (Stage 0) |
-| Problem viability fails | 3 problems | Pick the best scoring problem and proceed anyway |
-| Referee: Major Revision | Structural concerns (fragile, narrow, shallow) | Use extension playbook to strengthen before resubmitting. Do not loop back to Stage 0. |
+| Theory scored ABANDON | 5 theories on same problem | Change the problem (Stage 0) |
+| Problem viability fails | 5 problems | Pick the best scoring problem and proceed anyway |
+| Referee: Major Revision | Structural concerns (fragile, narrow, shallow) | Use extension playbook to strengthen before resubmitting. Be patient: keep revising as long as each round surfaces at least one new issue. Only escalate if the referee repeats the same concerns. Max 10 rounds. |
 | Referee rejects | 2 rejections with "fundamental flaw" | Return to Stage 0 with entirely new topic |
 
 ---
