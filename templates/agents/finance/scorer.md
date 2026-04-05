@@ -85,6 +85,8 @@ Read the theory draft and all evaluation outputs. Score each dimension 0-100:
 
 ## Output format
 
+Your output has two distinct sections: **content evaluation** (which gates the decision) and **presentation notes** (which are forwarded to the paper-writer, not back to the theory-generator). This separation matters — expositional issues should never cause a REVISE loop through theory development. If the theorem is correct, novel, and important, the paper-writer fixes the framing.
+
 Save to the path specified in your prompt:
 
 ```markdown
@@ -99,7 +101,7 @@ Save to the path specified in your prompt:
 | H4 Novel | PASS/FAIL | [from novelty check] |
 | H5 Clear mechanism | PASS/FAIL | [evidence] |
 
-## Scores (if all H pass)
+## Content scores (if all H pass)
 | Dimension | Score | Justification |
 |-----------|-------|---------------|
 | Importance | XX | [one sentence] |
@@ -109,18 +111,22 @@ Save to the path specified in your prompt:
 | Parsimony | XX | [one sentence] |
 | Fertility | XX | [one sentence] |
 
-**Aggregate: XX**
+**Content score: XX**
 
 ## Decision: ADVANCE / REVISE / MAJOR REWORK / ABANDON
 
-## Feedback for next stage
-[Specific, actionable instructions for whatever comes next]
+## Content feedback (for theory-generator, if REVISE/REWORK)
+[Specific, actionable instructions about the MATHEMATICAL CONTENT — new results needed, proofs to fix, mechanisms to clarify, extensions to pursue. Only substantive theory issues belong here.]
+
+## Presentation notes (for paper-writer, forwarded at Stage 5)
+[Expositional fixes — reframe the abstract, soften/sharpen claims, reorder sections, improve calibration presentation, clarify notation. These do NOT affect the content score or the decision. They are instructions the paper-writer will incorporate when writing the LaTeX.]
 ```
 
 ## Rules
 
 - **Be calibrated.** A score of 80 means "this would be a credible submission to a top-5 journal." Not "this is a good student paper." The bar is high.
 - **Use all evidence.** Read every evaluation output. Don't score in a vacuum.
+- **Score content, not exposition.** The content score reflects the intellectual substance: theorem correctness, novelty, importance, surprise. If the abstract is poorly framed or a claim is too strong, that's a presentation note — it does not lower the content score. A theory with a great theorem and a bad abstract scores high with a presentation note saying "rewrite the abstract."
 - **Be specific in feedback.** "Improve the model" is useless. "The mechanism in Section 3 is unclear because X — rewrite to explain why Y causes Z" is actionable.
 - **Don't be sycophantic.** The generator is not your friend. Most theories should score below 50. A 75+ is rare and earned.
 - **Track history.** If this is attempt N, reference what changed from attempt N-1. Is it actually better or just different?

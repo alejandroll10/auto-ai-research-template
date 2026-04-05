@@ -363,7 +363,10 @@ This is the full empirical analysis — deeper than the feasibility check at Gat
    - Novelty check (theory): `output/stage2/novelty_check_vN.md`
    - Self-attack: `output/stage4/self_attack_vN.md`
 2. Save result to `output/stage4/scorer_decision_vN.md`
-3. Read the decision using **state-dependent escalation**:
+3. Read the scorer output. It contains two sections:
+   - **Content score + content feedback**: determines the gate decision. Only substantive theory issues (new math needed, proofs to fix, mechanisms to clarify).
+   - **Presentation notes**: expositional improvements (reframe abstract, soften claims, reorder sections). These do NOT affect the score or gate decision. Save them — they are forwarded to the paper-writer at Stage 5.
+4. Use the **content score** for state-dependent escalation:
 
 **Scoring is absolute** — 80 means top-5 journal quality regardless of target. The advance threshold depends on the target journal tier. Default tiers:
 
@@ -387,10 +390,11 @@ This is the full empirical analysis — deeper than the feasibility check at Gat
 
 **Hard ceiling:** After 8 total scorer evaluations on the same problem, escalate one level regardless of trajectory. This prevents slow-but-never-arriving loops while still leaving room for extensions to land.
 
-Record all scores in `process_log/pipeline_state.json` under `"scores"` so the trajectory can be computed: `"scores": { "v1": 60, "v2": 63, "v3": 67 }`.
+Record all content scores in `process_log/pipeline_state.json` under `"scores"` so the trajectory can be computed: `"scores": { "v1": 60, "v2": 63, "v3": 67 }`.
 
-4. Update `process_log/pipeline_state.json` accordingly
-5. Commit: `pipeline: gate 4 — scorer {DECISION} (score: {N})`
+5. If REVISE/REWORK: pass only the **content feedback** to the theory-generator. Do NOT pass presentation notes — those are for the paper-writer.
+6. Update `process_log/pipeline_state.json` accordingly
+7. Commit: `pipeline: gate 4 — scorer {DECISION} (score: {N})`
 
 ---
 
@@ -398,7 +402,7 @@ Record all scores in `process_log/pipeline_state.json` under `"scores"` so the t
 
 **Agent:** `paper-writer`
 
-1. **Paper outline.** Launch paper-writer with instruction: "Write an outline only — do not write LaTeX yet." Provide: theory draft, literature map, scorer assessment, self-attack report. The paper-writer produces `paper/outline.md` with: section-by-section plan, what goes where, how to address self-attack weaknesses, which results to highlight, target length per section.
+1. **Paper outline.** Launch paper-writer with instruction: "Write an outline only — do not write LaTeX yet." Provide: theory draft, literature map, scorer assessment (including the **presentation notes** section — the paper-writer must address these), self-attack report. The paper-writer produces `paper/outline.md` with: section-by-section plan, what goes where, how to address self-attack weaknesses, how to incorporate scorer presentation notes, which results to highlight, target length per section.
 2. **Review the outline.** Check: does it address the self-attack points? Is the positioning against the literature accurate? Is the structure appropriate for the target journal? If not, provide feedback and re-launch.
 3. **Write.** Launch paper-writer with the approved outline + all inputs. Paper-writer creates files in `paper/sections/`:
    - `introduction.tex`
