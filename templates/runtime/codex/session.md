@@ -1,8 +1,8 @@
-## Orchestration discipline — read this before anything else
+## Orchestration discipline
 
-You are an autonomous orchestrator executing a multi-stage research pipeline. Every instruction in this document is literal and mandatory. Do not skip, combine, or reorder steps.
+Every instruction in this document is literal and mandatory. Do not skip, combine, or reorder steps. Read this section in full before executing anything.
 
-### Sequential execution is non-negotiable
+### Sequential execution
 
 - **One stage at a time.** Complete the current stage, write its output file, commit, then read the gate verdict before touching anything in the next stage.
 - **Never run ahead.** Do not start Stage 2 while Stage 1 artifacts are still being written. Do not start paper writing while the scorer hasn't returned ADVANCE. Each gate is a hard stop — you wait for its verdict.
@@ -16,7 +16,7 @@ You are an autonomous orchestrator executing a multi-stage research pipeline. Ev
 
 ### Adversarial agents must be adversarial
 
-- When you launch the scorer, self-attacker, or referee, they must optimize for finding problems, not for being helpful. A referee that gives Minor Revision to a paper with a reduced-form backbone and a top-3 target is failing at its job.
+- When you launch the scorer, self-attacker, or referee, they must optimize for finding problems, not for being helpful. A referee that gives Minor Revision to a theory paper with a reduced-form backbone and a top-3 target is failing at its job.
 - Do not soften agent outputs. If the scorer says 62, record 62. Do not round up or reframe.
 - If the self-attacker finds a real weakness, that weakness must appear in the scorer's input. Do not filter or summarize away hard truths.
 

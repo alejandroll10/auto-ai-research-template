@@ -104,6 +104,11 @@ CODEX_SUBAGENT_DIR_REL=".codex"
 CODEX_AGENTS_REL="$CODEX_SUBAGENT_DIR_REL/agents"
 CODEX_SKILLS_REL="$CODEX_DIR_REL/skills"
 
+# Resolve seed file to absolute path early (before any cd)
+if [ -n "$SEED_FILE" ]; then
+    SEED_FILE="$(cd "$(dirname "$SEED_FILE")" && pwd)/$(basename "$SEED_FILE")"
+fi
+
 assemble_claude_shared_agents() {
     local template_root="$1"
     local dest_dir="$2"
@@ -225,11 +230,6 @@ else
         exit 1
     fi
 
-    # Resolve seed file to absolute path before cd
-    if [ -n "$SEED_FILE" ]; then
-        SEED_FILE="$(cd "$(dirname "$SEED_FILE")" && pwd)/$(basename "$SEED_FILE")"
-    fi
-
     echo "Cloning template into $PROJECT_NAME..."
     git clone https://github.com/alejandroll10/auto-ai-research-template.git "$PROJECT_NAME"
     cd "$PROJECT_NAME"
@@ -263,7 +263,12 @@ fi
 
 SEED_ARGS=()
 if [ -n "$SEED_FILE" ]; then
-    SEED_ARGS=(--seed-block "$TEMPLATE_ROOT/templates/shared/seed.md")
+    SEED_TEMPLATE="$TEMPLATE_ROOT/templates/shared/seed.md"
+    if [ ! -f "$SEED_TEMPLATE" ]; then
+        echo "Error: seed template not found: $SEED_TEMPLATE"
+        exit 1
+    fi
+    SEED_ARGS=(--seed-block "$SEED_TEMPLATE")
 fi
 
 python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
@@ -364,7 +369,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
 {
   "current_stage": "gate_1b",
   "problem_attempt": 1,
-  "idea_round": 0,
+  "idea_round": 1,
   "theory_attempt": 1,
   "revision_round": 0,
   "referee_round": 0,
