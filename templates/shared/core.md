@@ -68,7 +68,7 @@ Stage 3: Implications        ──→ Stage 3c/3d: LLM Experiments (optional)
 Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-based)
                                    ├── ADVANCE (75+) → Stage 5
                                    ├── REVISE  → back to Stage 2 (continue if Δ≥3, else escalate)
-                                   ├── REWORK  → back to Stage 1 (continue if Δ≥3, else escalate)
+                                   ├── MAJOR REWORK → back to Stage 1 (continue if Δ≥3, else escalate)
                                    └── ABANDON → back to Stage 0 (max 3×)
 Stage 5: Paper Writing        ──→
 Stage 6: Referee Simulation   ──→ Gate 5: Referee Decision
@@ -139,7 +139,7 @@ Score 0-100. If below 50, re-run Stage 0 with different search terms. After 5 fa
 | Context | Ideas per round |
 |---------|----------------|
 | First time entering Stage 1 | 5 |
-| Returning from a failed theory (scorer REWORK/ABANDON) | 10 |
+| Returning from a failed theory (scorer MAJOR REWORK/ABANDON) | 10 |
 | Returning from a problem-level failure (Stage 0 re-run) | 10, and explicitly explore different territory |
 
 1. Read `output/stage0/problem_statement.md`, `output/stage0/literature_map.md`, and `output/data_inventory.md`
@@ -321,7 +321,7 @@ Quick falsification check: can this theory be calibrated at all? Do the key empi
 | **REVISE** | Re-run specific experiments or re-analyze. Max 2 revision rounds. |
 | **REDESIGN** | Fundamental methodology problem. Redesign and re-run. Max 1 redesign. |
 
-3. Commit: `artifact: experiments — {ACCEPT/REVISE/REDESIGN}`
+5. Commit: `artifact: experiments — {ACCEPT/REVISE/REDESIGN}`
 
 ---
 
