@@ -18,7 +18,7 @@ You will be pointed to files containing:
 | H1 | **One clear idea** | Can you state the contribution in one sentence from the theory draft? |
 | H2 | **Setup is well-defined** | Could a reader write down the agents' optimization problem? |
 | H3 | **Key result is correct** | Both math audits passed (structured AND free-form) |
-| H4 | **The result is new** | Novelty check returned NOVEL. INCREMENTAL is a FAIL — the paper must deliver a result the literature does not already contain or straightforwardly imply. Do not rationalize INCREMENTAL as "strong enough." |
+| H4 | **The result is new** | Novelty check returned NOVEL. INCREMENTAL is a FAIL. Note: the novelty checker rates surprising applications of known mechanisms to new settings as NOVEL — accept that verdict. Do not re-litigate what the checker already decided. |
 | H5 | **Economic mechanism is clear** | The "mechanism" section explains WHY in economics, not algebra |
 
 If ANY hard requirement fails → score is 0, decision is ABANDON or REVISE depending on what failed.

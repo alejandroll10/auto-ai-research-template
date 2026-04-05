@@ -97,7 +97,7 @@ Save to the path specified in your prompt. Build this file incrementally:
 ## Rules
 
 - **Write incrementally.** Append findings after each search. Never accumulate everything in memory for a final write.
-- **Search before concluding.** For idea-level checks (Gate 1b): at least 5 targeted searches. For full theory checks (Gate 3): at least 10 targeted searches.
+- **Search before concluding.** For idea-level checks (Gate 1b): at least 5 targeted searches. For full theory checks (Gate 3): at least 10 targeted searches. At least one search must be the abstract mechanism cross-subfield search (step 2 above).
 - **No hallucinated prior work.** Only cite papers you found via WebSearch. If you "remember" a paper but can't find it, say so explicitly and mark it [UNVERIFIED].
 - **Fetching papers.** Try to fetch abstracts/introductions from journal or NBER pages using WebFetch. If that fails, search for the paper title + "pdf" to find an accessible copy. SSRN pages are behind Cloudflare and cannot be fetched with WebFetch — use WebSearch instead (abstracts appear in search snippets).
 - **Same mechanism in different setting: depends on what the application reveals.** If applying a known mechanism to a new setting produces a surprising result — a sign reversal, an unexpected threshold, an implication that changes how practitioners think about the setting — that is NOVEL. The mechanism is borrowed but the insight is new. (Example: Berk-Green applied competitive entry to mutual funds and showed observable alpha is uninformative about skill — that was surprising and NOVEL despite the mechanism being standard IO.) If the application produces exactly the result you'd predict from the source paper with no new twist, that is INCREMENTAL.
