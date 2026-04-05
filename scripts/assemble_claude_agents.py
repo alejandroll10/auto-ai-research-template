@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 FIELD_ORDER = ["name", "description", "tools", "skills", "model", "background", "memory"]
+IGNORED_FIELDS = {"codex"}
 
 
 def format_value(value):
@@ -18,7 +19,7 @@ def render_agent(metadata, body):
         if key in metadata:
             lines.append(f"{key}: {format_value(metadata[key])}")
     for key, value in metadata.items():
-        if key not in FIELD_ORDER:
+        if key not in FIELD_ORDER and key not in IGNORED_FIELDS:
             lines.append(f"{key}: {format_value(value)}")
     lines.extend(["---", "", body.rstrip(), ""])
     return "\n".join(lines)
