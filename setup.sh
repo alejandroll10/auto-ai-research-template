@@ -109,7 +109,7 @@ assemble_claude_variant_agents() {
         --output-dir "$dest_dir"
 }
 
-assemble_codex_agents_from_parts() {
+assemble_codex_subagents_from_parts() {
     local template_root="$1"
     local metadata_file="$2"
     local bodies_dir="$3"
@@ -137,7 +137,7 @@ assemble_codex_shared_agents() {
     local template_root="$1"
     local dest_dir="$2"
 
-    assemble_codex_agents_from_parts \
+    assemble_codex_subagents_from_parts \
         "$template_root" \
         "$template_root/templates/agent_metadata/claude_shared_agents.json" \
         "$template_root/templates/agent_bodies/shared" \
@@ -149,7 +149,7 @@ assemble_codex_variant_agents() {
     local variant="$2"
     local dest_dir="$3"
 
-    assemble_codex_agents_from_parts \
+    assemble_codex_subagents_from_parts \
         "$template_root" \
         "$template_root/templates/agent_metadata/claude_${variant}_agents.json" \
         "$template_root/templates/agents/${variant}" \

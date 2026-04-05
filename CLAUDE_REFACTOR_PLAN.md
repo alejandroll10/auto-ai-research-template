@@ -83,9 +83,10 @@ Not started yet:
 
 Current status:
 - the currently implemented Claude runtime path is modularized end to end
-- a first Codex pass now shares the same runtime content and skill source layers
+- a first Codex pass now shares the same runtime content, skill source layers, and agent body source layers
 - shared capabilities and content are now separated from most runtime packaging concerns
 - Codex skill generation is implemented from the shared skill metadata + body layer
+- Codex custom-agent generation is implemented from the same metadata + body inputs used by Claude
 - runtime document generation is shared across `CLAUDE.md` and `AGENTS.md`
 
 Recommended structure:
@@ -100,32 +101,44 @@ Goal:
 ## Short-term Codex plan
 
 Principle:
-- do the minimum needed to prove a second runtime can consume the existing shared skill content
-- avoid renaming or restructuring existing skill metadata/body files in the first pass
+- do the minimum needed to prove a second runtime can consume the existing shared skill and agent content
+- keep shared prompt bodies as the source of truth
 - reuse current skill metadata JSON and body markdown as the source of truth
 
 Scope for first Codex pass:
 - add a Codex skill assembler script
+- add a Codex custom-agent assembler script
 - generate Codex-native skill directories from existing metadata + bodies
+- generate official Codex custom agents under `.codex/agents/*.toml`
 - add `AGENTS.md` generation as the Codex analogue of `CLAUDE.md`
 - keep shared content identical where possible and limit Codex-specific wording to the runtime layer
 - emit both `CLAUDE.md` and `AGENTS.md` by default from the same setup flow
 
 Recommended first target:
-- start with `AGENTS.md` + skills, not Codex-specific agent packaging
 - use existing files such as:
   - `templates/skill_metadata/empirical_skills.json`
   - `templates/skill_metadata/theory_llm_skills.json`
   - `templates/skill_metadata/codex_math_skills.json`
+  - `templates/agent_metadata/claude_shared_agents.json`
+  - `templates/agent_metadata/claude_finance_agents.json`
+  - `templates/agent_metadata/claude_macro_agents.json`
+  - `templates/agents/{finance,macro}/*.md`
+  - `templates/agent_bodies/shared/*.md`
   - `templates/skill_bodies/...`
   - shared `CLAUDE.md` source components where reusable
 
 Likely Codex runtime shape:
 - `AGENTS.md`
-- `.agents/agents/*.md`
+- `.codex/agents/*.toml`
 - `.agents/skills/<skill-name>/SKILL.md`
 
 Expected Codex output shape:
+- `.codex/agents/<agent-name>.toml`
+- each custom agent contains:
+  - `name`
+  - `description`
+  - `developer_instructions`
+  - optional Codex runtime fields such as `model` and `model_reasoning_effort`
 - `.agents/skills/<skill-name>/SKILL.md`
 - frontmatter contains only:
   - `name`
@@ -134,9 +147,10 @@ Expected Codex output shape:
 
 Likely implementation:
 - add `scripts/assemble_codex_skills.py`
+- add `scripts/assemble_codex_subagents.py`
 - add a general runtime document assembler for both `CLAUDE.md` and `AGENTS.md`
-- reuse current metadata files, with top-level shared fields plus nested `claude` fields
-- ignore Claude-only fields when generating Codex skills
+- reuse current metadata files, with top-level shared Claude fields plus nested Codex overrides
+- ignore Claude-only fields when generating Codex skills and custom agents
 
 If the first Codex pass works:
 - then decide whether to:
@@ -146,25 +160,34 @@ If the first Codex pass works:
 ## Verification for first Codex pass
 
 Codex-specific verification:
-1. Generate `AGENTS.md` and Codex skills into a test output directory.
+1. Generate `AGENTS.md`, Codex custom agents, and Codex skills into a test output directory.
 2. Confirm one directory is created per skill under `.agents/skills/`.
-3. Confirm `.agents/agents/` is generated from the same agent content used for Claude output.
-4. Confirm each generated `SKILL.md` has:
+3. Confirm `.codex/agents/` is generated from the same agent content used for Claude output.
+4. Confirm each generated custom agent `.toml` has:
+   - `name`
+   - `description`
+   - `developer_instructions`
+5. Confirm theory-heavy agents use the intended Codex `model` and `model_reasoning_effort`.
+6. Confirm each generated `SKILL.md` has:
    - only `name` and `description` in frontmatter
    - the expected body content from the existing skill body source
-5. Confirm no Claude-only metadata fields appear in generated Codex skills.
-6. Confirm `AGENTS.md` uses the expected shared content and Codex-specific runtime wording.
-7. Confirm existing Claude outputs are unchanged.
+7. Confirm no Claude-only metadata fields appear in generated Codex skills.
+8. Confirm `AGENTS.md` uses the expected shared content and Codex-specific runtime wording.
+9. Confirm existing Claude outputs are unchanged.
 
 Minimum checks:
 1. Run the Codex runtime generation into a scratch directory.
-2. Inspect a few representative generated skills:
+2. Inspect a few representative generated custom agents:
+   - `theory-generator`
+   - `math-auditor`
+   - `referee`
+3. Inspect a few representative generated skills:
    - one empirical skill
    - `llm-experiments`
    - `codex-math`
-3. Inspect generated `AGENTS.md`.
-4. Inspect generated `.agents/agents/`.
-5. Re-run the Claude generation path and diff against the pre-change output.
+4. Inspect generated `AGENTS.md`.
+5. Inspect generated `.codex/agents/`.
+6. Re-run the Claude generation path and diff against the pre-change output.
 
 Claude-regression checks:
 1. Run:
@@ -205,6 +228,5 @@ diff -u codex_inspect/CLAUDE.md test_output/refactor_compare/CLAUDE.md
 
 ## Suggested order for the next session
 
-1. decide whether the first Codex pass should keep `.agents/agents/` as a mirrored adapter layer or become more Codex-native
-2. add optional Codex-native metadata like `agents/openai.yaml` where useful
-3. then expand the same shared-layer approach to additional runtimes
+1. add optional Codex-native metadata like `agents/openai.yaml` where useful
+2. then expand the same shared-layer approach to additional runtimes

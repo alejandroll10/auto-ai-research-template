@@ -71,7 +71,7 @@ templates/
 scripts/
 ├── assemble_claude_agents.py   # Combines agent metadata + bodies → .claude/agents/*.md
 ├── assemble_claude_skills.py   # Combines skill metadata + skill bodies → .claude/skills/*/SKILL.md
-├── assemble_codex_agents.py    # Legacy Codex markdown adapter
+├── assemble_codex_skills.py    # Combines skill metadata + skill bodies → .agents/skills/*/SKILL.md
 └── assemble_codex_subagents.py # Combines agent metadata + bodies → .codex/agents/*.toml
 
 extensions/                  # Optional extensions (empirical, theory_llm)
@@ -84,7 +84,7 @@ extensions/                  # Optional extensions (empirical, theory_llm)
     ├── agent_bodies/        # Agent prompt bodies
     └── llm_client.py        # LLM client copied into project
 
-setup.sh                     # Clones repo, assembles CLAUDE.md + agents + skills for chosen variant
+setup.sh                     # Clones repo, assembles CLAUDE.md + AGENTS.md + Claude/Codex agents + skills
 dashboard.html               # Live progress dashboard
 test_scripts/                # Skill verification scripts (removed on deploy)
 ```
@@ -123,14 +123,19 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
 4. Assembles agents from metadata + prompt bodies:
    - Shared: `agent_metadata/claude_shared_agents.json` + `agent_bodies/shared/*.md`
    - Variant: `agent_metadata/claude_{variant}_agents.json` + `agents/{variant}/*.md`
+   - Claude agents are assembled into `.claude/agents/*.md`
    - Codex custom agents are assembled from the same inputs into `.codex/agents/*.toml`
 5. Injects variant context (paper type, journal list, domain) into key agents
 6. Creates project structure (output/, paper/, code/, etc.) and initial pipeline state
 7. Installs core Python deps (sympy, matplotlib) via `uv pip install`
-8. Assembles core skills (codex-math) and copies utility scripts to `code/utils/`
+8. Assembles core skills:
+   - Claude skills into `.claude/skills/`
+   - Codex skills into `.agents/skills/`
+   - copies utility scripts to `code/utils/`
 9. Applies extensions (`--ext empirical`, `--ext theory_llm`):
-   - Assembles extension agents via `assemble_claude_agents.py` from extension metadata + bodies
-   - Assembles extension skills via `scripts/assemble_claude_skills.py` from skill metadata + bodies
+   - Assembles extension Claude agents via `assemble_claude_agents.py`
+   - Assembles extension Codex custom agents via `assemble_codex_subagents.py`
+   - Assembles extension Claude/Codex skills from shared skill metadata + bodies
    - Copies utilities, creates dirs, appends API keys to `.env`
 10. Removes template infrastructure, detaches from origin, commits initial state
 
@@ -147,14 +152,14 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
 The pipeline is split into two layers:
 
 - **Runtime-agnostic**: `templates/shared/core.md` (orchestrator logic, pipeline stages, scoring), `templates/agent_bodies/shared/` and `templates/agents/{variant}/` (agent prompts), `templates/scoring/` — these are the same regardless of runtime.
-- **Runtime-specific**: `templates/runtime/claude/session.md` (Claude Code session guidance), `templates/agent_metadata/claude_*.json` (Claude frontmatter plus Codex subagent defaults), `templates/skill_metadata/claude_*.json`, `scripts/assemble_claude_*.py`, `scripts/assemble_codex_subagents.py`.
+- **Runtime-specific**: `templates/runtime/claude/session.md` (Claude Code session guidance), `templates/agent_metadata/claude_*.json` (Claude frontmatter plus Codex custom-agent defaults), `templates/skill_metadata/*.json`, `scripts/assemble_claude_*.py`, `scripts/assemble_codex_skills.py`, `scripts/assemble_codex_subagents.py`.
 
 This separation is designed to support future runtimes (e.g., Codex/Antigravity) by reusing the same core + agent bodies while swapping in different metadata and session guidance.
 
 ## Agent classification
 
 Agents are either **shared** (identical across variants) or **variant-specific** (different prompts per domain). Each agent is defined as:
-- **Metadata** (`agent_metadata/claude_*.json`): runtime-specific frontmatter (tools, model, description)
+- **Metadata** (`agent_metadata/claude_*.json`): Claude frontmatter plus Codex custom-agent defaults
 - **Body** (`agent_bodies/shared/*.md`, `agents/{variant}/*.md`): runtime-agnostic prompt content
 
 **Shared** (domain-agnostic, receive variant context via injection):
