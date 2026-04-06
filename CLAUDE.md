@@ -33,11 +33,11 @@ If a user asks to create/set up/start a new research project, run `setup.sh` for
 ./setup.sh <project-name> --variant finance --seed /path/to/idea.md --ext empirical
 ```
 
-This creates a standalone project folder with assembled CLAUDE.md, agents, and skills. After setup, tell the user to:
+This creates a standalone project folder with assembled CLAUDE.md, AGENTS.md, GEMINI.md, agents for all runtimes, and skills. After setup, tell the user to:
 
 1. `cd <project-name>`
 2. Edit `.env` with any required API keys (FRED, WRDS, etc.)
-3. Run `claude --dangerously-skip-permissions`
+3. Launch any runtime: `claude --dangerously-skip-permissions` / `codex --sandbox danger-full-access --ask-for-approval never` / `gemini --yolo`
 4. Say "Run the pipeline."
 
 ## Repository structure
@@ -48,8 +48,12 @@ templates/
 │   ├── core.md              # Runtime-agnostic pipeline orchestrator template
 │   └── seed.md              # Seeded-idea override block (injected when --seed is used)
 ├── runtime/
-│   └── claude/
-│       └── session.md       # Claude-specific session guidance (injected as {{RUNTIME_SESSION_GUIDANCE}})
+│   ├── claude/
+│   │   └── session.md       # Claude-specific session guidance (injected as {{RUNTIME_SESSION_GUIDANCE}})
+│   ├── codex/
+│   │   └── session.md       # Codex orchestration discipline
+│   └── gemini/
+│       └── session.md       # Gemini orchestration discipline
 ├── agent_metadata/          # JSON metadata for agent assembly (tools, model, description)
 │   ├── claude_shared_agents.json
 │   ├── claude_finance_agents.json
@@ -79,7 +83,8 @@ scripts/
 ├── assemble_claude_agents.py   # Combines agent metadata + bodies → .claude/agents/*.md
 ├── assemble_claude_skills.py   # Combines skill metadata + skill bodies → .claude/skills/*/SKILL.md
 ├── assemble_codex_skills.py    # Combines skill metadata + skill bodies → .agents/skills/*/SKILL.md
-└── assemble_codex_subagents.py # Combines agent metadata + bodies → .codex/agents/*.toml
+├── assemble_codex_subagents.py # Combines agent metadata + bodies → .codex/agents/*.toml
+└── assemble_gemini_agents.py   # Combines agent metadata + bodies → .gemini/agents/*.md
 
 extensions/                  # Optional extensions (empirical, theory_llm)
 ├── empirical/
@@ -91,7 +96,7 @@ extensions/                  # Optional extensions (empirical, theory_llm)
     ├── agent_bodies/        # Agent prompt bodies
     └── llm_client.py        # LLM client copied into project
 
-setup.sh                     # Clones repo, assembles CLAUDE.md + AGENTS.md + Claude/Codex agents + skills
+setup.sh                     # Clones repo, assembles CLAUDE.md + AGENTS.md + GEMINI.md + agents + skills
 dashboard.html               # Live progress dashboard
 test_scripts/                # Skill verification scripts (removed on deploy)
 ```
@@ -122,29 +127,27 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
 
 1. Clones this repo into a new project folder
 2. Reads `--variant` flag (default: `finance`)
-3. Assembles CLAUDE.md:
+3. Assembles runtime docs (CLAUDE.md, AGENTS.md, GEMINI.md):
    - Reads `templates/shared/core.md` (runtime-agnostic orchestrator)
-   - Injects `templates/runtime/claude/session.md` as `{{RUNTIME_SESSION_GUIDANCE}}`
+   - Injects runtime-specific session guidance from `templates/runtime/{runtime}/session.md`
    - Injects `templates/scoring/{variant}.md` as `{{SCORING}}`
-   - If `--seed`: injects `templates/shared/seed.md` as `{{SEED_OVERRIDE}}`; otherwise replaces with empty string
+   - If `--seed`: injects `templates/shared/seed.md` as `{{SEED_OVERRIDE}}`
    - Replaces `{{PAPER_TYPE}}`, `{{TARGET_JOURNALS}}`, `{{DOMAIN_AREAS}}`, `{{RUNTIME_DOC_NAME}}`, `{{AGENT_DIR}}`, `{{SKILL_DIR}}`
 4. Assembles agents from metadata + prompt bodies:
    - Shared: `agent_metadata/claude_shared_agents.json` + `agent_bodies/shared/*.md`
    - Variant: `agent_metadata/claude_{variant}_agents.json` + `agents/{variant}/*.md`
-   - Claude agents are assembled into `.claude/agents/*.md`
-   - Codex custom agents are assembled from the same inputs into `.codex/agents/*.toml`
+   - Claude agents → `.claude/agents/*.md`, Codex → `.codex/agents/*.toml`, Gemini → `.gemini/agents/*.md`
 5. Injects variant context (paper type, journal list, domain) into key agents
 6. Creates project structure (output/, paper/, code/, etc.) and initial pipeline state
    - If `--seed`: copies seed file to `output/seed/user_idea.md`, sets `pipeline_state.json` to start at `gate_1b` with `"seeded": true`
 7. Installs core Python deps (sympy, matplotlib) via `uv pip install`
 8. Assembles core skills:
    - Claude skills into `.claude/skills/`
-   - Codex skills into `.agents/skills/`
-   - copies utility scripts to `code/utils/`
+   - Codex/Gemini skills into `.agents/skills/` (shared)
+   - Copies utility scripts to `code/utils/`
 9. Applies extensions (`--ext empirical`, `--ext theory_llm`):
-   - Assembles extension Claude agents via `assemble_claude_agents.py`
-   - Assembles extension Codex custom agents via `assemble_codex_subagents.py`
-   - Assembles extension Claude/Codex skills from shared skill metadata + bodies
+   - Assembles extension agents for all three runtimes
+   - Assembles extension skills from shared skill metadata + bodies
    - Copies utilities, creates dirs, appends API keys to `.env`
 10. Removes template infrastructure, detaches from origin, commits initial state
 
@@ -161,14 +164,14 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
 The pipeline is split into two layers:
 
 - **Runtime-agnostic**: `templates/shared/core.md` (orchestrator logic, pipeline stages, scoring), `templates/agent_bodies/shared/` and `templates/agents/{variant}/` (agent prompts), `templates/scoring/` — these are the same regardless of runtime.
-- **Runtime-specific**: `templates/runtime/claude/session.md` (Claude Code session guidance), `templates/agent_metadata/claude_*.json` (Claude frontmatter plus Codex custom-agent defaults), `templates/skill_metadata/*.json`, `scripts/assemble_claude_*.py`, `scripts/assemble_codex_skills.py`, `scripts/assemble_codex_subagents.py`.
+- **Runtime-specific**: `templates/runtime/{claude,codex,gemini}/session.md` (session guidance per runtime), `templates/agent_metadata/claude_*.json` (shared metadata with per-runtime overrides via `codex` and `gemini` keys), `scripts/assemble_{claude_agents,codex_subagents,gemini_agents}.py`.
 
-This separation is designed to support future runtimes (e.g., Codex/Antigravity) by reusing the same core + agent bodies while swapping in different metadata and session guidance.
+Three runtimes share the same core + agent bodies, with runtime-specific packaging.
 
 ## Agent classification
 
 Agents are either **shared** (identical across variants) or **variant-specific** (different prompts per domain). Each agent is defined as:
-- **Metadata** (`agent_metadata/claude_*.json`): Claude frontmatter plus Codex custom-agent defaults
+- **Metadata** (`agent_metadata/claude_*.json`): Claude frontmatter plus Codex and Gemini overrides
 - **Body** (`agent_bodies/shared/*.md`, `agents/{variant}/*.md`): runtime-agnostic prompt content
 
 **Shared** (domain-agnostic, receive variant context via injection):

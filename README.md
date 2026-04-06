@@ -1,12 +1,12 @@
 # Auto AI Research Template
 
-Autonomous research paper generator. Set up a project, launch Claude Code or Codex, walk away. The system discovers a problem, generates a theory, verifies it adversarially, and writes a publication-ready paper.
+Autonomous research paper generator. Set up a project, launch Claude Code, Codex, or Gemini CLI, walk away. The system discovers a problem, generates a theory, verifies it adversarially, and writes a publication-ready paper.
 
 ## How it works
 
 1. You clone this template repo once
 2. You run `setup.sh` to create a new project — each run creates an independent project folder with its own git repo
-3. You open the project folder in Claude Code or Codex and say "Run the pipeline"
+3. You open the project folder in Claude Code, Codex, or Gemini CLI and say "Run the pipeline"
 4. The pipeline runs autonomously: problem discovery → idea generation → theory development → math verification → paper writing → referee simulation
 
 ## Prerequisites
@@ -23,6 +23,9 @@ npm install -g @anthropic-ai/claude-code
 
 # Codex
 npm install -g @openai/codex
+
+# Gemini CLI
+npm install -g @google/gemini-cli
 ```
 
 ## Quick start
@@ -53,7 +56,7 @@ cd auto-ai-research-template
 ./setup.sh my-paper --variant finance --ext empirical --ext theory_llm
 ```
 
-This creates `my-paper/` with everything assembled and ready — `CLAUDE.md`, `AGENTS.md`, Claude agents, Codex custom agents, skills, and pipeline state. The folder is a standalone git repo detached from this template.
+This creates `my-paper/` with everything assembled and ready — `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, agents for all three runtimes, skills, and pipeline state. The folder is a standalone git repo detached from this template.
 
 You can create as many projects as you want from the same template.
 
@@ -86,9 +89,16 @@ cd my-paper
 codex --sandbox danger-full-access --ask-for-approval never
 ```
 
+Gemini CLI:
+
+```bash
+cd my-paper
+gemini --yolo
+```
+
 Then say: **"Run the pipeline."**
 
-That's it. Claude Code reads `CLAUDE.md`; Codex reads `AGENTS.md`. In either runtime, the pipeline checks its state and runs autonomously from there. If the session ends mid-pipeline, relaunch the runtime and say "Run the pipeline" — it picks up where it left off.
+That's it. Claude Code reads `CLAUDE.md`; Codex reads `AGENTS.md`; Gemini reads `GEMINI.md`. In any runtime, the pipeline checks its state and runs autonomously from there. If the session ends mid-pipeline, relaunch the runtime and say "Run the pipeline" — it picks up where it left off.
 
 ## Watch progress
 
@@ -186,18 +196,22 @@ Each gate is adversarial. Failed theories get revised, reworked, or abandoned. T
 
 ```
 my-paper/
-├── CLAUDE.md                 # Claude runtime orchestration (assembled by setup.sh)
-├── AGENTS.md                 # Codex runtime orchestration (assembled by setup.sh)
+├── CLAUDE.md                 # Claude Code orchestration (assembled by setup.sh)
+├── AGENTS.md                 # Codex orchestration (assembled by setup.sh)
+├── GEMINI.md                 # Gemini CLI orchestration (assembled by setup.sh)
 ├── .env                      # API keys (gitignored)
 ├── dashboard.html            # Live progress dashboard
 ├── .claude/
 │   ├── settings.json         # Sandbox config
-│   ├── agents/               # Claude subagents
+│   ├── agents/               # Claude subagents (.md)
 │   └── skills/               # Claude skills
 ├── .codex/
 │   └── agents/               # Codex custom agents (.toml)
+├── .gemini/
+│   ├── settings.json         # Gemini config
+│   └── agents/               # Gemini subagents (.md)
 ├── .agents/
-│   └── skills/               # Codex skills
+│   └── skills/               # Shared skills (Codex + Gemini)
 ├── output/                   # Pipeline outputs by stage
 ├── paper/                    # LaTeX paper
 │   ├── main.tex
@@ -216,9 +230,10 @@ my-paper/
 
 ## Runtime notes
 
-- Claude Code launch: `claude --dangerously-skip-permissions`
-- Codex launch: `codex --sandbox danger-full-access --ask-for-approval never`
-- Codex custom agents inherit the parent session's approval and sandbox policy unless explicitly overridden in agent config.
+- Claude Code: `claude --dangerously-skip-permissions`
+- Codex: `codex --sandbox danger-full-access --ask-for-approval never`
+- Gemini CLI: `gemini --yolo`
+- All runtimes read the same pipeline state and produce identical artifacts — you can switch runtimes mid-pipeline.
 
 ## Safety
 
