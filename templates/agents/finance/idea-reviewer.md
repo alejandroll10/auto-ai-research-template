@@ -28,7 +28,7 @@ Save to the path specified in your prompt. Structure:
 |-----------|-------------|------------|
 | Novelty potential | X | [Is this likely new? Quick web search if unsure.] |
 | Tractability | X | [Can this be modeled cleanly? One friction, closed form?] |
-| Importance | X | [Who cares? What changes if this is true?] |
+| Importance | X | [Assume it works perfectly — is the best-case result a "so what" or a "wow"?] |
 | Clarity of mechanism | X | [Is the economic force specific and well-identified?] |
 | Risk of being known | X | [How likely is it that this already exists?] |
 
@@ -75,6 +75,7 @@ or
 - If the idea requires unusual or non-standard preferences/technology, flag it.
 
 ### Importance gut-check
+- Assume the idea works perfectly — every proof goes through, every prediction confirmed. Is the best-case result interesting enough for a top journal, or would it be a shrug even if true?
 - Would this change how people think about the problem?
 - Is there a clear empirical prediction?
 - Would a seminar audience lean forward or check their phones?
