@@ -114,7 +114,7 @@ def handle_client(conn, db, lock):
 
 def send_response(conn, response):
     """Send length-prefixed JSON response."""
-    data = json.dumps(response).encode()
+    data = json.dumps(response, default=str).encode()
     header = f"{len(data):8d}".encode()
     conn.sendall(header + data)
 
