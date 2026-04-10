@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 FIELD_ORDER = ["name", "description", "tools", "skills", "model", "background", "memory"]
-IGNORED_FIELDS = {"codex"}
+IGNORED_FIELDS = {"codex", "gemini"}
 
 
 def format_value(value):

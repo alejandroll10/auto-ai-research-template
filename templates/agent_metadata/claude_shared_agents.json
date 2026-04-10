@@ -105,6 +105,32 @@
       "model": "gemini-3-flash-preview"
     }
   },
+  "gap-scout": {
+    "name": "gap-scout",
+    "description": "Deep literature search on a pre-selected gap. Launched at Stage 0 after the broad scan. Surveys adjacent literatures, identifies the closest competitor, maps open questions without pre-specifying a framework, and validates whether the gap is actually open.",
+    "tools": "WebSearch, WebFetch, Read, Write, Glob, Grep",
+    "model": "sonnet",
+    "codex": {
+      "model": "gpt-5.4",
+      "model_reasoning_effort": "medium"
+    },
+    "gemini": {
+      "model": "gemini-3-flash-preview"
+    }
+  },
+  "branch-manager": {
+    "name": "branch-manager",
+    "description": "Strategic advisor launched at every Gate 4 after scorer(s) return. Diagnoses whether the current theoretical path has ceilinged, surfaces concrete alternatives from the Round 1 sketch portfolio, and recommends continue/restructure/restart. Produces a structured 5-section report; does not make the gate decision.",
+    "tools": "Read, Write",
+    "model": "opus",
+    "codex": {
+      "model": "gpt-5.4",
+      "model_reasoning_effort": "high"
+    },
+    "gemini": {
+      "model": "gemini-3-preview"
+    }
+  },
   "theory-explorer": {
     "name": "theory-explorer",
     "description": "Computational exploration of a theory model. Launched after math audit passes (Stage 3a). Pokes the model numerically — what breaks, what's robust, where are the knife-edges. Produces diagnostic plots and a verification report.",

@@ -65,6 +65,12 @@ Save to the path specified in your prompt:
 ### Severity 1-3 (minor issues)
 [Nice to fix but won't determine acceptance]
 
+For each attack, tag the recommended action:
+- `[FIX]` — a load-bearing claim is wrong; requires main-text correction
+- `[LIMITS]` — legitimate concern; acknowledge in limitations
+- `[RESPONSE]` — anticipated referee objection; address in response letter only
+- `[NOTE]` — recorded but no action needed
+
 ## The strongest single attack
 [Your best shot at killing this paper. One paragraph.]
 

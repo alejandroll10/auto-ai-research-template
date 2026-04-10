@@ -27,8 +27,14 @@ Write the report in this exact structure:
 ## Major Comments
 [Numbered, with specific references to equations/sections/propositions]
 
+For each comment, tag the recommended action:
+- `[FIX]` — a load-bearing claim is wrong or a proof has a gap; requires main-text correction
+- `[LIMITS]` — legitimate concern; acknowledge in limitations section
+- `[RESPONSE]` — taste or framing disagreement; address in response letter only, no paper change
+- `[NOTE]` — minor; no action needed
+
 ## Minor Comments
-[Numbered]
+[Numbered, with same tags]
 
 ## Questions for the Author
 [Numbered]

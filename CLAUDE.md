@@ -178,7 +178,8 @@ Agents are either **shared** (identical across variants) or **variant-specific**
 - **Body** (`agent_bodies/shared/*.md`, `agents/{variant}/*.md`): runtime-agnostic prompt content
 
 **Shared** (domain-agnostic, receive variant context via injection):
-- `literature-scout` — searches for papers (variant context provides target journals)
+- `literature-scout` — broad literature survey (variant context provides target journals)
+- `gap-scout` — deep search on a pre-selected gap (adjacent literatures, closest competitor, gap validation)
 - `idea-prototyper` — quick math feasibility + surprise check
 - `theory-explorer` — computational verification, calibration, parameter exploration, plots
 - `math-auditor` — checks derivations step-by-step
@@ -186,6 +187,7 @@ Agents are either **shared** (identical across variants) or **variant-specific**
 - `novelty-checker` — searches web for prior work
 - `paper-writer` — writes LaTeX from inputs
 - `style` — checks writing style
+- `branch-manager` — strategic advisor at Gate 4, diagnoses ceiling/alternatives
 - `scribe` — documents the process
 
 **Variant-specific** (different prompts per domain):

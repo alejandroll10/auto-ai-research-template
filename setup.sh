@@ -393,9 +393,23 @@ VARIANT_BLOCK="
 - **Domain:** ${DOMAIN_AREAS}
 "
 
-for agent in literature-scout novelty-checker theory-explorer referee scorer paper-writer style; do
+for agent in literature-scout gap-scout novelty-checker theory-explorer referee scorer paper-writer style; do
     if [ -f "$AGENTS_OUT/$agent.md" ]; then
         echo "$VARIANT_BLOCK" >> "$AGENTS_OUT/$agent.md"
+    fi
+    if [ -f "$CODEX_AGENTS_OUT/$agent.toml" ]; then
+        # Insert before the closing ''' in the TOML multiline string
+        # Use awk to find the LAST ''' and insert the block before it
+        awk -v block="$VARIANT_BLOCK" '
+        { lines[NR] = $0 }
+        /^'\'''\'''\''$/ { last = NR }
+        END {
+            for (i = 1; i <= NR; i++) {
+                if (i == last) print block
+                print lines[i]
+            }
+        }' "$CODEX_AGENTS_OUT/$agent.toml" > "$CODEX_AGENTS_OUT/$agent.toml.tmp" \
+        && mv "$CODEX_AGENTS_OUT/$agent.toml.tmp" "$CODEX_AGENTS_OUT/$agent.toml"
     fi
     if [ -f "$GEMINI_AGENTS_OUT/$agent.md" ]; then
         echo "$VARIANT_BLOCK" >> "$GEMINI_AGENTS_OUT/$agent.md"
