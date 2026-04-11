@@ -7,18 +7,18 @@
 | H1 | One clear idea — contribution statable in one sentence |
 | H2 | Well-defined setup — a reader can write down the agents' problem |
 | H3 | Key result is mathematically correct (math audit passed) |
-| H4 | The result is new (novelty check passed) |
+| H4 | The result is new (novelty check passed; INCREMENTAL triggers Gate 3 cross-check — see scorer for details) |
 | H5 | Economic mechanism is clear — why the result holds, in economics not algebra |
 
 ### Scored dimensions
 
 | Dimension | Weight | Calibration |
 |-----------|--------|-------------|
-| Importance | 30% | CAPM-level = 100, minor extension = 20 |
+| Importance | 30% | What decision/belief changes if true? Must name it. 100 = changes a first-order practitioner decision, 70 = sharpens a specific policy trade-off, 55 = formalizes something roughly believed, 40 = internally interesting but no decision changes, 20 = minor extension |
 | Novelty | 15% | New mechanism = 100, known mechanism in new setting with surprising implication = 80, known mechanism in new setting with predictable implication = 40 |
-| Surprise | 15% | Sign reversal or existence result no one expected = 100, non-obvious comparative static = 60, confirms intuition with precise conditions = 40, formalizes what everyone already believed = 15 |
-| Rigor | 20% | Full proof = 100, clear with small gaps = 60, hand-waving = 20 |
-| Parsimony | 10% | One-friction model = 100, kitchen-sink = 20 |
+| Surprise | 20% | Sign reversal or existence result no one expected = 100, non-obvious comparative static = 60, confirms intuition with precise conditions = 40, formalizes what everyone already believed = 15 |
+| Rigor | 15% | Correct proof with stated assumptions + both audits passed = 80 (default), boundary behavior characterized for main result = 100, gaps a reader would notice = 60, hand-waving = 20 |
+| Parsimony | 10% | Every assumption load-bearing for main result = 100, one or two robustness extensions = 80, multiple non-load-bearing extensions = 60, kitchen-sink = 20. Assumptions added to address audits but not used in main proof count against. |
 | Fertility | 10% | Reframes a literature = 100, dead-end result = 20 |
 
 Threshold to advance: 75+

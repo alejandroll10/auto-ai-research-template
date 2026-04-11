@@ -18,7 +18,7 @@ You will be pointed to files containing:
 | H1 | **One clear idea** | Can you state the contribution in one sentence from the theory draft? |
 | H2 | **Setup is well-defined** | Could a reader write down the equilibrium? Are agents' problems specified, market clearing stated, equilibrium concept defined? |
 | H3 | **Key result is correct** | Both math audits passed (structured AND free-form) |
-| H4 | **The result is new** | Novelty check returned NOVEL. INCREMENTAL is a FAIL. Note: the novelty checker rates surprising applications of known mechanisms to new settings as NOVEL — accept that verdict. Do not re-litigate what the checker already decided. |
+| H4 | **The result is new** | Novelty check returned NOVEL → PASS. KNOWN → FAIL. INCREMENTAL → cross-check against the Gate 3 novelty report: if Gate 3 identified a distinguishing result (a new comparative static, a sign reversal, an additional assumption that changes the conclusion, or a new empirical implication), the theory passes H4 and is scored on its merits. If Gate 3 found no distinguishing result, INCREMENTAL is FAIL. |
 | H5 | **Economic channel is clear** | The draft explains WHY the result holds in terms of economic forces — not just algebra. A macro seminar audience would understand the mechanism. |
 
 If ANY hard requirement fails → score is 0, decision is ABANDON or REVISE depending on what failed.
@@ -32,33 +32,49 @@ If ANY hard requirement fails → score is 0, decision is ABANDON or REVISE depe
 Read the theory draft and all evaluation outputs. Score each dimension 0-100:
 
 ### Importance (weight: 30%)
-- Does the question matter? Would anyone change policy advice, measurement, or thinking?
-- Is this a first-order question or a curiosity?
-- Calibration: Lucas-critique-level insight = 100, minor extension of a known NK model = 20
+
+Importance is measured by what the result, if true, would change:
+
+- **100**: changes a first-order policy decision that central banks or fiscal authorities make routinely (e.g., optimal monetary rule, core stabilization design, fiscal multiplier magnitude). Requires generality and immediate policy consequence.
+- **85**: changes how a specific subfield approaches a class of questions, with downstream effects on measurement, future theory, or a concrete policy debate within five years.
+- **70**: sharpens an identifiable policy trade-off in a specific institutional context, or changes how researchers in a narrower subfield think about a specific transmission channel. Typical ceiling for JME-quality theory.
+- **55**: formalizes something people roughly believed, with precise conditions that clarify when it holds. No immediate policy change, but the characterization is sharper than what existed.
+- **40**: internally interesting but does not connect to any policy decision, measurement question, or empirical fact anyone acts on.
+- **20**: minor extension of a known NK model.
+
+**You must identify, in one sentence, what policy decision or belief this result would change if true.** If no specific decision or belief can be named, the score is below 55 regardless of how ambitiously the paper is framed. Framing cannot substitute for operational consequence.
 
 ### Novelty (weight: 15%)
 - How new is the economic insight (not the technique)?
 - Novelty check output informs this but isn't the whole picture
 - Calibration: new channel that changes how we think about transmission = 100, known channel in new setting with surprising implication = 80, known channel in new setting with predictable implication = 40
 
-### Surprise (weight: 15%)
+### Surprise (weight: 20%)
 - Is the main result non-obvious? Would a knowledgeable macro reader predict it before seeing the proof?
 - A result that confirms standard intuition with precise conditions is worth less than one that overturns it
 - Calibration: sign reversal or existence result no one expected = 100, non-obvious comparative static or multiplicity = 60, confirms intuition with precise conditions = 40, formalizes what everyone already believed = 15
 
-### Rigor (weight: 20%)
-- Is the core argument airtight?
-- Is the equilibrium well-defined (existence, uniqueness/multiplicity acknowledged)?
-- Math audit severity informs this
-- Are boundary cases and limiting behavior acknowledged?
-- Calibration: full equilibrium characterization with all cases = 100, clear argument with small gaps = 60, hand-waving = 20
+### Rigor (weight: 15%)
+
+Rigor is measured by whether the core argument is airtight under the assumptions the paper makes. It is NOT measured by how many edge cases are exhaustively covered.
+
+- **100**: full equilibrium characterization, all assumptions explicitly stated, boundary behavior characterized where relevant to the main result.
+- **80**: correct proof with clearly stated assumptions, equilibrium well-defined. **Default for theorems that pass both structured and free-form math audits.** Not all edge cases need exhaustive treatment; if the result is clean under its stated assumptions, 80 is the expected score. Score below 80 only if reader-noticeable gaps exist despite audit passage.
+- **60**: argument is clear but has gaps a careful reader would notice. Equilibrium concept may be ambiguous.
+- **40**: meaningful hand-waving; the argument would not survive a thorough audit.
+- **20**: the argument is incomplete or incorrect.
 
 ### Parsimony (weight: 10%)
-- Is this the simplest model for this result?
-- Count assumptions beyond standard GE — could any be dropped?
-- Does the model nest a standard benchmark as a special case?
-- Self-attack "could you get this from a simpler model?" informs this
-- Calibration: tractable GE with one key friction = 100, kitchen-sink DSGE with 15 shocks = 20
+
+Parsimony is measured relative to the paper's core result: how many of the assumptions and model elements are load-bearing for the main result, versus added for scope, defense, or extension?
+
+- **100**: tractable GE with one key friction. Every assumption is used in the main result. Nothing can be cut without breaking the paper. Nests a standard benchmark as a special case.
+- **80**: one or two assumptions or propositions exist as robustness or extension. Core model is clean.
+- **60**: the paper has a clear core but also carries multiple extensions, alternate formulations, or scope conditions that expand the paper without expanding the contribution proportionally.
+- **40**: kitchen-sink. Multiple shocks, welfare treatments, appendices addressing concerns not load-bearing for the main result.
+- **20**: reads as a collection of related results rather than a single paper.
+
+**An assumption added to address an audit concern or referee objection, but not used in the proof of the main result, counts against parsimony.** Scope conditions, alternative formulations, and "we also show" extensions are parsimony violations unless genuinely central to the contribution.
 
 ### Fertility (weight: 10%)
 - Does the model open new questions?
@@ -69,7 +85,7 @@ Read the theory draft and all evaluation outputs. Score each dimension 0-100:
 
 ## Aggregate
 
-`total = 0.30 * importance + 0.15 * novelty + 0.15 * surprise + 0.20 * rigor + 0.10 * parsimony + 0.10 * fertility`
+`total = 0.30 * importance + 0.15 * novelty + 0.20 * surprise + 0.15 * rigor + 0.10 * parsimony + 0.10 * fertility`
 
 ## Decision thresholds
 
@@ -132,4 +148,5 @@ Save to the path specified in your prompt:
 - **Score content, not exposition.** The content score reflects the intellectual substance: theorem correctness, novelty, importance, surprise. If the abstract is poorly framed or a claim is too strong, that's a presentation note — it does not lower the content score. A theory with a great theorem and a bad abstract scores high with a presentation note saying "rewrite the abstract."
 - **Be specific in feedback.** "Improve the model" is useless. "The channel in Section 3 is unclear because X — rewrite to explain how the wealth distribution amplifies the aggregate effect" is actionable.
 - **Don't be sycophantic.** The generator is not your friend. Most theories should score below 50. A 75+ is rare and earned.
+- **Penalize inflation.** If the introduction or abstract invokes a large phenomenon (a recession, a crisis, a first-order policy question) but the paper's results do not resolve or change that phenomenon, that is inflation. Score Importance based on what the results actually deliver, not what the framing claims. A paper that says "explains the Great Recession" but whose model only characterizes a narrow transmission channel scores Importance on the channel, not the recession framing. Framing-content gaps are a first-order problem — flag them explicitly in your content feedback.
 - **Track history.** If this is attempt N, reference what changed from attempt N-1. Is it actually better or just different?
