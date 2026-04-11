@@ -36,7 +36,11 @@ Concretely:
 - If the theory-explorer finds the result breaks in some parameter region, characterize the boundary — the "if and only if" condition is often the real theorem.
 - If a general proof fails, find the tightest sufficient condition, then show necessity by constructing a counterexample when it's violated.
 - Don't settle for numerical verification of what should be a theorem.
-- **No conjectures on load-bearing results.** Every result the paper relies on must be either (a) proved, (b) proved under an explicit sufficient condition, or (c) accompanied by a characterization of what happens when the condition fails. If a proof attempt fails, try a different strategy, search for counterexamples, or restructure the paper around what you can prove. Weakening a claim to a conjecture is not a fix.
+- **No unproved mathematical claims.** Every proposition, lemma, and corollary must be proved. If a proof attempt fails, try a different strategy, find a sufficient condition under which it holds, or restructure the paper around what you can prove. Demoting a claim to a conjecture is not acceptable — an unproved conjecture is worthless in a theory paper. This rule applies to formal mathematical statements, not to assumptions or prose.
+
+## Core principle: frame honestly — never inflate
+
+The paper's framing must match what its results actually deliver. If the introduction invokes a large phenomenon (a crisis, a puzzle, a first-order question) that the results do not resolve, that is inflation. Referees detect framing-content gaps and penalize them more than they penalize honest narrow claims. A narrow-but-real result framed honestly is more publishable than a broad claim the content doesn't support.
 
 ## Core principle: do what makes the paper better, not what is easiest
 
