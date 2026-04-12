@@ -119,342 +119,49 @@ When you start the pipeline, set `"status": "running"` and begin appending to th
 
 ## Stage 0: Problem Discovery
 
-### Step 0a: Broad literature scan
-
-**Agent:** `literature-scout`
-
-1. Choose a domain within {{DOMAIN_AREAS}}
-2. Launch literature-scout to search for open questions, puzzles, or gaps
-3. Save results to `output/stage0/literature_map_broad.md`
-4. Commit: `artifact: broad literature scan`
-
-### Step 0b: Pre-select a gap
-
-Read the broad map + `output/data_inventory.md` (if it exists). Pick the most promising gap area, considering: gap size, tractability, data availability, room between existing papers. Write the selection (a few sentences) to `output/stage0/gap_selection.md`.
-
-### Step 0c: Deep search on the gap
-
-**Agent:** `gap-scout`
-
-1. Launch gap-scout with the broad map, the gap selection, and the data inventory
-2. Save results to `output/stage0/literature_map.md` (this is the canonical map used downstream)
-3. Commit: `artifact: deep literature map`
-4. If the gap-scout reports the gap is **closed**: return to Step 0b, pick the next most promising gap from the broad scan, re-run Step 0c
-
-### Step 0d: Problem statement
-
-Write `output/stage0/problem_statement.md`. Requirements:
-- Must reference the data inventory (if it exists)
-- Must name the closest competitor identified by the gap-scout
-- Must NOT specify a theoretical framework — that is the idea-generator's job
-- Commit: `pipeline: stage 0 — problem statement written`
-
-### Gate 0: Problem Viability
-
-The orchestrator (you) evaluates:
-- Is this question important enough for a top journal?
-- Is there actually a gap? (The gap-scout's gap status is the primary evidence.)
-- Is it tractable as a pure theory paper?
-- Is the closest competitor correctly identified?
-- Is the idea space left open? (If the problem statement pre-commits to a specific framework, that is a Gate 0 failure — rewrite it.)
-
-Score 0-100. If below 50, return to Step 0b with a different gap. After 5 failures, pick the best problem and proceed.
+Read `docs/stage_0.md` and proceed accordingly.
 
 ---
 
 ## Stage 1: Idea Generation
 
-**Agents:** `idea-generator` + `idea-reviewer` (iterating)
-
-**How many ideas to generate:** More candidates when the pool is weaker — more failures mean more draws needed.
-
-| Context | Ideas per round |
-|---------|----------------|
-| 1st time entering Stage 1 | 5 |
-| Returning from a failed theory (scorer MAJOR REWORK/ABANDON) | 10 |
-| Returning from a problem-level failure (Stage 0 re-run) | 10, and explicitly explore different territory |
-
-1. Read `output/stage0/problem_statement.md`, `output/stage0/literature_map.md`, and `output/data_inventory.md`
-2. **If returning from a failed attempt:** first reread all `output/stage1/idea_sketches_r*.md` files. Identify which unused sketches are still viable given what the failed attempt revealed. Pick the next-best unused sketch before generating new ideas — only regenerate if no unused sketch is viable. Also read the previous scorer feedback and/or failed theory to understand what went wrong — instruct the idea-generator to avoid the same failure mode
-3. Launch idea-generator with the problem statement, literature map, **and data inventory** to brainstorm candidate mechanisms (see table above for count)
-4. Save sketches to `output/stage1/idea_sketches_rN.md` (N = round number)
-5. Commit: `artifact: idea sketches round {N}`
-
-### Gate 1: Idea Review
-
-**Agent:** `idea-reviewer`
-
-1. Launch idea-reviewer on the sketches + problem statement + literature map
-2. If this is a return visit to Stage 1, also provide the previous scorer feedback so the reviewer knows what to screen against
-3. Save review to `output/stage1/idea_review_rN.md`
-4. Commit: `artifact: idea review round {N}`
-5. Read the decision:
-
-| Decision | Action |
-|----------|--------|
-| **ADVANCE** | Best idea identified. Proceed to Stage 2 with the reviewer's instructions for theory development. |
-| **ITERATE** | Re-launch idea-generator with the reviewer's feedback. Max 5 rounds of iteration. |
-| **REJECT ALL** | All ideas are weak. Return to Stage 0 for a different problem. |
-
-6. After 5 rounds without ADVANCE, pick the highest-scored idea and advance it anyway.
-7. Save the winning idea summary to `output/stage1/selected_idea.md`
-8. Commit: `artifact: selected idea saved`
-
-### Gate 1b: Novelty Check on Selected Idea
-
-**Agent:** `novelty-checker`
-
-1st of 2 novelty checks — runs on the selected idea *before* investing in theory development.
-
-1. Launch novelty-checker on `output/stage1/selected_idea.md` + `output/stage0/literature_map.md`
-2. Save result to `output/stage1/novelty_check_idea.md`
-3. Read the verdict:
-
-| Verdict | Action |
-|---------|--------|
-| **KNOWN** | Kill this idea. Pick the next-best idea from the current round's sketches (per idea-reviewer rankings) and re-run Gates 1b + 1c on it. If no viable ideas remain, re-run Stage 1 with a new round (counts toward the 5-round total cap on Stage 1 iterations). |
-| **INCREMENTAL** | Proceed to Gate 1c, then Stage 2, but instruct the theory-generator: "This idea was flagged INCREMENTAL — the obvious version of this model already exists in the literature. Your job is to find a result within this framework that the existing papers do not imply: a sign reversal, an unexpected threshold, a case where the standard intuition breaks. Do not formalize the obvious version." Gate 3 will hard-fail INCREMENTAL on the full theory, so the theory must escape incrementality during development. |
-| **NOVEL** | Proceed to Gate 1c. |
-
-4. Commit: `pipeline: gate 1b — novelty check on idea {NOVEL/INCREMENTAL/KNOWN}`
-
-### Gate 1c: Idea Prototype (tractability + surprise check)
-
-**Agent:** `idea-prototyper`
-
-Quick mathematical feasibility check — attempt the key derivation before investing in full theory development. **Always runs** (not optional), because even 1st-attempt ideas can have hidden tractability issues that the sketch doesn't reveal. Also performs a **surprise check** on TRACTABLE results: now that the math shows what the result looks like, is it non-obvious?
-
-1. Launch idea-prototyper on `output/stage1/selected_idea.md` + `output/stage0/problem_statement.md`
-2. Save result to `output/stage1/idea_prototype.md`
-3. Read the verdict:
-
-| Verdict | Surprise | Action |
-|---------|----------|--------|
-| **TRACTABLE** | **SURPRISING** or **POTENTIALLY SURPRISING** | Proceed to Stage 2 — pass the prototype to the theory-generator as a head start. |
-| **TRACTABLE** | **OBVIOUS** | Soft kill signal. The idea is tractable but the result confirms what everyone would guess. Proceed to Stage 2, but instruct the theory-generator to find a non-obvious result within the model (unexpected comparative static, interaction effect, parameter regime where the sign flips). If the full theory also scores low on surprise at Gate 4, the idea will not advance. |
-| **BLOCKED** | — | The derivation hit a wall. Read where it got stuck. If fixable: pick the next-best idea from the reviewer's rankings and re-run Gates 1b+1c. If fundamental: return to Stage 1 for a new round. |
-
-4. Commit: `pipeline: gate 1c — idea prototype {TRACTABLE/BLOCKED}, surprise: {SURPRISING/POTENTIALLY SURPRISING/OBVIOUS}`
-5. Update `process_log/pipeline_state.json` and commit: `pipeline: stage 1 complete — idea selected, novelty-checked, and prototyped`
+Read `docs/stage_1.md` and proceed accordingly.
 
 ---
 
 ## Stage 2: Theory Development
 
-**Agent:** `theory-generator`
-
-1. Read `output/stage1/selected_idea.md`, `output/stage1/idea_prototype.md`, `output/stage0/problem_statement.md`, and `output/stage0/literature_map.md`
-2. Choose strategy:
-   - Attempt 1: develop the selected idea into a full theory, building on the prototype's derivation
-   - Attempt 2+: mutate (if previous attempt had good elements) or fresh with different approach
-3. Launch theory-generator with the selected idea, problem statement, literature map, and strategy
-4. Save result to `output/stage2/theory_draft_vN.md` (N = attempt number)
-5. Commit: `artifact: theory draft v{N}`
-
-### Gate 2: Math Audit (structured + free-form)
-
-**Agents:** `math-auditor` then `math-auditor-freeform`
-
-Two sequential audits — structured (step-by-step derivation check) then free-form (skeptical reader, catches conceptual issues). Both must PASS.
-
-**Step 1: Structured audit**
-
-1. Launch math-auditor on `output/stage2/theory_draft_vN.md`
-2. Save result to `output/stage2/math_audit_vN.md`
-3. Commit: `artifact: math audit v{N} — {PASS/FAIL}`
-4. If FAIL:
-   - Read the specific errors from the audit
-   - If the auditor flagged a **load-bearing conjecture** (unproved claim that other results depend on): instruct the theory-generator to use `code/utils/codex_math/` (explore mode for proof strategies, write mode for proof attempts) before weakening the claim. Codex is an erratic genius — its output must be independently verified before incorporation.
-   - Re-launch theory-generator in **mutate** mode with the draft + audit feedback
-   - Keep iterating as long as the error count is decreasing (making progress). Escalate only if errors plateau or increase across two consecutive attempts — treat as theory failure, increment theory_attempt
-   - **After every 3rd theory version on the same attempt:** launch branch-manager with the current draft, audit feedback, idea sketches, and literature map (no scorer output — sections A and score references will be empty). If it recommends restart, escalate to Stage 1 with a different sketch rather than continuing to patch.
-5. If PASS: proceed to Step 2
-
-**Step 2: Free-form audit**
-
-1. Launch math-auditor-freeform on `output/stage2/theory_draft_vN.md`
-2. Save result to `output/stage2/freeform_audit_vN.md`
-3. Commit: `artifact: freeform audit v{N} — {PASS/FAIL}`
-4. If FAIL:
-   - Read the concerns from the free-form audit
-   - Re-launch theory-generator in **mutate** mode with the draft + free-form audit feedback
-   - After mutation, re-run **both** audits from Step 1 (the fix may have introduced new algebraic errors)
-   - Same rule: keep iterating while progress is being made, escalate if concerns plateau or increase
-5. If PASS: proceed to Gate 3
-
-### Gate 3: Novelty Check on Full Theory
-
-**Agent:** `novelty-checker`
-
-2nd novelty check. The idea passed at Gate 1b, but the full theory may overlap with prior work the sketch didn't reveal — novel mechanism, known result, or convergence to an existing framework.
-
-1. Launch novelty-checker on `output/stage2/theory_draft_vN.md`
-2. Save result to `output/stage2/novelty_check_vN.md`
-3. If KNOWN: abandon this theory, return to Stage 2 with new approach
-4. If INCREMENTAL: return to Stage 2 with novelty feedback. Theory must deliver a result the literature doesn't already contain — scorer will hard-fail H4 on INCREMENTAL.
-5. If NOVEL: proceed to Stage 3a (theory exploration)
-6. Commit: `artifact: novelty check v{N} — {NOVEL/INCREMENTAL/KNOWN}`
-
-### Stage 3a: Theory Exploration
-
-**Agent:** `theory-explorer`
-
-Computational exploration — implement the key result, check at calibration, explore parameter space, produce diagnostic plots. Catches results that are correct but quantitatively zero, conditions that fail at calibration, and knife-edge assumptions.
-
-1. Launch `theory-explorer` on the theory draft + math audit results + data inventory.
-2. The agent implements the key result computationally, checks it at calibration, explores the parameter space, verifies necessary conditions, and produces diagnostic plots.
-3. Save to `output/stage3a/exploration.md`, code to `code/explore/`, figures to `output/stage3a/figures/`.
-4. Read the verdict:
-   - If main result **holds at calibration and is quantitatively meaningful**: proceed.
-   - If result **doesn't hold** or is **effectively zero** at calibration: return to Stage 2 with the exploration results. The theory-generator needs to know what the computation found.
-   - If result is **fragile** (holds only in a narrow parameter region): flag for the scorer. Proceed but the paper should be honest about this.
-5. Commit: `artifact: theory exploration — {HOLDS/FRAGILE/FAILS}`
+Read `docs/stage_2.md` and proceed accordingly.
 
 ## Stage 3: Implications
 
-**Orchestrator task** (no separate agent needed — you do this)
-
-1. Read the theory draft
-2. Work out:
-   - Testable predictions
-   - Comparative statics
-   - Special cases that recover known results
-   - Economic intuition for each result
-3. Append to the theory draft or write to `output/stage3/implications.md`
-4. Commit: `pipeline: stage 3 — implications developed`
+Read `docs/stage_3.md` and proceed accordingly.
 
 {{EXTENSION_STAGES}}
 
 ---
 
-## Stage 4: Self-Attack
+## Stage 4: Self-Attack + Gate 4 Scorer Decision
 
-**Agent:** `self-attacker`
-
-1. Launch self-attacker on the theory draft + implications + theory exploration results (if available)
-2. Save result to `output/stage4/self_attack_vN.md`
-3. Commit: `artifact: self-attack v{N}`
-4. **Triage the concerns.** Before any revision, categorize each concern from the self-attack (and any prior free-form audit concerns still open) using the agent's own tags as a starting point:
-   - `[FIX]` — a load-bearing claim is wrong; revise in main text
-   - `[LIMITS]` — legitimate concern; one sentence in limitations
-   - `[RESPONSE]` — address in response letter only; no paper change
-   - `[NOTE]` — no action
-   Save the triage to `output/stage4/triage_vN.md`. Only `[FIX]` items feed into the theory-generator for revision. The rest are held for Stage 5 (paper-writer) or the response letter.
-5. Commit: `artifact: concern triage v{N}`
-
-### Gate 4: Scorer Decision
-
-**Agents:** `scorer` + `scorer-freeform` (launched in parallel — neither sees the other's output)
-
-1. Launch both scorers in parallel with the same inputs:
-   - Theory draft: `output/stage2/theory_draft_vN.md`
-   - Math audit (structured): `output/stage2/math_audit_vN.md`
-   - Math audit (free-form): `output/stage2/freeform_audit_vN.md`
-   - Theory exploration: `output/stage3a/exploration.md` (if available — computational verification and diagnostic plots)
-   - Novelty check (idea): `output/stage1/novelty_check_idea.md`
-   - Novelty check (theory): `output/stage2/novelty_check_vN.md`
-   - Self-attack: `output/stage4/self_attack_vN.md`
-2. Save results to `output/stage4/scorer_decision_vN.md` and `output/stage4/scorer_freeform_vN.md`
-3. Commit: `artifact: scorer decisions v{N} (structured + freeform)`
-
-**Agent:** `branch-manager`
-
-4. Launch branch-manager with:
-   - Theory draft: `output/stage2/theory_draft_vN.md`
-   - Both scorer outputs: `output/stage4/scorer_decision_vN.md`, `output/stage4/scorer_freeform_vN.md`
-   - Full score history from `process_log/pipeline_state.json`
-   - Stage 1 idea sketches: all `output/stage1/idea_sketches_r*.md` files (all rounds, not just r1)
-   - Pipeline state: `process_log/pipeline_state.json`
-   - Self-attack + triage: `output/stage4/self_attack_vN.md`, `output/stage4/triage_vN.md`
-   - Free-form audit: `output/stage2/freeform_audit_vN.md`
-   - Literature map: `output/stage0/literature_map.md`
-5. Save result to `output/stage4/branch_manager_vN.md`
-6. Commit: `artifact: branch-manager report v{N}`
-7. Read the branch-manager report. The gate decision must be consistent with its recommendation. If you disagree, log the disagreement and your reasoning in the commit message — do not silently override.
-
-8. Read the **structured scorer** output (`scorer_decision_vN.md`). It contains two sections:
-   - **Content score + content feedback**: determines the gate decision. Only substantive theory issues (new math needed, proofs to fix, mechanisms to clarify).
-   - **Presentation notes**: expositional improvements (reframe abstract, soften claims, reorder sections). These do NOT affect the score or gate decision. Save them — they are forwarded to the paper-writer at Stage 5.
-   Also read the **freeform scorer** output (`scorer_freeform_vN.md`) for holistic assessment; if the freeform scorer's score estimate diverges significantly (±10 points) from the structured score, note the discrepancy and factor it into the branch-manager review.
-9. Use the **content score** for state-dependent escalation:
-
-**Scoring is absolute** — 80 means top-5 journal quality regardless of target. The advance threshold depends on the target journal tier. Default tiers:
-
-| Target tier | Examples | Advance | Revise | Rework | Abandon |
-|-------------|----------|---------|--------|--------|---------|
-| **top-5** | AER, JF, Econometrica, QJE, JPE, ReStud, JFE, RFS | 75+ | 55-74 | 35-54 | <35 |
-| **field** | JME, JFQA, Rev Finance, Management Science, RED | 65+ | 45-64 | 30-44 | <30 |
-| **letters** | Economics Letters, Finance Research Letters | 55+ | 40-54 | 25-39 | <25 |
-
-**1st scorer evaluation** (no prior score): use band logic from the table above.
-
-**Subsequent scorer evaluations** (has prior score): use score trajectory.
-
-| Condition | Action |
-|-----------|--------|
-| Score ≥ advance threshold | **ADVANCE** — always, regardless of trajectory |
-| Score < abandon threshold | **ABANDON** — always, regardless of trajectory |
-| Delta ≥ 3 points | **CONTINUE** — one more iteration in current band (improving, worth continuing) |
-| Delta < 3 points | **ESCALATE** — move up one level: REVISE → MAJOR REWORK → ABANDON (plateau, not converging) |
-| Score < (advance threshold + 5) on attempt 3+ | **ESCALATE** — regardless of delta. Still below the bar after two revisions suggests a ceiling. Regenerate. |
-
-**Hard ceiling:** After 8 total scorer evaluations on same problem, escalate one level regardless of trajectory.
-
-Record all content scores in `process_log/pipeline_state.json` under `"scores"` so the trajectory can be computed: `"scores": { "v1": 60, "v2": 63, "v3": 67 }`.
-
-10. If REVISE/REWORK: pass only the **content feedback** to the theory-generator. Do NOT pass presentation notes — those are for the paper-writer.
-11. Update `process_log/pipeline_state.json` accordingly
-12. Commit: `pipeline: gate 4 — scorer {DECISION} (score: {N})`
+Read `docs/stage_4.md` and proceed accordingly.
 
 ---
 
 ## Stage 5: Paper Writing
 
-**Agent:** `paper-writer`
-
-1. **Paper outline.** Launch paper-writer with instruction: "Write an outline only — do not write LaTeX yet." Provide: theory draft, literature map, scorer assessment (including the **presentation notes** section — the paper-writer must address these), self-attack report. The paper-writer produces `paper/outline.md` with: section-by-section plan, what goes where, how to address self-attack weaknesses, how to incorporate scorer presentation notes, which results to highlight, target length per section.
-2. **Review the outline.** Check: does it address the self-attack points? Is the positioning against the literature accurate? Is the structure appropriate for the target journal? If not, provide feedback and re-launch.
-3. **Write.** Launch paper-writer with the approved outline + all inputs. Paper-writer creates files in `paper/sections/`:
-   - `introduction.tex`
-   - `model.tex`
-   - `results.tex`
-   - `discussion.tex`
-   - `conclusion.tex`
-   - `appendix.tex` (if needed)
-4. Paper-writer creates `paper/main.tex` with `\input` commands
-5. Commit: `pipeline: stage 5 — paper draft written`
+Read `docs/stage_5.md` and proceed accordingly.
 
 ---
 
 ## Stage 6: Referee Simulation
 
-**Agents:** `referee` + `referee-freeform` (launched in parallel — neither sees the other's output)
-
-1. Delete any previous reports in `paper/referee_reports/`
-2. Launch both referees in parallel (fresh context, no knowledge of development process). Provide save paths: structured → `paper/referee_reports/YYYY-MM-DD_vN.md`, freeform → `paper/referee_reports/YYYY-MM-DD_vN_freeform.md`
-3. Commit after both complete
-4. Commit: `pipeline: stage 6 — referee reports received (structured + freeform)`
-
-### Gate 5: Referee Decision
-
-Read both referee reports. The structured referee provides numbered comments with action tags; the free-form referee provides editorial assessment and publishability verdict. Use both to inform the decision:
-
-| Recommendation | Action |
-|---------------|--------|
-| **Accept / Minor Revision** | Fix minor comments, proceed to Stage 7 (style check). |
-| **Major Revision / Revise and Resubmit** | **Triage first.** Categorize each referee comment using the referee's own tags (`[FIX]`/`[LIMITS]`/`[RESPONSE]`/`[NOTE]`) as a starting point. Only `[FIX]` items trigger main-text revisions. `[LIMITS]` items get one sentence in limitations. `[RESPONSE]` items go in the response letter only. Save triage to `paper/referee_reports/triage_rN.md`. Then revise only the `[FIX]` items. When a referee challenges an assumption, first try to prove the result without it or characterize exactly when it fails — weakening claims is the last resort (per "characterize, don't just prove"). Re-run Stage 6. Max 10 rounds; keep going as long as each round surfaces at least one genuinely new issue (not a variant of a previously-triaged concern). |
-| **Reject** | Read the rejection reasons. If fixable: return to Stage 2 with referee feedback. If fundamental: return to Stage 0. |
+Read `docs/stage_6.md` and proceed accordingly.
 
 ---
 
 ## Stage 7: Style Check
 
-**Agent:** `style`
-
-1. Launch style agent on the paper. It edits mechanical violations directly in `paper/sections/*.tex` and writes flagged judgment calls to `paper/style_report.md`.
-2. Commit: `pipeline: stage 7 — mechanical style edits applied`
-3. Read `paper/style_report.md`. For each flagged item, decide whether to act — edit the section file if the fix is clear, leave it if the original reads better. Commit any follow-up edits: `paper: style flags resolved`
-4. Update `process_log/pipeline_state.json` with `"status": "complete"`. Final commit: `pipeline: COMPLETE — paper ready for submission`
+Read `docs/stage_7.md` and proceed accordingly.
 
 ---
 
@@ -559,9 +266,6 @@ Prefixes: `pipeline:` (state changes), `artifact:` (agent output), `paper:` (LaT
 
 ## Documentation
 
-The **scribe** agent runs in the background after each stage, logging:
-- What happened (discussions, decisions)
-- What was tried and failed (dead ends)
-- The full pipeline history (`process_log/history.md`)
+The orchestrator's own commit messages and `process_log/pipeline_state.json` history array are the primary record — usually sufficient on their own.
 
-The scribe's role is pedagogical — recording the process for the AI-assisted research guide.
+The **scribe** agent is a supplementary pedagogical recorder for discussions, dead ends, and decision rationale that don't fit in a commit message. Launch it whenever the user intervenes mid-pipeline — any course correction, redirection, feedback, or answer to a question. The intervention itself is the trigger; the user may not ask for scribe explicitly, so capture it. Do not launch scribe automatically between stages when no intervention occurred.

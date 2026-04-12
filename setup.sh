@@ -433,6 +433,14 @@ mkdir -p "$P/paper/sections" "$P/paper/referee_reports"
 mkdir -p "$P/process_log/sessions" "$P/process_log/decisions" "$P/process_log/discussions" "$P/process_log/patterns"
 mkdir -p "$P/references"
 
+# Copy per-stage documentation (referenced from CLAUDE.md/AGENTS.md/GEMINI.md pointer blocks)
+mkdir -p "$P/docs"
+cp "$TEMPLATE_ROOT/templates/shared/docs/"*.md "$P/docs/"
+# Substitute variant placeholders (same ones assemble_runtime_doc.py handles for core.md)
+for _docfile in "$P/docs/"*.md; do
+    sed -i "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$_docfile"
+done
+
 # Create seed folder with instructions if --seed
 if [ "$SEEDED" = "1" ]; then
     mkdir -p "$P/output/seed"
