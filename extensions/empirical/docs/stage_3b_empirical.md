@@ -1,4 +1,6 @@
-# Stage 3e: Empirical Analysis (Gate 3b + Full Analysis)
+# Stage 3b/3e: Empirical Analysis
+
+This file covers two sub-stages: **Gate 3b** (empirical feasibility, runs *before* Stage 3 implications) and **Stage 3e** (full empirical analysis, runs *after* Stage 3 implications). In `pipeline_state.json`, use `"stage_3b"` during feasibility and `"stage_3e"` during full analysis.
 
 ## Gate 3b: Empirical Feasibility (falsify-first)
 

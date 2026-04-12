@@ -107,7 +107,7 @@ Initial state (created by setup.sh):
 }
 ```
 
-When `--seed` is used, setup.sh also adds `"seeded": true` and sets `"current_stage": "seed_triage"`. See the seeded idea mode section below.
+When `--seed` is used, setup.sh also adds `"seeded": true` and sets `"current_stage": "seed_triage"`. In that case, a **Seeded idea mode** section is injected below with the entry procedure.
 
 When you start the pipeline, set `"status": "running"` and begin appending to the history array.
 
@@ -132,6 +132,8 @@ Read `docs/stage_1.md` and proceed accordingly.
 ## Stage 2: Theory Development
 
 Read `docs/stage_2.md` and proceed accordingly.
+
+---
 
 ## Stage 3: Implications
 
