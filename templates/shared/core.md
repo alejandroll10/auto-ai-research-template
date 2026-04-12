@@ -451,11 +451,10 @@ Read both referee reports. The structured referee provides numbered comments wit
 
 **Agent:** `style`
 
-1. Launch style agent on the paper
-2. Read the style report
-3. Fix all violations by editing the section files directly
-4. Commit: `pipeline: stage 7 — style violations fixed`
-5. Update `process_log/pipeline_state.json` with `"status": "complete"`. Final commit: `pipeline: COMPLETE — paper ready for submission`
+1. Launch style agent on the paper. It edits mechanical violations directly in `paper/sections/*.tex` and writes flagged judgment calls to `paper/style_report.md`.
+2. Commit: `pipeline: stage 7 — mechanical style edits applied`
+3. Read `paper/style_report.md`. For each flagged item, decide whether to act — edit the section file if the fix is clear, leave it if the original reads better. Commit any follow-up edits: `paper: style flags resolved`
+4. Update `process_log/pipeline_state.json` with `"status": "complete"`. Final commit: `pipeline: COMPLETE — paper ready for submission`
 
 ---
 
@@ -551,25 +550,6 @@ Prefixes: `pipeline:` (state changes), `artifact:` (agent output), `paper:` (LaT
 ---
 
 {{SCORING}}
-
----
-
-## Paper Writing Style Guide
-
-These rules apply when writing paper drafts.
-
-- Active voice always. Passive voice is the enemy.
-- No filler before "that": "It should be noted that X" → "X"
-- No self-congratulatory adjectives (striking, novel, important)
-- Clothe the naked "this" — always follow with a noun
-- No em-dashes; use commas, colons, periods, or parentheses
-- Don't "assume" model structure — state it: "Consumers have power utility"
-- "I" is fine, but "I show that X" → just say X
-- Make the object the subject: "Table 5 presents estimates" not "I present estimates in Table 5"
-- No royal "we" — "we" means "you the reader and I"
-- Simple words: "use" not "utilize," "several" not "diverse"
-- No "I leave X for future research"
-- Let the content speak for itself
 
 ---
 

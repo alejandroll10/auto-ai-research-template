@@ -50,8 +50,6 @@ Write each section to a separate file in `paper/sections/`:
 
 ## Style rules (mandatory)
 
-Follow ALL rules from the project's style guide (see CLAUDE.md). Key ones:
-
 - Active voice always
 - No filler before "that"
 - No self-congratulatory adjectives
@@ -60,6 +58,8 @@ Follow ALL rules from the project's style guide (see CLAUDE.md). Key ones:
 - No "I show that" — just state the result
 - Don't "assume" model structure — state it
 - Concrete language, normal sentence structure
+
+The `style` agent enforces these (and more) at Stage 7, but write them right the first time.
 
 ## Rules
 
