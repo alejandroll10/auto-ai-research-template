@@ -77,12 +77,12 @@ Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-base
                                    ├── ADVANCE (75+) → Stage 5
                                    ├── REVISE  → back to Stage 2 (continue if Δ≥3, else escalate)
                                    ├── MAJOR REWORK → back to Stage 1 (continue if Δ≥3, else escalate)
-                                   └── ABANDON → back to Stage 0 (max 3×)
+                                   └── ABANDON → back to Stage 0 (max 5×)
 Stage 5: Paper Writing        ──→
 Stage 6: Referee Simulation   ──→ Gate 5: Referee Decision
                                    ├── Minor/Accept → Stage 7
                                    ├── Major Revision → revise, re-run Stage 6 (max 10×)
-                                   └── Reject → back to Stage 1
+                                   └── Reject → back to Stage 2 (fixable) or Stage 0 (fundamental)
 Stage 7: Style Check          ──→ Done
 ```
 
@@ -372,9 +372,10 @@ Computational exploration — implement the key result, check at calibration, ex
 6. Commit: `artifact: branch-manager report v{N}`
 7. Read the branch-manager report. The gate decision must be consistent with its recommendation. If you disagree, log the disagreement and your reasoning in the commit message — do not silently override.
 
-8. Read the scorer output. It contains two sections:
+8. Read the **structured scorer** output (`scorer_decision_vN.md`). It contains two sections:
    - **Content score + content feedback**: determines the gate decision. Only substantive theory issues (new math needed, proofs to fix, mechanisms to clarify).
    - **Presentation notes**: expositional improvements (reframe abstract, soften claims, reorder sections). These do NOT affect the score or gate decision. Save them — they are forwarded to the paper-writer at Stage 5.
+   Also read the **freeform scorer** output (`scorer_freeform_vN.md`) for holistic assessment; if the freeform scorer's score estimate diverges significantly (±10 points) from the structured score, note the discrepancy and factor it into the branch-manager review.
 9. Use the **content score** for state-dependent escalation:
 
 **Scoring is absolute** — 80 means top-5 journal quality regardless of target. The advance threshold depends on the target journal tier. Default tiers:
@@ -420,8 +421,8 @@ Record all content scores in `process_log/pipeline_state.json` under `"scores"` 
    - `discussion.tex`
    - `conclusion.tex`
    - `appendix.tex` (if needed)
-3. Paper-writer creates `paper/main.tex` with `\input` commands
-4. Commit: `pipeline: stage 5 — paper draft written`
+4. Paper-writer creates `paper/main.tex` with `\input` commands
+5. Commit: `pipeline: stage 5 — paper draft written`
 
 ---
 

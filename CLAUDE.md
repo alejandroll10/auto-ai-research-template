@@ -189,7 +189,7 @@ Agents are either **shared** (identical across variants) or **variant-specific**
 - `novelty-checker` — searches web for prior work
 - `paper-writer` — writes LaTeX from inputs
 - `style` — checks writing style
-- `branch-manager` — strategic advisor at Gate 4, diagnoses ceiling/alternatives
+- `branch-manager` — strategic advisor at Gate 4 + Stage 2 audit loop (every 3rd theory version); diagnoses ceiling/alternatives
 - `scribe` — documents the process
 
 **Variant-specific** (different prompts per domain):
