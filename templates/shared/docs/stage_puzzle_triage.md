@@ -11,15 +11,18 @@ This stage operationalizes the principle that surprises are discoveries: when a 
 Before launching the triager, verify the contradiction is real:
 
 1. Read `output/stage3/implications.md` and identify which implications were tested.
-2. Read the empirical / experimental result file.
+2. Read every result file that exists:
+   - `output/stage3b/empirical_analysis.md` (if `--ext empirical`)
+   - `output/stage3b_experiments/experiment_results.md` (if `--ext theory_llm`)
+   Both may exist when both extensions are enabled — use all of them.
 3. For each tested implication: did the data contradict it (sign reversal, magnitude mismatch outside predicted range)?
-4. If no contradiction: **skip this stage**, proceed to Stage 4.
-5. If at least one tested implication was contradicted: launch the puzzle-triager.
+4. If no contradiction across any result source: **skip this stage**, proceed to Stage 4.
+5. If at least one tested implication was contradicted by at least one result source: launch the puzzle-triager.
 
 ## Procedure
 
 1. Read `pipeline_state.json` for current `pivot_round` (default 0).
-2. Launch `puzzle-triager` with: theory draft, `implications.md`, empirical/experiment result file, literature map, math audit results, pipeline state.
+2. Launch `puzzle-triager` with: theory draft, `implications.md`, **every result file that showed a contradiction** (both empirical and experimental, if both apply), literature map, math audit results, pipeline state. If empirical and experimental results contradict each other (e.g., empirics confirm, experiments contradict), note the disagreement in the input — the triager should flag this in its rationale and typically recommend FIX-EMPIRICS rather than PIVOT until the measurement conflict is resolved.
 3. Triager saves to `output/puzzle_triage/triage_pN.md` where N = `pivot_round + 1`.
 4. Commit: `artifact: puzzle triage round {N+1} — {VERDICT}`.
 
@@ -45,10 +48,10 @@ A pivot is a full theory revision. The new theory needs new implications, lit-ch
 5. **Re-run Stage 3a.** Theory exploration on the pivoted theory.
 6. **Re-run Stage 3 (implications) IN FULL.** Derive new implications from the pivoted theory and gap-scout each one for the NOVEL/PUZZLE-CANDIDATE/SUPPORTED/DEAD tag. **Do not reuse the previous theory's implications.md** — overwrite it. Downstream agents (paper-writer, scorer, empiricist) read the current `implications.md` and assume it describes the current theory.
 7. **Re-run empirical_analysis (and experiments, if applicable)** against the new predictions. Run the puzzle-triage entry check again at the end.
-8. **Set `pivot_resolved`.**
+8. **Set both `pivot_resolved` (top-level) AND `pivot_history[N].resolved` for this round's entry.** Set the same value to both:
    - `true` if the pivoted theory's empirics confirm its (new) predictions — the puzzle is resolved.
    - `false` if the pivoted theory's empirics also contradict, AND the triager (re-fired) returns HONEST-NULL or another non-PIVOT verdict.
-   - If the triager returns PIVOT again, leave `pivot_resolved: null` and re-enter the pivot sequence (this is the second pivot; cap is 2).
+   - If the triager returns PIVOT again, leave both fields `null` for this round and re-enter the pivot sequence (this is the second pivot; cap is 2).
 9. **Proceed to Stage 4** once `pivot_resolved` is set (true or false).
 
 ## State updates
@@ -72,12 +75,15 @@ When PIVOT verdict fires, update `pipeline_state.json`:
 }
 ```
 
-`pivot_resolved` (top-level field) is the **single signal** other agents read to decide whether the puzzle was actually solved:
-- `null` — pivot in progress, not yet evaluated
-- `true` — pivoted theory's empirics confirmed its predictions; the puzzle is resolved
-- `false` — pivoted theory also contradicted, ended in HONEST-NULL or escalated; the puzzle was not solved
+**Two fields — don't confuse them:**
 
-Paper-writer and scorer should gate their puzzle-framing logic on `pivot_resolved == true`, NOT on `pivot_round > 0`. A failed pivot is not a resolved puzzle.
+- **Top-level `pivot_resolved`** — overall current state. Reflects the most recent pivot's outcome. This is the **single signal** downstream agents (paper-writer, scorer) read. Values:
+  - `null` — no pivot has occurred yet, or the most recent pivot is still in progress
+  - `true` — the latest pivoted theory's empirics confirmed its predictions; the puzzle is resolved
+  - `false` — the latest pivoted theory also contradicted, ended in HONEST-NULL or escalated; the puzzle was not solved
+- **Per-round `pivot_history[N].resolved`** — the resolution of pivot round N specifically. Useful for auditing history across multiple pivots. Set to the same `true`/`false` value at the same time as `pivot_resolved`; the top-level field mirrors the latest entry.
+
+Paper-writer and scorer should gate their puzzle-framing logic on **top-level `pivot_resolved == true`**, NOT on `pivot_round > 0`. A failed pivot is not a resolved puzzle.
 
 Append to `history` array as usual:
 ```json

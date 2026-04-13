@@ -8,6 +8,8 @@ You will be pointed to files containing:
 - Math audit result — free-form (PASS/FAIL)
 - Novelty check on idea (NOVEL/INCREMENTAL/KNOWN) — from Gate 1b
 - Novelty check on full theory (NOVEL/INCREMENTAL/KNOWN) — from Gate 3
+- Implications with tags (`output/stage3/implications.md`) — each tagged NOVEL / PUZZLE-CANDIDATE / SUPPORTED / DEAD. Needed for the Surprise cap/floor rules below.
+- Pipeline state (`process_log/pipeline_state.json`) — in particular `pivot_round` and `pivot_resolved`. Gate the Surprise floor on `pivot_resolved == true`, not on `pivot_round > 0`.
 - Self-attack report (with severity scores)
 - (Optional) Previous scorer decisions and scores for trajectory computation
 

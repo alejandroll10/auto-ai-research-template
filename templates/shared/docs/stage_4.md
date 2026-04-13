@@ -24,6 +24,8 @@
    - Theory exploration: `output/stage3a/exploration.md` (if available — computational verification and diagnostic plots)
    - Novelty check (idea): `output/stage1/novelty_check_idea.md`
    - Novelty check (theory): `output/stage2/novelty_check_vN.md`
+   - **Implications with lit-check tags:** `output/stage3/implications.md` (for the SUPPORTED-cap / PUZZLE-CANDIDATE-floor rules on Surprise)
+   - **Pipeline state:** pass `pivot_round` and `pivot_resolved` so the scorer knows whether a pivot fired and whether it resolved
    - Self-attack: `output/stage4/self_attack_vN.md`
 2. Save results to `output/stage4/scorer_decision_vN.md` and `output/stage4/scorer_freeform_vN.md`
 3. Commit: `artifact: scorer decisions v{N} (structured + freeform)`
