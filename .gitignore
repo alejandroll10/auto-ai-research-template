@@ -9,6 +9,9 @@ references/
 .claude/agent-memory/
 .claude/skills/
 
+# Local test artifacts from ./setup.sh <name> --local
+demo_*/
+
 # Python
 __pycache__/
 *.pyc
