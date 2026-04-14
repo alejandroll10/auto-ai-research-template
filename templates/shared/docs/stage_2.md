@@ -27,6 +27,9 @@ Two sequential audits — structured (step-by-step derivation check) then free-f
    - Re-launch theory-generator in **mutate** mode with the draft + audit feedback
    - Keep iterating as long as the error count is decreasing (making progress). Escalate only if errors plateau or increase across two consecutive attempts — treat as theory failure, **increment `theory_attempt` AND reset `theory_version` to 1** (the next draft is `theory_draft_v1.md` under the new attempt)
    - **After every 3rd theory version on the same attempt** (i.e., when `theory_version % 3 == 0`): launch branch-manager with the current draft, audit feedback, idea sketches, and literature map (no scorer output — sections A and score references will be empty). If it recommends restart, escalate to Stage 1 with a different sketch rather than continuing to patch.
+
+{{SEED_OVERRIDE_STAGE_2_GATE_2}}
+
 5. If PASS: proceed to Step 2
 
 **Step 2: Free-form audit**
@@ -41,8 +44,6 @@ Two sequential audits — structured (step-by-step derivation check) then free-f
    - Same rule: keep iterating while progress is being made, escalate if concerns plateau or increase
 5. If PASS: proceed to Gate 3
 
-{{SEED_OVERRIDE_STAGE_2_GATE_2}}
-
 ## Gate 3: Novelty Check on Full Theory
 
 **Agent:** `novelty-checker`
@@ -53,10 +54,11 @@ Two sequential audits — structured (step-by-step derivation check) then free-f
 2. Save result to `output/stage2/novelty_check_vN.md`
 3. If KNOWN: abandon this theory, return to Stage 2 with new approach (increment `theory_attempt`, reset `theory_version` to 1)
 4. If INCREMENTAL: return to Stage 2 with novelty feedback (increment `theory_version`). Theory must deliver a result the literature doesn't already contain — scorer will hard-fail H4 on INCREMENTAL. After Gate 2 + Gate 3 pass on the reworked theory, **re-run Stage 3a (exploration) AND Stage 3 (implications) before proceeding** — the theory changed, so `implications.md` and `exploration.md` are stale.
-5. If NOVEL: proceed to Stage 3a (theory exploration)
-6. Commit: `artifact: novelty check v{N} — {NOVEL/INCREMENTAL/KNOWN}`
 
 {{SEED_OVERRIDE_STAGE_2_GATE_3}}
+
+5. If NOVEL: proceed to Stage 3a (theory exploration)
+6. Commit: `artifact: novelty check v{N} — {NOVEL/INCREMENTAL/KNOWN}`
 
 ## Stage 3a: Theory Exploration
 

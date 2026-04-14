@@ -441,11 +441,15 @@ for _docfile in "$P/docs/"*.md; do
     sed -i "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$_docfile"
 done
 
-# Substitute {{SEED_OVERRIDE_*}} placeholders: inject override content if --seed, blank otherwise
-SEED_OVERRIDE_DIR="$TEMPLATE_ROOT/templates/shared/seed_overrides"
-if [ -d "$SEED_OVERRIDE_DIR" ]; then
-    for _override in "$SEED_OVERRIDE_DIR"/*.md; do
+# Function to substitute {{SEED_OVERRIDE_*}} placeholders in all docs in $P/docs/.
+# Called after shared docs copy AND after each extension copies its own docs, so
+# extension-specific stage docs (e.g., stage_3b_empirical.md) also get substituted.
+apply_seed_overrides() {
+    local override_dir="$TEMPLATE_ROOT/templates/shared/seed_overrides"
+    [ -d "$override_dir" ] || return 0
+    for _override in "$override_dir"/*.md; do
         [ -f "$_override" ] || continue
+        local _key
         _key=$(basename "$_override" .md)
         for _docfile in "$P/docs/"*.md; do
             if grep -q "{{$_key}}" "$_docfile"; then
@@ -457,12 +461,20 @@ override = pathlib.Path(sys.argv[2]).read_text().rstrip()
 doc.write_text(doc.read_text().replace('{{' + sys.argv[3] + '}}', override))
 " "$_docfile" "$_override" "$_key"
                 else
-                    sed -i "s|{{$_key}}||g" "$_docfile"
+                    # Strip placeholder and any immediately surrounding blank lines
+                    python3 -c "
+import sys, re, pathlib
+p = pathlib.Path(sys.argv[1])
+key = sys.argv[2]
+p.write_text(re.sub(r'\n*\{\{' + re.escape(key) + r'\}\}\n*', '\n\n', p.read_text()))
+" "$_docfile" "$_key"
                 fi
             fi
         done
     done
-fi
+}
+
+apply_seed_overrides
 
 # Create seed folder with instructions if --seed
 if [ "$SEEDED" = "1" ]; then
@@ -687,6 +699,10 @@ content=open(d).read()
 open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', '').rstrip()+'\n')
 " "$doc"
 done
+
+# Re-run seed-override substitution now that extension docs have been copied into $P/docs/.
+# Extensions may ship stage docs (e.g., stage_3b_empirical.md) containing {{SEED_OVERRIDE_*}} placeholders.
+apply_seed_overrides
 
 echo "  ✓ Codex custom agents assembled"
 

@@ -32,6 +32,8 @@
 | **ITERATE** | Re-launch idea-generator with the reviewer's feedback. Max 5 rounds of iteration. |
 | **REJECT ALL** | All ideas are weak. Return to Stage 0 for a different problem. |
 
+{{SEED_OVERRIDE_STAGE_1_GATE_1_REJECT_ALL}}
+
 6. After 5 rounds without ADVANCE, pick the highest-scored idea and advance it anyway.
 7. Save the winning idea summary to `output/stage1/selected_idea.md`
 8. Commit: `artifact: selected idea saved`
@@ -72,9 +74,7 @@ Quick mathematical feasibility check — attempt the key derivation before inves
 | **TRACTABLE** | **OBVIOUS** | Soft kill signal. The idea is tractable but the result confirms what everyone would guess. Proceed to Stage 2, but instruct the theory-generator to find a non-obvious result within the model (unexpected comparative static, interaction effect, parameter regime where the sign flips). If the full theory also scores low on surprise at Gate 4, the idea will not advance. |
 | **BLOCKED** | — | The derivation hit a wall. Read where it got stuck. If fixable: pick the next-best idea from the reviewer's rankings and re-run Gates 1b+1c. If fundamental: return to Stage 1 for a new round. |
 
-4. Commit: `pipeline: gate 1c — idea prototype {TRACTABLE/BLOCKED}, surprise: {SURPRISING/POTENTIALLY SURPRISING/OBVIOUS}`
-5. Update `process_log/pipeline_state.json` and commit: `pipeline: stage 1 complete — idea selected, novelty-checked, and prototyped`
-
 {{SEED_OVERRIDE_STAGE_1_GATE_1C}}
 
-{{SEED_OVERRIDE_STAGE_1_GATE_1_REJECT_ALL}}
+4. Commit: `pipeline: gate 1c — idea prototype {TRACTABLE/BLOCKED}, surprise: {SURPRISING/POTENTIALLY SURPRISING/OBVIOUS}`
+5. Update `process_log/pipeline_state.json` and commit: `pipeline: stage 1 complete — idea selected, novelty-checked, and prototyped`

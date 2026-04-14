@@ -75,8 +75,8 @@
 
 Record all content scores in `process_log/pipeline_state.json` under `"scores"` so the trajectory can be computed: `"scores": { "v1": 60, "v2": 63, "v3": 67 }`.
 
+{{SEED_OVERRIDE_STAGE_4_GATE_4}}
+
 10. If REVISE/REWORK: pass only the **content feedback** to the theory-generator. Do NOT pass presentation notes — those are for the paper-writer.
 11. Update `process_log/pipeline_state.json` accordingly
 12. Commit: `pipeline: gate 4 — scorer {DECISION} (score: {N})`
-
-{{SEED_OVERRIDE_STAGE_4_GATE_4}}

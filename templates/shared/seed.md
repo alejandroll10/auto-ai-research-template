@@ -36,6 +36,7 @@ Per-gate seeded-mode overrides are injected directly into each stage doc at the 
 - `docs/stage_0.md` — Step 0c gap-scout "closed" verdict.
 - `docs/stage_1.md` — Gate 1 REJECT ALL, Gate 1b, Gate 1c.
 - `docs/stage_2.md` — Gate 2 FAIL, Gate 3 KNOWN/INCREMENTAL.
+- `docs/stage_3b_empirical.md` — Gate 3b FALSIFIED (only if `--ext empirical`).
 - `docs/stage_4.md` — Gate 4 verdicts.
 - `docs/stage_6.md` — Gate 5 Major Revision / Reject.
 - `docs/stage_puzzle_triage.md` — triager verdicts (PIVOT / BACK-TO-IDEA / HONEST-NULL).
