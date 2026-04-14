@@ -441,6 +441,29 @@ for _docfile in "$P/docs/"*.md; do
     sed -i "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$_docfile"
 done
 
+# Substitute {{SEED_OVERRIDE_*}} placeholders: inject override content if --seed, blank otherwise
+SEED_OVERRIDE_DIR="$TEMPLATE_ROOT/templates/shared/seed_overrides"
+if [ -d "$SEED_OVERRIDE_DIR" ]; then
+    for _override in "$SEED_OVERRIDE_DIR"/*.md; do
+        [ -f "$_override" ] || continue
+        _key=$(basename "$_override" .md)
+        for _docfile in "$P/docs/"*.md; do
+            if grep -q "{{$_key}}" "$_docfile"; then
+                if [ "$SEEDED" = "1" ]; then
+                    python3 -c "
+import sys, pathlib
+doc = pathlib.Path(sys.argv[1])
+override = pathlib.Path(sys.argv[2]).read_text().rstrip()
+doc.write_text(doc.read_text().replace('{{' + sys.argv[3] + '}}', override))
+" "$_docfile" "$_override" "$_key"
+                else
+                    sed -i "s|{{$_key}}||g" "$_docfile"
+                fi
+            fi
+        done
+    done
+fi
+
 # Create seed folder with instructions if --seed
 if [ "$SEEDED" = "1" ]; then
     mkdir -p "$P/output/seed"

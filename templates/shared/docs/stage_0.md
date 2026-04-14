@@ -22,6 +22,8 @@ Read the broad map + `output/data_inventory.md` (if it exists). Pick the most pr
 3. Commit: `artifact: deep literature map`
 4. If the gap-scout reports the gap is **closed**: return to Step 0b, pick the next most promising gap from the broad scan, re-run Step 0c
 
+{{SEED_OVERRIDE_STAGE_0_STEP_0C}}
+
 ## Step 0d: Problem statement
 
 Write `output/stage0/problem_statement.md`. Requirements:
