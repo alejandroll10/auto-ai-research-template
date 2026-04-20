@@ -43,6 +43,24 @@ This creates a standalone project folder with assembled CLAUDE.md, AGENTS.md, GE
 3. Launch any runtime: `claude --dangerously-skip-permissions` / `codex --sandbox danger-full-access --ask-for-approval never` / `gemini --yolo`
 4. Say "Run the pipeline."
 
+### WRDS server (only with `--ext empirical`)
+
+The empirical extension talks to WRDS through a long-running local socket server (port 23847) so the Duo 2FA push happens once per session, not per query. The pipeline's data-inventory step starts it automatically (`templates/runtime/claude/session.md` runs `code/utils/start_services.sh` before Stage 0), but you can also start it manually:
+
+```bash
+cd <project-name>
+bash code/utils/start_services.sh   # idempotent; reuses an existing server if one is up
+```
+
+To check if it's already running on this machine (one server can serve all empirical projects on the same host):
+
+```bash
+ss -tlnp | grep 23847                                                  # is anything listening?
+PYTHONPATH=code python3 -c "from utils.wrds_client import wrds_ping; print(wrds_ping())"
+```
+
+`True` from the ping means it's healthy. The server is per-host, not per-project — once it's running, every project that has the WRDS skill will reuse it.
+
 ## Repository structure
 
 ```
