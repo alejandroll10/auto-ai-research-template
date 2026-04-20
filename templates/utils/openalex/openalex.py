@@ -1,0 +1,376 @@
+#!/usr/bin/env python3
+"""Query OpenAlex for finance/economics literature.
+
+OpenAlex is a free, no-auth bibliographic database (~250M works). This script
+exposes the subset of the API that is useful for literature scouting:
+
+  search   — keyword search, optionally filtered by venue/year/author
+  cites    — works that cite a given work (forward citations)
+  refs     — works that a given work references (backward citations)
+  author   — all works by an author (resolved by name → OpenAlex author ID)
+  work     — full record for a single work (by DOI or OpenAlex ID)
+  venues   — show the resolved venue IDs used by --venue aliases
+
+Output formats:
+  default — human-readable list (for grep / eyeballing)
+  --json  — one JSON object per line (for piping to jq or another script)
+
+Reads EMAIL from .env at the project root for the OpenAlex polite pool.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+API = "https://api.openalex.org"
+TIMEOUT = 12
+RETRIES = 2
+BACKOFF = 1.5
+
+# Aliases for top finance/economics venues. The OpenAlex source IDs below were
+# resolved from the search API and verified against the journal page. Update as
+# OpenAlex revises its source registry.
+VENUE_ALIASES = {
+    # Top-3 finance
+    "jf":   "S5353659",      # The Journal of Finance
+    "jfe":  "S149240962",    # Journal of Financial Economics
+    "rfs":  "S170137484",    # Review of Financial Studies
+    # Other top finance
+    "jfqa": "S193228710",    # Journal of Financial and Quantitative Analysis
+    "raps": "S2735409286",   # The Review of Asset Pricing Studies
+    "rcfs": "S2736251538",   # The Review of Corporate Finance Studies
+    "ms":   "S33323087",     # Management Science
+    # Top-5 economics
+    "aer":  "S23254222",     # American Economic Review
+    "qje":  "S203860005",    # The Quarterly Journal of Economics
+    "jpe":  "S95323914",     # Journal of Political Economy
+    "ecma": "S95464858",     # Econometrica
+    "restud": "S88935262",   # The Review of Economic Studies
+    # Macro
+    "jme":  "S6711363",      # Journal of Monetary Economics
+}
+
+# Default field set we extract from works. Keep small to limit response payload.
+WORK_FIELDS = (
+    "id,doi,title,display_name,publication_year,publication_date,"
+    "primary_location,authorships,cited_by_count,referenced_works,"
+    "open_access,language,type"
+)
+
+
+# ── env / http helpers ────────────────────────────────────────────────────────
+
+def load_env_email() -> str:
+    email = (os.environ.get("EMAIL") or "").strip().strip('"').strip("'")
+    if email:
+        return email
+    cwd = Path.cwd()
+    for parent in [cwd, *cwd.parents]:
+        env = parent / ".env"
+        if env.is_file():
+            for line in env.read_text().splitlines():
+                if line.startswith("EMAIL="):
+                    return line.split("=", 1)[1].strip().strip('"').strip("'")
+            break
+    return ""
+
+
+def http_get(path: str, params: dict, mailto: str) -> dict:
+    if mailto:
+        params = {**params, "mailto": mailto}
+    url = f"{API}{path}?{urllib.parse.urlencode(params, safe=',:|')}"
+    last_err: Exception | None = None
+    for attempt in range(RETRIES + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=TIMEOUT) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except Exception as exc:
+            last_err = exc
+            if attempt < RETRIES:
+                time.sleep(BACKOFF * (attempt + 1))
+    raise RuntimeError(f"OpenAlex GET {url} failed: {last_err}")
+
+
+# ── filter / venue helpers ────────────────────────────────────────────────────
+
+def resolve_venues(spec: str | None) -> list[str]:
+    """Resolve a comma-separated venue spec into OpenAlex source IDs.
+
+    Each token is either an alias from VENUE_ALIASES, an explicit S<id>, or a
+    literal name (resolved via the sources endpoint, slower).
+    """
+    if not spec:
+        return []
+    out: list[str] = []
+    mailto = load_env_email()
+    for tok in [t.strip() for t in spec.split(",") if t.strip()]:
+        low = tok.lower()
+        if low in VENUE_ALIASES:
+            out.append(VENUE_ALIASES[low])
+        elif tok.startswith("S") and tok[1:].isdigit():
+            out.append(tok)
+        else:
+            payload = http_get("/sources", {"search": tok, "per-page": "1"}, mailto)
+            results = payload.get("results") or []
+            if not results:
+                print(f"WARN: venue '{tok}' not found, skipping", file=sys.stderr)
+                continue
+            out.append(results[0]["id"].rsplit("/", 1)[-1])
+    return out
+
+
+def build_filter(venues: list[str], years: str | None, work_type: str | None) -> str:
+    parts: list[str] = []
+    if venues:
+        parts.append("primary_location.source.id:" + "|".join(venues))
+    if years:
+        if "-" in years:
+            lo, hi = years.split("-", 1)
+            parts.append(f"publication_year:{lo}-{hi}")
+        else:
+            parts.append(f"publication_year:{years}")
+    if work_type:
+        parts.append(f"type:{work_type}")
+    return ",".join(parts)
+
+
+# ── projection ────────────────────────────────────────────────────────────────
+
+def project(work: dict) -> dict:
+    primary = work.get("primary_location") or {}
+    src = primary.get("source") or {}
+    authors = []
+    for au in (work.get("authorships") or [])[:8]:
+        nm = (au.get("author") or {}).get("display_name")
+        if nm:
+            authors.append(nm)
+    return {
+        "openalex_id": work.get("id"),
+        "doi": work.get("doi"),
+        "title": work.get("title") or work.get("display_name"),
+        "year": work.get("publication_year"),
+        "date": work.get("publication_date"),
+        "authors": authors,
+        "venue": src.get("display_name"),
+        "venue_id": src.get("id"),
+        "url": primary.get("landing_page_url") or work.get("doi") or work.get("id"),
+        "cited_by_count": work.get("cited_by_count"),
+        "type": work.get("type"),
+        "open_access_pdf": (work.get("open_access") or {}).get("oa_url"),
+        "n_references": len(work.get("referenced_works") or []),
+    }
+
+
+# ── output ────────────────────────────────────────────────────────────────────
+
+def render_human(rows: list[dict], header: str = "") -> str:
+    out = []
+    if header:
+        out.append(header)
+        out.append("")
+    if not rows:
+        out.append("(no results)")
+        return "\n".join(out)
+    for i, r in enumerate(rows, 1):
+        au = ", ".join(r["authors"][:3])
+        if len(r["authors"]) > 3:
+            au += f", +{len(r['authors']) - 3}"
+        cite = f"cited={r['cited_by_count']}" if r.get("cited_by_count") is not None else ""
+        out.append(f"[{i}] {cite} ({r.get('year','?')}) {au}")
+        out.append(f"    \"{r['title']}\"")
+        venue = r.get("venue") or ""
+        doi = r.get("doi") or ""
+        loc = " · ".join([s for s in (venue, doi) if s])
+        if loc:
+            out.append(f"    {loc}")
+        out.append(f"    id: {r['openalex_id']}")
+    return "\n".join(out)
+
+
+def emit(rows: list[dict], as_json: bool, header: str = "") -> None:
+    if as_json:
+        for r in rows:
+            sys.stdout.write(json.dumps(r, ensure_ascii=False) + "\n")
+    else:
+        sys.stdout.write(render_human(rows, header) + "\n")
+
+
+# ── commands ──────────────────────────────────────────────────────────────────
+
+def normalize_work_id(s: str) -> str:
+    s = s.strip()
+    if s.startswith("https://openalex.org/"):
+        return s.rsplit("/", 1)[-1]
+    if s.startswith("doi:"):
+        return s
+    if s.startswith("10."):
+        return f"doi:{s}"
+    if s.startswith("https://doi.org/"):
+        return f"doi:{s.split('https://doi.org/', 1)[1]}"
+    return s
+
+
+def cmd_search(args, mailto: str) -> int:
+    venues = resolve_venues(args.venue)
+    flt = build_filter(venues, args.years, args.type)
+    sort = "cited_by_count:desc" if args.sort == "cited" else "relevance_score:desc"
+    params = {
+        "search": args.query,
+        "per-page": str(args.top),
+        "sort": sort,
+        "select": WORK_FIELDS,
+    }
+    if flt:
+        params["filter"] = flt
+    payload = http_get("/works", params, mailto)
+    rows = [project(w) for w in (payload.get("results") or [])]
+    meta = payload.get("meta") or {}
+    header = f"# OpenAlex search: \"{args.query}\"  (filter={flt or 'none'}, sort={sort}, total={meta.get('count','?')})"
+    emit(rows, args.json, header)
+    return 0
+
+
+def cmd_cites(args, mailto: str) -> int:
+    wid = normalize_work_id(args.work_id)
+    target = http_get(f"/works/{wid}", {"select": "id,title"}, mailto)
+    target_oid = target["id"].rsplit("/", 1)[-1]
+    venues = resolve_venues(args.venue)
+    flt_parts = [f"cites:{target_oid}"]
+    extra = build_filter(venues, args.years, args.type)
+    if extra:
+        flt_parts.append(extra)
+    params = {
+        "filter": ",".join(flt_parts),
+        "per-page": str(args.top),
+        "sort": "cited_by_count:desc",
+        "select": WORK_FIELDS,
+    }
+    payload = http_get("/works", params, mailto)
+    rows = [project(w) for w in (payload.get("results") or [])]
+    header = f"# Forward citations of {target_oid} (\"{target.get('title','')}\")  total={payload.get('meta',{}).get('count','?')}"
+    emit(rows, args.json, header)
+    return 0
+
+
+def cmd_refs(args, mailto: str) -> int:
+    wid = normalize_work_id(args.work_id)
+    target = http_get(f"/works/{wid}", {"select": "id,title,referenced_works"}, mailto)
+    refs = target.get("referenced_works") or []
+    if not refs:
+        emit([], args.json, f"# No references for {wid}")
+        return 0
+    refs = refs[: args.top] if args.top else refs
+    ids = "|".join(r.rsplit("/", 1)[-1] for r in refs)
+    payload = http_get("/works", {"filter": f"openalex_id:{ids}", "per-page": str(len(refs)), "select": WORK_FIELDS}, mailto)
+    rows = [project(w) for w in (payload.get("results") or [])]
+    header = f"# Backward references of {target['id'].rsplit('/',1)[-1]} (\"{target.get('title','')}\")  shown={len(rows)}/{len(refs)}"
+    emit(rows, args.json, header)
+    return 0
+
+
+def cmd_author(args, mailto: str) -> int:
+    payload = http_get("/authors", {"search": args.name, "per-page": "1"}, mailto)
+    candidates = payload.get("results") or []
+    if not candidates:
+        print(f"ERROR: no author named '{args.name}'", file=sys.stderr)
+        return 4
+    author = candidates[0]
+    aid = author["id"].rsplit("/", 1)[-1]
+    venues = resolve_venues(args.venue)
+    flt_parts = [f"author.id:{aid}"]
+    extra = build_filter(venues, args.years, args.type)
+    if extra:
+        flt_parts.append(extra)
+    params = {
+        "filter": ",".join(flt_parts),
+        "per-page": str(args.top),
+        "sort": "cited_by_count:desc",
+        "select": WORK_FIELDS,
+    }
+    works_payload = http_get("/works", params, mailto)
+    rows = [project(w) for w in (works_payload.get("results") or [])]
+    header = (f"# Works by {author.get('display_name','?')} ({aid}) "
+              f"works_count={author.get('works_count','?')}, cited_by={author.get('cited_by_count','?')}")
+    emit(rows, args.json, header)
+    return 0
+
+
+def cmd_work(args, mailto: str) -> int:
+    wid = normalize_work_id(args.work_id)
+    payload = http_get(f"/works/{wid}", {"select": WORK_FIELDS}, mailto)
+    rows = [project(payload)]
+    emit(rows, args.json, "")
+    return 0
+
+
+def cmd_venues(args, mailto: str) -> int:
+    width = max(len(k) for k in VENUE_ALIASES)
+    print("Configured venue aliases:")
+    print()
+    for alias, sid in VENUE_ALIASES.items():
+        info = http_get(f"/sources/{sid}", {"select": "id,display_name,issn_l,country_code,works_count"}, mailto)
+        print(f"  {alias.ljust(width)}  {sid}  {info.get('display_name','?')}  ({info.get('works_count','?')} works)")
+    return 0
+
+
+# ── cli ───────────────────────────────────────────────────────────────────────
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sp = p.add_subparsers(dest="cmd", required=True)
+
+    common_filter = lambda x: (
+        x.add_argument("--venue", help="Comma-separated venue aliases or S-ids (e.g. jf,jfe,rfs)"),
+        x.add_argument("--years", help="Year range YYYY or YYYY-YYYY"),
+        x.add_argument("--type", help="Work type (article, book-chapter, dataset, ...)"),
+        x.add_argument("--top", type=int, default=20, help="Max results (default 20, max 200)"),
+        x.add_argument("--json", action="store_true", help="Emit one JSON object per result"),
+    )
+
+    s = sp.add_parser("search", help="Keyword search over works")
+    s.add_argument("query", help="Search query (free text)")
+    s.add_argument("--sort", choices=["relevance", "cited"], default="relevance")
+    common_filter(s)
+    s.set_defaults(func=cmd_search)
+
+    s = sp.add_parser("cites", help="Forward citations of a work")
+    s.add_argument("work_id", help="OpenAlex W-id, full URL, or doi:10.xxx/...")
+    common_filter(s)
+    s.set_defaults(func=cmd_cites)
+
+    s = sp.add_parser("refs", help="Backward references of a work")
+    s.add_argument("work_id", help="OpenAlex W-id, full URL, or doi:10.xxx/...")
+    s.add_argument("--top", type=int, default=50, help="Max references to fetch (default 50)")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_refs)
+
+    s = sp.add_parser("author", help="Works by an author (top by citations)")
+    s.add_argument("name", help="Author name (free text)")
+    common_filter(s)
+    s.set_defaults(func=cmd_author)
+
+    s = sp.add_parser("work", help="Full record for one work")
+    s.add_argument("work_id", help="OpenAlex W-id, full URL, or doi:10.xxx/...")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_work)
+
+    s = sp.add_parser("venues", help="Show resolved venue alias table")
+    s.set_defaults(func=cmd_venues)
+
+    args = p.parse_args()
+    mailto = load_env_email()
+    try:
+        return args.func(args, mailto)
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 5
+
+
+if __name__ == "__main__":
+    sys.exit(main())

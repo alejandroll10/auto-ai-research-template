@@ -1,0 +1,11 @@
+{
+  "openalex": {
+    "name": "openalex",
+    "description": "Query OpenAlex (a free, ~250M-work bibliographic database) for finance/economics literature: top-cited papers in a topic, recent work in a specific venue, forward/backward citation traversal, an author's bibliography. Use this for any structured literature query where you want hallucination-free, real-DOI results. Complementary to WebSearch (which remains the right tool for grey literature, news, and very-recent uploads).",
+    "claude": {
+      "user-invocable": true,
+      "argument-hint": "search|cites|refs|author|work|venues <args>",
+      "allowed-tools": "Bash, Read, Write"
+    }
+  }
+}

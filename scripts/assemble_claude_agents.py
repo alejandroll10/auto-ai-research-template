@@ -10,6 +10,8 @@ IGNORED_FIELDS = {"codex", "gemini"}
 def format_value(value):
     if isinstance(value, bool):
         return "true" if value else "false"
+    if isinstance(value, list):
+        return "[" + ", ".join(str(v) for v in value) + "]"
     return str(value)
 
 

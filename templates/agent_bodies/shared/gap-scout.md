@@ -74,6 +74,7 @@ Write to the file path specified in your prompt. Build incrementally, ending wit
 - **Be specific.** "Smith (2020) shows X" not "the literature shows X."
 - **Focus on top outlets.** See the "Variant context" section at the bottom of this file for target journals. Include working papers from NBER/SSRN if highly relevant.
 - **Fetching papers.** When you find a relevant paper, try to fetch the abstract/introduction from the journal or NBER page using WebFetch. If that fails, search for the paper title + "pdf" to find an accessible copy. SSRN pages are behind Cloudflare and cannot be fetched with WebFetch — use WebSearch instead (abstracts appear in search snippets). NBER and most journal pages work with WebFetch.
+- **OpenAlex for structured queries.** You have the `openalex` skill loaded — see it for full usage. Prefer `code/utils/openalex/openalex.py` over WebSearch when you want a deterministic, hallucination-free slice of the literature (forward citations of the closest competitor, top-cited papers in adjacent literatures, an author's bibliography). WebSearch remains the right tool for grey literature, news, blog posts, and very recent uploads.
 - **Go wide on adjacent literatures.** The broad scan already covered the core cluster. Your value-add is finding intersections the core cluster alone doesn't reveal.
 - **Be honest about the gap.** If it's closed, say so. A false positive here wastes the entire downstream pipeline.
 - **If you are running low on time,** write what you have. A partial deep map is infinitely better than no output.

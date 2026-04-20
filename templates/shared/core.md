@@ -97,7 +97,8 @@ Stage 6: Referee Simulation   ──→ Gate 5: Referee Decision
                                    ├── Minor/Accept → Stage 7
                                    ├── Major Revision → revise, re-run Stage 6 (max 10×)
                                    └── Reject → back to Stage 2 (fixable) or Stage 0 (fundamental)
-Stage 7: Style Check          ──→ Done
+Stage 7: Style Check          ──→
+Stage 8: Bibliography Verify  ──→ Done
 ```
 
 ---
@@ -117,6 +118,7 @@ Initial state (created by setup.sh):
   "referee_round": 0,
   "pivot_round": 0,
   "fix_empirics_rounds": 0,
+  "bib_verify_round": 0,
   "pivot_resolved": null,
   "pivot_history": [],
   "status": "not_started",
@@ -188,6 +190,12 @@ Read `docs/stage_6.md` and proceed accordingly.
 ## Stage 7: Style Check
 
 Read `docs/stage_7.md` and proceed accordingly.
+
+---
+
+## Stage 8: Bibliography Verification
+
+Read `docs/stage_8.md` and proceed accordingly.
 
 ---
 

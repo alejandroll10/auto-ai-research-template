@@ -438,7 +438,7 @@ mkdir -p "$P/docs"
 cp "$TEMPLATE_ROOT/templates/shared/docs/"*.md "$P/docs/"
 # Substitute variant placeholders (same ones assemble_runtime_doc.py handles for core.md)
 for _docfile in "$P/docs/"*.md; do
-    sed -i "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$_docfile"
+    sed -i.bak "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$_docfile" && rm "${_docfile}.bak"
 done
 
 # Function to substitute {{SEED_OVERRIDE_*}} placeholders in all docs in $P/docs/.
@@ -508,6 +508,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "referee_round": 0,
   "pivot_round": 0,
   "fix_empirics_rounds": 0,
+  "bib_verify_round": 0,
   "pivot_resolved": null,
   "pivot_history": [],
   "status": "not_started",
@@ -527,6 +528,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "referee_round": 0,
   "pivot_round": 0,
   "fix_empirics_rounds": 0,
+  "bib_verify_round": 0,
   "pivot_resolved": null,
   "pivot_history": [],
   "status": "not_started",
@@ -589,6 +591,41 @@ if ! command -v codex >/dev/null 2>&1; then
     echo "  ⚠ The codex-math skill will not work until codex is installed."
 fi
 
+# Bibliography verification skill (available for all variants)
+assemble_claude_skills \
+    "$TEMPLATE_ROOT" \
+    "$TEMPLATE_ROOT/templates/skill_metadata/bib_verify_skills.json" \
+    "$TEMPLATE_ROOT/templates/skill_bodies/bib_verify" \
+    "$SKILLS_OUT"
+
+python3 "$TEMPLATE_ROOT/scripts/assemble_codex_skills.py" \
+    --metadata "$TEMPLATE_ROOT/templates/skill_metadata/bib_verify_skills.json" \
+    --bodies-dir "$TEMPLATE_ROOT/templates/skill_bodies/bib_verify" \
+    --output-dir "$CODEX_SKILLS_OUT"
+
+# Copy bib-verify utility scripts
+mkdir -p "$P/code/utils/bib_verify"
+cp "$TEMPLATE_ROOT/templates/utils/bib_verify/"openalex_check.py "$P/code/utils/bib_verify/"
+cp "$TEMPLATE_ROOT/templates/utils/bib_verify/"verify_bib.sh "$P/code/utils/bib_verify/"
+chmod +x "$P/code/utils/bib_verify/"openalex_check.py "$P/code/utils/bib_verify/"verify_bib.sh
+
+# OpenAlex literature search skill (loaded by literature-scout, gap-scout, novelty-checker)
+assemble_claude_skills \
+    "$TEMPLATE_ROOT" \
+    "$TEMPLATE_ROOT/templates/skill_metadata/openalex_skills.json" \
+    "$TEMPLATE_ROOT/templates/skill_bodies/openalex" \
+    "$SKILLS_OUT"
+
+python3 "$TEMPLATE_ROOT/scripts/assemble_codex_skills.py" \
+    --metadata "$TEMPLATE_ROOT/templates/skill_metadata/openalex_skills.json" \
+    --bodies-dir "$TEMPLATE_ROOT/templates/skill_bodies/openalex" \
+    --output-dir "$CODEX_SKILLS_OUT"
+
+# Copy OpenAlex utility script
+mkdir -p "$P/code/utils/openalex"
+cp "$TEMPLATE_ROOT/templates/utils/openalex/"openalex.py "$P/code/utils/openalex/"
+chmod +x "$P/code/utils/openalex/"openalex.py
+
 echo "  ✓ Core skills assembled"
 
 # ── Apply extensions ──
@@ -636,7 +673,7 @@ open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', inject.rstrip()+'\n\n{
                 cp "$TEMPLATE_ROOT/extensions/theory_llm/docs/"*.md "$P/docs/"
                 for _docfile in "$TEMPLATE_ROOT/extensions/theory_llm/docs/"*.md; do
                     _name=$(basename "$_docfile")
-                    sed -i "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$P/docs/$_name"
+                    sed -i.bak "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$P/docs/$_name" && rm "$P/docs/${_name}.bak"
                 done
             fi
 
@@ -677,7 +714,7 @@ open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', inject.rstrip()+'\n\n{
                 cp "$TEMPLATE_ROOT/extensions/empirical/docs/"*.md "$P/docs/"
                 for _docfile in "$TEMPLATE_ROOT/extensions/empirical/docs/"*.md; do
                     _name=$(basename "$_docfile")
-                    sed -i "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$P/docs/$_name"
+                    sed -i.bak "s|{{DOMAIN_AREAS}}|$DOMAIN_AREAS|g; s|{{PAPER_TYPE}}|$PAPER_TYPE|g; s|{{TARGET_JOURNALS}}|$TARGET_JOURNALS|g" "$P/docs/$_name" && rm "$P/docs/${_name}.bak"
                 done
             fi
 

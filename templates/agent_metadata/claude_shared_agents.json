@@ -1,4 +1,18 @@
 {
+  "bib-verifier": {
+    "name": "bib-verifier",
+    "description": "Verifies the paper's bibliography against OpenAlex (and a WebSearch fallback for SSRN/recent papers). Launched after paper-writer drafts and after referee rounds that change citations, before marking the pipeline complete. Reports VERIFIED / RESOLVED / FABRICATED counts and a fix list; does not edit the bibliography itself.",
+    "tools": "Bash, Read, Write, WebSearch, WebFetch",
+    "skills": ["bib-verify"],
+    "model": "sonnet",
+    "codex": {
+      "model": "gpt-5.4",
+      "model_reasoning_effort": "low"
+    },
+    "gemini": {
+      "model": "gemini-3-flash-preview"
+    }
+  },
   "idea-prototyper": {
     "name": "idea-prototyper",
     "description": "Quick mathematical prototype of a selected idea. Launched between idea selection and full theory development to verify tractability. Attempts the key derivation — if the main result doesn't go through, kills the idea before expensive theory investment.",
@@ -15,7 +29,8 @@
   "literature-scout": {
     "name": "literature-scout",
     "description": "Searches the web for relevant papers, surveys existing literature, and builds a literature map. The orchestrator launches this agent at Stage 0 (Problem Discovery).",
-    "tools": "WebSearch, WebFetch, Read, Write, Glob, Grep",
+    "tools": "WebSearch, WebFetch, Bash, Read, Write, Glob, Grep",
+    "skills": ["openalex"],
     "model": "sonnet",
     "codex": {
       "model": "gpt-5.4",
@@ -54,7 +69,8 @@
   "novelty-checker": {
     "name": "novelty-checker",
     "description": "Adversarial novelty verification. The orchestrator launches this agent twice — at Gate 1b (on the selected idea, before theory development) and at Gate 3 (on the full theory, after math audit). Checks whether the content is genuinely new or a known result repackaged.",
-    "tools": "WebSearch, WebFetch, Read, Write",
+    "tools": "WebSearch, WebFetch, Bash, Read, Write",
+    "skills": ["openalex"],
     "model": "sonnet",
     "codex": {
       "model": "gpt-5.4",
@@ -108,7 +124,8 @@
   "gap-scout": {
     "name": "gap-scout",
     "description": "Deep literature search on a pre-selected gap. Launched at Stage 0 after the broad scan. Surveys adjacent literatures, identifies the closest competitor, maps open questions without pre-specifying a framework, and validates whether the gap is actually open.",
-    "tools": "WebSearch, WebFetch, Read, Write, Glob, Grep",
+    "tools": "WebSearch, WebFetch, Bash, Read, Write, Glob, Grep",
+    "skills": ["openalex"],
     "model": "sonnet",
     "codex": {
       "model": "gpt-5.4",

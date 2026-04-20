@@ -49,6 +49,7 @@ Write your results to the file path specified in your prompt. Build incrementall
 - **Be specific.** "Smith (2020) shows X" not "the literature shows X."
 - **Focus on top outlets.** See the "Variant context" section at the bottom of this file for target journals. Include working papers from NBER/SSRN if highly relevant.
 - **Fetching papers.** When you find a relevant paper, try to fetch the abstract/introduction from the journal or NBER page using WebFetch. If that fails, search for the paper title + "pdf" to find an accessible copy. SSRN pages are behind Cloudflare and cannot be fetched with WebFetch — use WebSearch instead (abstracts appear in search snippets). NBER and most journal pages work with WebFetch.
+- **OpenAlex for structured queries.** You have the `openalex` skill loaded — see it for full usage. Prefer `code/utils/openalex/openalex.py` over WebSearch when you want a deterministic, hallucination-free slice of the literature (top-cited papers, recent work in a venue, citation traversal, an author's bibliography). WebSearch remains the right tool for grey literature, news, blog posts, and very recent uploads.
 - **Distinguish theory from empirics.** Note which papers are theoretical, which are empirical.
 - **Find the frontier.** The most valuable output is identifying what the newest papers are doing and where the field is heading.
 - **If you are running low on time,** write what you have. A partial literature map is infinitely better than no output.
