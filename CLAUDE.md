@@ -58,14 +58,16 @@ cd <project-name>
 bash code/utils/start_services.sh   # idempotent; reuses an existing server if one is up
 ```
 
-To check if it's already running on this machine (one server can serve all empirical projects on the same host):
+The server is per-host, not per-project — once it's running, every project that has the WRDS skill reuses it. If you are working in the template repo itself (no `.env`, no `code/utils/`), `cd` into any existing deployed empirical project on this host and run `bash code/utils/start_services.sh` from there; the resulting server will serve the template's future deployments too.
+
+To check if it's already running on this machine:
 
 ```bash
 ss -tlnp | grep 23847                                                  # is anything listening?
 PYTHONPATH=code python3 -c "from utils.wrds_client import wrds_ping; print(wrds_ping())"
 ```
 
-`True` from the ping means it's healthy. The server is per-host, not per-project — once it's running, every project that has the WRDS skill will reuse it.
+`True` from the ping means it's healthy.
 
 ## Repository structure
 

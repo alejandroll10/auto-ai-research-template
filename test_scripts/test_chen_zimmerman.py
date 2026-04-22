@@ -1,37 +1,40 @@
-"""Test Chen-Zimmerman Open Source Asset Pricing data access."""
-import subprocess
+"""Test chen-zimmerman skill — Open Source Asset Pricing data via openassetpricing pkg.
+
+Replaces an older discovery-only script. Verifies the helper API actually works.
+"""
 import sys
 
-# Check if openassetpricing package exists
-try:
-    import openassetpricing
-    print("openassetpricing package available")
-except ImportError:
-    print("openassetpricing not available, using direct download")
+# === Test 1: helper imports and OpenAP instantiates ===
+print("=== Test 1: instantiate OpenAP via helper ===")
+from utils.chen_zimmerman_utils import _get_ap, list_portfolio_types
+ap = _get_ap()
+print(f"  OpenAP instance: {type(ap).__name__}")
+ports = list_portfolio_types()
+print(f"  available portfolio types: {ports}")
 
-# Try pandas-datareader approach
-try:
-    import pandas_datareader.data as web
-    # Chen-Zimmerman isn't in pandas-datareader, but let's confirm
-    print("pandas-datareader available but Chen-Zimmerman not in it")
-except:
-    pass
+# === Test 2: download a single signal (BM = book-to-market) ===
+print("\n=== Test 2: get_signals(['BM']) ===")
+from utils.chen_zimmerman_utils import get_signals
+bm = get_signals(['BM'])
+assert 'permno' in bm.columns and 'yyyymm' in bm.columns and 'BM' in bm.columns, f"unexpected cols: {list(bm.columns)}"
+assert len(bm) > 100_000, f"BM panel too small: {len(bm)} rows"
+print(f"  BM signal: {len(bm):,} rows, {bm['permno'].nunique()} permnos, "
+      f"{bm['yyyymm'].min()}-{bm['yyyymm'].max()}")
 
-# Try direct download from GitHub
-import requests
-import io
+# === Test 3: portfolios for BM ===
+print("\n=== Test 3: get_portfolios(['BM'], port_type='op') ===")
+from utils.chen_zimmerman_utils import get_portfolios
+bm_p = get_portfolios(['BM'], port_type='op')
+assert 'ret' in bm_p.columns, f"missing ret col: {list(bm_p.columns)}"
+assert len(bm_p) > 100, f"BM portfolio panel too small: {len(bm_p)}"
+print(f"  BM portfolio rows: {len(bm_p):,}; cols: {list(bm_p.columns)}")
+print(f"  mean monthly ret across all ports: {bm_p['ret'].mean():.4f}")
 
-print("\n=== Checking GitHub README for current download links ===")
-readme_url = "https://raw.githubusercontent.com/OpenSourceAP/CrossSection/master/README.md"
-r = requests.get(readme_url, timeout=15)
-if r.status_code == 200:
-    # Find download links
-    lines = r.text.split('\n')
-    for line in lines:
-        if 'drive.google' in line.lower() or 'download' in line.lower() or 'csv' in line.lower() or 'parquet' in line.lower():
-            print(f"  {line.strip()}")
-    print(f"\nREADME fetched successfully ({len(r.text)} chars)")
-else:
-    print(f"Failed to fetch README: {r.status_code}")
+# === Test 4: signal documentation ===
+print("\n=== Test 4: signal_doc() ===")
+from utils.chen_zimmerman_utils import signal_doc
+doc = signal_doc()
+assert len(doc) > 100, f"signal_doc too small: {len(doc)}"
+print(f"  signal docs: {len(doc)} rows; sample cols: {list(doc.columns)[:6]}")
 
-print("\n=== Test complete ===")
+print("\nALL TESTS PASSED")

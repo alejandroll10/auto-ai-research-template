@@ -49,18 +49,65 @@ def get_company(ticker):
     return ed.Company(ticker)
 
 def get_xbrl_facts(ticker, concept):
-    """Get XBRL time series for a company and concept.
+    """Get XBRL time series for a company and concept via SEC's companyfacts API.
 
     Args:
-        ticker: Stock ticker (e.g., "AAPL")
-        concept: XBRL tag (e.g., "us-gaap:Revenues")
+        ticker: Stock ticker (e.g., "AAPL") OR a 10-digit zero-padded CIK string
+        concept: XBRL tag. May be bare ("Revenues") or namespaced ("us-gaap:Revenues",
+            "us-gaap/Revenues"). Searched across us-gaap, dei, ifrs-full.
 
     Returns:
-        pandas DataFrame with the time series
+        pandas DataFrame with one row per reported fact, columns:
+        end (date), val, accn, fy, fp, form, filed, unit
     """
-    company = get_company(ticker)
-    facts = company.get_facts()
-    return facts.to_pandas(concept)
+    # Resolve ticker → CIK
+    if isinstance(ticker, str) and not ticker.isdigit():
+        cik = get_company(ticker).cik
+    else:
+        cik = int(ticker)
+    facts = get_company_facts_raw(cik)
+
+    # Strip namespace prefix if present
+    if ':' in concept:
+        ns_pref, tag = concept.split(':', 1)
+    elif '/' in concept:
+        ns_pref, tag = concept.split('/', 1)
+    else:
+        ns_pref, tag = None, concept
+
+    facts_root = facts.get('facts', {})
+    namespaces = [ns_pref] if ns_pref else ['us-gaap', 'dei', 'ifrs-full']
+    concept_node = None
+    matched_ns = None
+    for ns in namespaces:
+        node = facts_root.get(ns, {}).get(tag)
+        if node:
+            concept_node = node
+            matched_ns = ns
+            break
+    if concept_node is None:
+        raise KeyError(f"Concept {concept!r} not found in companyfacts for CIK {cik} "
+                       f"(searched {namespaces})")
+
+    rows = []
+    for unit, observations in concept_node.get('units', {}).items():
+        for obs in observations:
+            rows.append({
+                'end': obs.get('end'),
+                'val': obs.get('val'),
+                'accn': obs.get('accn'),
+                'fy': obs.get('fy'),
+                'fp': obs.get('fp'),
+                'form': obs.get('form'),
+                'filed': obs.get('filed'),
+                'unit': unit,
+                'namespace': matched_ns,
+            })
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df['end'] = pd.to_datetime(df['end'])
+        df = df.sort_values('end').reset_index(drop=True)
+    return df
 
 def search_filings_text(query, form="10-K", start_date=None, end_date=None):
     """Full-text search across SEC filings.

@@ -26,6 +26,15 @@
       "allowed-tools": "Bash, Read, Write"
     }
   },
+  "form-5500": {
+    "name": "form-5500",
+    "description": "DOL EBSA Form 5500 — annual ERISA filings for every U.S. pension/welfare plan with ≥100 participants. Schedule H gives plan-level asset breakdowns including mutual-fund holdings (INT_REG_INVST_CO_*_AMT); Schedule R covers retirement-plan distributions and rollovers. Free public-use research files. Use for retirement, household finance, defined-contribution/401(k), and labor-finance research.",
+    "claude": {
+      "user-invocable": true,
+      "argument-hint": "[year and/or schedule]",
+      "allowed-tools": "Bash, Read, Write"
+    }
+  },
   "fred": {
     "name": "fred",
     "description": "Fetch macroeconomic and financial time series from FRED (Federal Reserve Economic Data). Use when calibrating models to macro moments, testing time-series predictions, or getting risk-free rates, spreads, and macro indicators.",

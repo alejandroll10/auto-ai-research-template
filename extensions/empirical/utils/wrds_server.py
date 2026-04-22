@@ -37,6 +37,35 @@ PORT = 23847  # arbitrary high port
 PID_FILE = os.path.join(os.path.dirname(__file__), '.wrds_server.pid')
 MAX_MSG = 10 * 1024 * 1024  # 10MB max message size
 
+def _safe_raw_sql(db, sql):
+    """Run a SQL query, falling back to a manual sqlalchemy path if wrds.raw_sql trips
+    the sqlalchemy 2.x immutabledict bug.
+
+    `wrds.Connection.raw_sql()` hardcodes `dtype_backend="numpy_nullable"`, which on
+    some queries (LIKE, pg_tables, information_schema, certain GROUP BY ... COUNT(*))
+    raises:
+        sqlalchemy.cyextension.immutabledict.immutabledict is not a sequence
+    The fallback bypasses pd.read_sql_query and constructs the DataFrame from raw
+    tuple rows + explicit column list.
+    """
+    import pandas as pd
+    try:
+        return db.raw_sql(sql)
+    except TypeError as e:
+        if 'immutabledict' not in str(e):
+            raise
+    except Exception as e:
+        if 'immutabledict' not in str(e):
+            raise
+    # Fallback path
+    from sqlalchemy import text
+    with db.engine.connect() as conn:
+        result = conn.execute(text(sql))
+        cols = list(result.keys())
+        rows = [tuple(r) for r in result.fetchall()]
+    return pd.DataFrame(rows, columns=cols)
+
+
 def connect_wrds():
     """Establish WRDS connection (triggers Duo 2FA)."""
     import wrds
@@ -73,7 +102,7 @@ def handle_client(conn, db, lock):
         elif cmd == 'query':
             sql = request['sql']
             with lock:
-                df = db.raw_sql(sql)
+                df = _safe_raw_sql(db, sql)
             # Convert to JSON-serializable format
             response = {
                 'status': 'ok',

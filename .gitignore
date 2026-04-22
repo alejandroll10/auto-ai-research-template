@@ -12,6 +12,9 @@ references/
 # Local test artifacts from ./setup.sh <name> --local
 demo_*/
 
+# Local skill-test sandbox (replicates a deployed project for skill verification)
+_skill_test_sandbox/
+
 # Python
 __pycache__/
 *.pyc
