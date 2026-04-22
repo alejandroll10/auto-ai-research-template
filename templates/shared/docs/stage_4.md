@@ -5,12 +5,7 @@
 1. Launch self-attacker on the theory draft + implications + theory exploration results (if available)
 2. Save result to `output/stage4/self_attack_vN.md`
 3. Commit: `artifact: self-attack v{N}`
-4. **Triage the concerns.** Before any revision, categorize each concern from the self-attack (and any prior free-form audit concerns still open) using the agent's own tags as a starting point:
-   - `[FIX]` — a load-bearing claim is wrong; revise in main text
-   - `[LIMITS]` — legitimate concern; one sentence in limitations
-   - `[RESPONSE]` — address in response letter only; no paper change
-   - `[NOTE]` — no action
-   Save the triage to `output/stage4/triage_vN.md`. Only `[FIX]` items feed into the theory-generator for revision. The rest are held for Stage 5 (paper-writer) or the response letter.
+4. **Triage the concerns.** Launch `triager` with: input = `output/stage4/self_attack_vN.md` plus all prior triage files `output/stage4/triage_v*.md` (if any), output path = `output/stage4/triage_vN.md`, context = `gate-4`. Triager applies the rules (severity-≥7 default to `[FIX]`, re-raises of prior soft-triaged concerns auto-upgrade to `[FIX]`, written justifications for downgrades) and produces the triage file. Only `[FIX]` items feed into the theory-generator for revision; the rest are held for Stage 5 (paper-writer) or the response letter. Do not edit the triager's output — if you disagree with a classification, re-launch the triager with explicit instructions, do not silently override.
 5. Commit: `artifact: concern triage v{N}`
 
 ## Gate 4: Scorer Decision
@@ -27,6 +22,7 @@
    - **Implications with lit-check tags:** `output/stage3/implications.md` (for the SUPPORTED-cap / PUZZLE-CANDIDATE-floor rules on Surprise)
    - **Pipeline state:** pass `pivot_round` and `pivot_resolved` so the scorer knows whether a pivot fired and whether it resolved
    - Self-attack: `output/stage4/self_attack_vN.md`
+   - **Structured scorer only, on revisions (N ≥ 2):** also pass the prior theory draft (`output/stage2/theory_draft_v{N-1}.md`) and the `## Unverified claims` section of the prior math audit (`output/stage2/math_audit_v{N-1}.md`). Do NOT pass any prior scorer output or prior score to either agent — the structured scorer scores independently; the freeform scorer is history-blind.
 2. Save results to `output/stage4/scorer_decision_vN.md` and `output/stage4/scorer_freeform_vN.md`
 3. Commit: `artifact: scorer decisions v{N} (structured + freeform)`
 
@@ -43,7 +39,7 @@
    - Literature map: `output/stage0/literature_map.md`
 5. Save result to `output/stage4/branch_manager_vN.md`
 6. Commit: `artifact: branch-manager report v{N}`
-7. Read the branch-manager report. The gate decision must be consistent with its recommendation. If you disagree, log the disagreement and your reasoning in the commit message — do not silently override.
+7. Read the branch-manager report. The gate decision must be consistent with its recommendation. If you disagree, log the disagreement and your reasoning in the commit message — do not silently override. **Gate 4 is invalid without a fresh `output/stage4/branch_manager_vN.md` for the current version N. If the file does not exist or is from an earlier version, re-run branch-manager before any gate decision — no exceptions.**
 
 8. Read the **structured scorer** output (`scorer_decision_vN.md`). It contains two sections:
    - **Content score + content feedback**: determines the gate decision. Only substantive theory issues (new math needed, proofs to fix, mechanisms to clarify).

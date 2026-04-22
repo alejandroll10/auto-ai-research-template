@@ -64,6 +64,10 @@ Save to the path specified in your prompt. Build this file incrementally:
 **Results:** [what you found, or "no relevant results"]
 
 #### [Author (Year)] — Similarity: HIGH/MEDIUM/LOW
+- **Title:** [exact title as it appears in the source]
+- **Authors:** [full author list, exact order]
+- **Year:** [year]
+- **DOI/URL:** [DOI or stable URL; if neither can be located, mark `[UNVERIFIED]`]
 - **Their result:** [what they showed]
 - **Overlap:** [what's the same]
 - **Difference:** [what's different]

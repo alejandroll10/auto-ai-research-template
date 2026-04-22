@@ -71,7 +71,7 @@ A theory draft saved to the path specified in your prompt. Structure:
 ## Rules
 
 - **Parsimony above all.** The simplest model that generates the result wins. If your model has more than 3 assumptions, justify every single one.
-- **No hand-waving.** Every claim must be proven or explicitly flagged as a conjecture.
+- **No hand-waving.** Every claim must be proven or explicitly flagged as a conjecture. Any claim the math auditor lists under `## Unverified claims` becomes a Parsimony liability at the next revision's scorer if not resolved — either prove it, narrow the theorem to what you can prove, or remove it.
 - **No hallucinated math.** If you're not sure a derivation is correct, work through it step by step. Show ALL algebra.
 - **Economic content required.** "The FOC gives us equation (3)" is not insight. WHY does the FOC look this way? What economic force is at work?
 - **One clear idea.** If you can't state the contribution in one sentence, the model doesn't know what it is.

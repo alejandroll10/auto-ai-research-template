@@ -18,6 +18,10 @@ Concretely:
 - If the scorer finds the current theory is at a ceiling (score plateau), abandon and regenerate rather than continuing to polish.
 - If empirical results contradict the theory, report honestly and revise the theory — don't cherry-pick supportive tests.
 
+## Core principle: no phantom time pressure
+
+There is no deadline, no time budget, and no version-count limit. Keep iterating as long as each round is positive for the paper, even if marginal — "diminishing returns" is a stop condition only once returns are zero or negative, not merely small. If you feel worried about how long this is taking, consider the reference class: what the pipeline does in hours or days would take a human researcher months. Have faith in the process.
+
 ## Core principle: surprises are discoveries
 
 When results go against well-formed priors — a comparative static flips sign, a necessary condition fails at calibration, or the model generates an unexpected pattern — that is often the most valuable finding. Lean into it.
@@ -36,11 +40,15 @@ Concretely:
 - If the theory-explorer finds the result breaks in some parameter region, characterize the boundary — the "if and only if" condition is often the real theorem.
 - If a general proof fails, find the tightest sufficient condition, then show necessity by constructing a counterexample when it's violated.
 - Don't settle for numerical verification of what should be a theorem.
-- **No unproved mathematical claims.** Every proposition, lemma, and corollary must be proved. If a proof attempt fails, try a different strategy, find a sufficient condition under which it holds, or restructure the paper around what you can prove. Demoting a claim to a conjecture is not acceptable — an unproved conjecture is worthless in a theory paper. This rule applies to formal mathematical statements, not to assumptions or prose.
+- **No unproved mathematical claims.** Every proposition, lemma, and corollary must be proved. If a proof attempt fails, try a different strategy, find a sufficient condition under which it holds, or restructure the paper around what you can prove. Demoting a claim to a conjecture to dodge an audit is not acceptable; narrowing scope when the math or computation shows the broader version fails is the correct move. This rule applies to formal mathematical statements, not to assumptions or prose.
 
 ## Core principle: frame honestly — never inflate
 
 The paper's framing must match what its results actually deliver. If the introduction invokes a large phenomenon (a crisis, a puzzle, a first-order question) that the results do not resolve, that is inflation. Referees detect framing-content gaps and penalize them more than they penalize honest narrow claims. A narrow-but-real result framed honestly is more publishable than a broad claim the content doesn't support.
+
+## Core principle: scientist first
+
+We are scientists, not marketers. A precisely-bounded result is a stronger contribution than an overclaimed broader one. When the math or computation narrows the claim, narrow it — an "if and only if" characterization beats a fragile general theorem. Honest scope narrowing is a gain; hedging to preserve a broad claim you cannot defend is the failure.
 
 ## Core principle: do what makes the paper better, not what is easiest
 
@@ -123,6 +131,7 @@ Initial state (created by setup.sh):
   "pivot_history": [],
   "status": "not_started",
   "scores": {},
+  "stage3a_theory_version": null,
   "history": []
 }
 ```
@@ -132,6 +141,8 @@ When `--seed` is used, setup.sh also adds `"seeded": true` and sets `"current_st
 When you start the pipeline, set `"status": "running"` and begin appending to the history array.
 
 **History array:** Append a `{ "timestamp": "ISO-8601", "event": "description" }` entry for every pipeline event. This feeds the dashboard. Use `date -u +%Y-%m-%dT%H:%M:%SZ` to get the timestamp. Never truncate or clear the history array.
+
+**`stage3a_theory_version`:** Set to the `theory_version` that Stage 3a last fully explored. Before advancing at Gate 4, the orchestrator must verify this equals the current `theory_version`; if it is stale, re-run Stage 3a on the new content (see `docs/stage_2.md` Stage 3a step 5).
 
 {{SEED_OVERRIDE}}
 

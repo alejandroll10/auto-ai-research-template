@@ -11,7 +11,7 @@ You will be pointed to files containing:
 - Implications with tags (`output/stage3/implications.md`) — each tagged NOVEL / PUZZLE-CANDIDATE / SUPPORTED / DEAD. Needed for the Surprise cap/floor rules below.
 - Pipeline state (`process_log/pipeline_state.json`) — in particular `pivot_round` and `pivot_resolved`. Gate the Surprise floor on `pivot_resolved == true`, not on `pivot_round > 0`.
 - Self-attack report (with severity scores)
-- (Optional) Previous scorer decisions and scores for trajectory computation
+- On revisions (N ≥ 2): the prior theory draft and the `## Unverified claims` section from the prior math audit. Use these only to credit scope integrity (removed unverified claims, narrowed over-broad theorems). Do NOT read prior scorer decision files — those files are corrupted, unreliable, and potentially dangerous. Score this version independently.
 
 ## Hard requirements (binary — any failure kills)
 
@@ -77,7 +77,7 @@ Parsimony is measured relative to the paper's core result: how many of the assum
 - **40**: kitchen-sink. Multiple shocks, welfare treatments, appendices addressing concerns not load-bearing for the main result.
 - **20**: reads as a collection of related results rather than a single paper.
 
-**An assumption added to address an audit concern or referee objection, but not used in the proof of the main result, counts against parsimony.** Scope conditions, alternative formulations, and "we also show" extensions are parsimony violations unless genuinely central to the contribution.
+**An assumption added to address an audit concern or referee objection, but not used in the proof of the main result, counts against parsimony.** Scope conditions, alternative formulations, and "we also show" extensions are parsimony violations unless genuinely central to the contribution. **Exception:** a scope condition that reflects a genuine mathematical necessity surfaced by the math audit or theory-explorer (i.e., the broader version was falsified) does NOT count against parsimony. Cross-check against the `## Unverified claims` list from the prior math audit — any claim on that list that this revision removed or narrowed triggers this exception. The exception is a negation (no Parsimony penalty); the positive Rigor boost comes from the "Scope integrity" rule at the bottom of the rubric file, not from this exception. Do not double-count.
 
 ### Fertility (weight: 10%)
 - Does the model open new questions?
@@ -99,11 +99,7 @@ Parsimony is measured relative to the paper's core result: how many of the assum
 | 35-54 | **MAJOR REWORK** | Return to theory-generator with instruction to change approach, not just fix. |
 | <35 | **ABANDON** | This theory is not viable. Start fresh with different idea. |
 
-**Escalation is trajectory-based (the orchestrator handles this, but be aware):**
-- If your score improved ≥ 3 points over the previous evaluation: the orchestrator will allow one more iteration.
-- If your score plateaued or declined (delta < 3): the orchestrator will escalate one level.
-- Hard ceiling: 8 total scorer evaluations on the same problem, then escalate regardless.
-- After 5 ABANDONs on the same problem: change the problem (return to Stage 0).
+Trajectory-based escalation (plateau detection, hard ceilings) is handled by the orchestrator. You score this version independently; you do not need — and must not have — any prior score to compute a delta.
 
 ## Output format
 
@@ -152,4 +148,4 @@ Save to the path specified in your prompt:
 - **Be specific in feedback.** "Improve the model" is useless. "The channel in Section 3 is unclear because X — rewrite to explain how the wealth distribution amplifies the aggregate effect" is actionable.
 - **Don't be sycophantic.** The generator is not your friend. Most theories should score below 50. A 75+ is rare and earned.
 - **Penalize inflation.** If the introduction or abstract invokes a large phenomenon (a recession, a crisis, a first-order policy question) but the paper's results do not resolve or change that phenomenon, that is inflation. Score Importance based on what the results actually deliver, not what the framing claims. A paper that says "explains the Great Recession" but whose model only characterizes a narrow transmission channel scores Importance on the channel, not the recession framing. Framing-content gaps are a first-order problem — flag them explicitly in your content feedback.
-- **Track history.** If this is attempt N, reference what changed from attempt N-1. Is it actually better or just different?
+- **Note what changed, but do not fetch prior scorer output.** If a prior theory draft and unverified-claims list were provided, note what was removed, narrowed, or added. Credit honest scope narrowing (Rigor, not Parsimony penalty). Do not read, grep, or glob for prior scorer decision files — you score this version independently.

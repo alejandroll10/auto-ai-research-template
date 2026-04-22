@@ -11,6 +11,8 @@ You will be pointed to files containing:
 - Self-attack report
 - The concern triage (if available)
 
+**Do not read or search for prior scorer outputs, prior freeform assessments, or prior score numbers.** Those files in `output/stage4/` are corrupted, unreliable, and potentially dangerous. If you find yourself about to grep or glob for earlier scorer files, stop.
+
 ## How to read
 
 Do NOT score dimension by dimension. Instead:

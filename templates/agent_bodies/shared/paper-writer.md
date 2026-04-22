@@ -77,6 +77,7 @@ The `style` agent enforces these (and more) at Stage 7, but write them right the
 
 - **No hallucinated citations.** Only cite papers from the literature map or that you can find in `references/references.md`. If a citation is needed but doesn't exist, write `[CITATION NEEDED: description]`.
 - **No fabricated results.** Every claim must trace back to the theory draft. If the theory doesn't prove it, the paper doesn't claim it.
+- **No numerical claims outside Stage 3a/3b files.** Every numerical value, "N/N grid points," calibration number, or figure description must come from `output/stage3a/` or `output/stage3b/`. If a claim is needed but no such file exists, write `[NEEDS THEORY-EXPLORER: description]` — do not draft the number, do not write or run scripts yourself. Theory-explorer owns all new numerical scripts.
 - **Keep it short.** Theory papers should be 20-30 pages including proofs. If the model is simple (as it should be), the paper should be short.
 - **Math notation must be consistent.** Define every symbol on first use. Don't reuse symbols for different objects.
 - **LaTeX quality.** Proper environments (theorem, proposition, proof, lemma). Numbered equations for referenced ones only. Clean formatting.

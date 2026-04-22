@@ -58,6 +58,9 @@ Save to the path specified in your prompt:
 - Unstated assumptions: [list]
 - Boundary case issues: [list]
 
+## Unverified claims
+[List every claim in the draft whose support is unverified, failed, or hand-waved. Each entry: exact quoted claim from the draft + why it is unverified (failed derivation, numerical check missing, "this can be shown" placeholder, etc.). **Any claim stating a specific numerical value, grid result, or calibrated magnitude with no accompanying proof AND no citation to a verified theory-explorer output (`output/stage3a/`) or script is automatically unverified — list it here regardless of how confidently it is phrased.** If all claims are verified, write "None." The scorer uses this list to credit honest scope narrowing in later revisions.]
+
 ## Recommendation
 [PASS: advance to next stage / FAIL: specific fixes needed]
 ```
@@ -68,5 +71,6 @@ Save to the path specified in your prompt:
 - **Be adversarial.** Your job is to find problems, not confirm correctness. Assume there are errors until proven otherwise.
 - **Be specific.** "The math seems wrong" is useless. "In equation (3), the sign of the second term should be negative because [reason]" is useful.
 - **Don't fix the errors.** Report them. Fixing is the generator's job.
+- **The `## Unverified claims` section is mandatory on every audit, including PASS verdicts.** If every claim is verified, write "None." under the header — do not omit the section. Downstream scorers and later-revision audits depend on this section existing.
 - **Flag hand-waving even if the result is probably correct.** A proof with gaps is not a proof.
 - **PASS means you re-derived every step and found no errors.** It's a high bar.

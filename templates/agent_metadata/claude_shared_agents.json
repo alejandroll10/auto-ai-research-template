@@ -187,6 +187,19 @@
       "model": "gemini-3-preview"
     }
   },
+  "triager": {
+    "name": "triager",
+    "description": "Mechanically applies the pipeline's triage rules to self-attack concerns (Gate 4) or referee comments (Gate 5). Independent of the orchestrator; produces structured triage files with written justifications for every downgrade and explicit re-raise detection across rounds. Replaces orchestrator-side triage to remove silent-dismissal failure modes.",
+    "tools": "Read, Write",
+    "model": "sonnet",
+    "codex": {
+      "model": "gpt-5.4",
+      "model_reasoning_effort": "medium"
+    },
+    "gemini": {
+      "model": "gemini-3-flash-preview"
+    }
+  },
   "theory-explorer": {
     "name": "theory-explorer",
     "description": "Computational exploration of a theory model. Launched after math audit passes (Stage 3a). Pokes the model numerically — what breaks, what's robust, where are the knife-edges. Produces diagnostic plots and a verification report.",

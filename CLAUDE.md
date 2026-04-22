@@ -1,10 +1,16 @@
 # CLAUDE.md — Meta Project: Pipeline Template Development
 
+AFTER EVERY BIG CHANGE  SPAN A SONNET AGENT TO REVIE YOUR CHANGES FOR ISSUES. IF ANY ISSUES ARE FOUNG, ADD A NEW ROUND OF AUDITING AFTER FIXING. ITERATE UNTIL DONE.
+
 ## What this is
 
 This is the **template repository** for the autonomous research paper pipeline. We are building and iterating on the pipeline infrastructure itself — agents, setup scripts, CLAUDE.md templates, dashboard, etc.
 
 This file is tracked in git but **overwritten by `setup.sh`** in cloned projects. It is for our development work only. The pipeline's CLAUDE.md that end users see is assembled by `setup.sh` from `templates/shared/core.md` + `templates/runtime/claude/session.md` + variant-specific scoring blocks.
+
+## Working principle: no unsolved or undocumented architectural limits
+
+When auditing or editing the pipeline, if a known architectural limit is identified (e.g., a self-referential check, a subjective rule, an enforcement gap, a missing producer for a consumed artifact), do not leave it acknowledged-and-moved-on. Either (a) solve it in the same pass, or (b) document it explicitly — in the relevant agent body, doc file, or a dedicated `LIMITATIONS.md` — with the failure mode it can produce and what would be needed to close it. Acknowledged-but-undocumented limits accumulate silently and produce surprises in future runs.
 
 ## Setting up a new project
 

@@ -64,3 +64,4 @@ paper/*.lot
 paper/*-SAVE-ERROR
 codex_inspect/
 local_testing/
+run_lessons/
