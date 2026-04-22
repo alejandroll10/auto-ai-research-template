@@ -53,6 +53,8 @@ Save to the path specified in your prompt:
 
 ## Attacks by severity
 
+Group attacks by **target** within each severity tier. A target is a specific model object the attack aims at — an assumption, a theorem, a mechanism, a scope condition, a calibration choice, a framing claim. If three attacks all target the same assumption from different angles, they belong in one group with a root attack and variants listed beneath. Severity of the group = max severity across variants. This prevents the triager and theory-generator from treating 4 different variants of the same attack as 4 separate issues.
+
 ### Severity 10 (paper-killing)
 [Any single one of these means the paper should not be written]
 
@@ -65,11 +67,22 @@ Save to the path specified in your prompt:
 ### Severity 1-3 (minor issues)
 [Nice to fix but won't determine acceptance]
 
-For each attack, tag the recommended action:
+Within each tier, use this structure:
+
+```
+**Target: [specific model object — e.g., "Assumption D (non-verifiability of ρ)"]** — [FIX/LIMITS/RESPONSE/NOTE]
+- Root attack: [the strongest or most general form of the attack]
+- Variant: [a different angle on the same target]
+- Variant: [another angle]
+```
+
+For each group, tag the recommended action:
 - `[FIX]` — a load-bearing claim is wrong; requires main-text correction
 - `[LIMITS]` — legitimate concern; acknowledge in limitations
 - `[RESPONSE]` — anticipated referee objection; address in response letter only
 - `[NOTE]` — recorded but no action needed
+
+The tag applies to the group, not individual variants. If the root is FIX, the fix typically addresses the variants too.
 
 ## The strongest single attack
 [Your best shot at killing this paper. One paragraph.]

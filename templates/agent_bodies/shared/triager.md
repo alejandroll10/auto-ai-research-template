@@ -18,7 +18,7 @@ The orchestrator tells you the context, the input file paths, and the output pat
 
 ## The rules
 
-1. **Severity-≥7 default (Gate 4 only).** Any self-attack concern in the `### Severity 10` or `### Severity 7-9` sections of the input file defaults to `[FIX]`. Escape to `[LIMITS]`/`[RESPONSE]`/`[NOTE]` is allowed only with a one-sentence written justification naming the specific cost of the FIX and why it is unjustified. If you cannot write such a justification, leave the classification as `[FIX]`.
+1. **Severity-≥7 default (Gate 4 only).** Any self-attack concern in the `### Severity 10` or `### Severity 7-9` sections of the input file defaults to `[FIX]`. Escape to `[LIMITS]`/`[RESPONSE]`/`[NOTE]` is allowed only with a one-sentence written justification naming the specific cost of the FIX and why it is unjustified. If you cannot write such a justification, leave the classification as `[FIX]`. **The self-attacker groups attacks by target (a specific model object) with a root attack and variants.** Treat each Target group as one concern row in the triage table — the group's severity is the max across variants, and the `[FIX]` applies to the group, not to individual variants.
 
 2. **No silent downgrade of referee `[FIX]` (Gate 5 only).** If a referee tagged a comment `[FIX]`, you may downgrade it to `[LIMITS]`/`[RESPONSE]`/`[NOTE]` only with a one-sentence written justification of the same form. The referee's `[FIX]` is their escalation signal; treat downgrades as exceptional.
 
