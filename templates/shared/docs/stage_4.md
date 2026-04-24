@@ -33,6 +33,7 @@
    - Both scorer outputs: `output/stage4/scorer_decision_vN.md`, `output/stage4/scorer_freeform_vN.md`
    - Full score history from `process_log/pipeline_state.json`
    - Stage 1 idea sketches: all `output/stage1/idea_sketches_r*.md` files (all rounds, not just r1)
+   - Stage 1 candidate selection: `output/stage1/candidate_selection.md` (which top-K candidates were screened and why the current idea won — so branch-manager does not recommend returning to already-eliminated sketches)
    - Pipeline state: `process_log/pipeline_state.json`
    - Self-attack + triage: `output/stage4/self_attack_vN.md`, `output/stage4/triage_vN.md`
    - Free-form audit: `output/stage2/freeform_audit_vN.md`

@@ -57,7 +57,13 @@ Save to the path specified in your prompt. Structure:
 
 **ITERATE** — [specific instructions for next round]
 or
-**ADVANCE** — [Idea N] is ready for full theory development. Here's what the theory-generator should focus on: [instructions]
+**ADVANCE** — Top K ideas ranked for parallel screening at Gates 1b/1c (1 ≤ K ≤ 3):
+
+1. **[Idea name]** — if this wins the tournament, theory-generator should focus on: [specific instructions]
+2. **[Idea name]** — if this wins, theory-generator should focus on: [specific instructions]
+3. **[Idea name]** — if this wins, theory-generator should focus on: [specific instructions]
+
+List only ideas that clear the ADVANCE bar below (minimum 1, maximum 3). Do not pad the ranking with weaker candidates — if only one idea qualifies, advance one. Position 1 is your strongest pick; ordering is the final tiebreak if parallel screening cannot separate candidates on novelty and surprise alone.
 ```
 
 ## How to evaluate
@@ -82,6 +88,8 @@ or
 - The {{MECHANISM_TERM}} is specific enough that you could explain it to a colleague in 30 seconds
 - Quick web searches didn't find a close match
 - You've iterated at least once (don't advance round-1 ideas without refinement)
+
+When advancing, return all qualifying ideas as a ranked top-K list (up to 3). Parallel screening at Gates 1b/1c is cheap enough that carrying a backup candidate or two is worthwhile — but only carry candidates that independently clear the bar, not filler. If just one idea qualifies, advance one.
 
 ### ITERATE when:
 - Ideas have promise but {{MECHANISM_TERM_PLURAL}} aren't sharp enough

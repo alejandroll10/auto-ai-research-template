@@ -74,14 +74,18 @@ Concretely:
 ```
 Stage 0: Problem Discovery   ──→ Gate 0: Problem Viability
 Stage 1: Idea Generation     ──→ Gate 1: Idea Review (iterates with generator)
-                                   └── ADVANCE → best idea selected
-                                Gate 1b: Novelty Check on idea
-                                   ├── KNOWN → kill idea, back to Stage 1
-                                   ├── INCREMENTAL → flag, proceed with caution
-                                   └── NOVEL → Gate 1c
-                                Gate 1c: Idea Prototype (tractability)
-                                   ├── BLOCKED → try next idea or back to Stage 1
-                                   └── TRACTABLE → proceed to Stage 2
+                                   └── ADVANCE → top-K ideas ranked (1 ≤ K ≤ 3)
+                                Gates 1b/1c: Parallel screening on top-K
+                                   Step 1: K novelty-checkers in parallel
+                                     └── drop KNOWN; survivors continue
+                                   Step 2: prototypers on survivors in parallel
+                                     └── drop BLOCKED (Negative results →
+                                         stage1/negative_results.md, sequential append)
+                                   Step 3: tiebreak among TRACTABLE survivors
+                                     (novelty tier > surprise tier > reviewer rank)
+                                     → winner copied to canonical files
+                                   ├── all K eliminated → new Round of Stage 1
+                                   └── ≥1 survives → proceed to Stage 2
 Stage 2: Theory Development  ──→ Gate 2: Math Audit (structured then free-form)
                                    Gate 3: Novelty Check on full theory
                                    Stage 3a: Theory Exploration (compute, verify, plot)
@@ -139,6 +143,7 @@ Initial state (created by setup.sh):
   "status": "not_started",
   "scores": {},
   "stage3a_theory_version": null,
+  "stage1_candidates": [],
   "history": []
 }
 ```
@@ -150,6 +155,15 @@ When you start the pipeline, set `"status": "running"` and begin appending to th
 **History array:** Append a `{ "timestamp": "ISO-8601", "event": "description" }` entry for every pipeline event. This feeds the dashboard. Use `date -u +%Y-%m-%dT%H:%M:%SZ` to get the timestamp. Never truncate or clear the history array.
 
 **`stage3a_theory_version`:** Set to the `theory_version` that Stage 3a last fully explored. Before advancing at Gate 4, the orchestrator must verify this equals the current `theory_version`; if it is stale, re-run Stage 3a on the new content (see `docs/stage_2.md` Stage 3a step 5).
+
+**`stage1_candidates`:** Records every sketch screened at Gates 1b/1c during Stage 1. Each entry: `{round, rank, sketch_name, novelty, prototype, surprise, eliminated, winner}` — `round` is the `idea_round` value when the entry was last written; `rank` is the idea-reviewer ADVANCE position (1..K) **within that round** (rank is unique per-round, NOT unique across the array); verdict fields are `null` until the agent runs. The flags mean:
+- `eliminated: true` — screened as dead. Set **only** for KNOWN at 1b or BLOCKED at 1c. Never re-nominate.
+- `winner: true` — the sketch whose theory is currently being developed downstream. If the theory later fails, this sketch has already been tried and should not be re-nominated.
+- `eliminated: false AND winner: false` — a TRACTABLE survivor that lost the tiebreak. **This is a pre-vetted runner-up** and is the preferred re-nomination on re-entry after a failed theory (see `docs/stage_1.md` step 2).
+
+Entries accumulate across Rounds — do not clear between Rounds. **Deduplicate by `sketch_name`**: if an entry with the same `sketch_name` already exists when Step 7 of Stage 1 runs, update it in place (new `round`, new `rank`, verdict fields reset to `null` for re-screening) rather than appending a duplicate. Lookups that need "the current winner" must filter by `winner: true` (at most one such entry should exist at any time during a run); lookups that need "pre-vetted runner-ups" filter by `eliminated: false AND winner: false`.
+
+**Per-round indexed file namespace.** Stage 1 writes indexed candidate files (`selected_idea_{k}.md`, `novelty_check_{k}.md`, `idea_prototype_{k}.md`) under `output/stage1/round_{N}/` where N is the current `idea_round`. This keeps each Round's artifacts self-contained and prevents stale indexed files from a prior Round being mistaken for current state. The canonical winner files (`output/stage1/selected_idea.md`, `novelty_check_idea.md`, `idea_prototype.md`) are written at the top level of `output/stage1/` and are the authoritative inputs for Stage 2.
 
 {{SEED_OVERRIDE}}
 
@@ -257,7 +271,7 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 |-----------|-----------------|--------|
 | Idea review iterates | 5 rounds | Pick the best idea and advance to Gate 1b |
 | Idea review rejects all | 1 rejection | Return to Stage 0 for a different problem |
-| Idea novelty check (Gate 1b) KNOWN | All ideas from current round exhausted | New round of Stage 1 (counts toward 5-round limit) |
+| Gates 1b/1c parallel screening eliminates all candidates | All top-K KNOWN at 1b OR BLOCKED at 1c | New Round of Stage 1 (counts toward 5-round limit) |
 | Gate 3 novelty INCREMENTAL | 3 rework attempts at Stage 2 | Abandon this idea, return to Stage 1 for a new one |
 | Math audit fails | 3 attempts | Abandon this theory version |
 | Scorer: delta ≥ 3 | — | Allow one more iteration in current band |
