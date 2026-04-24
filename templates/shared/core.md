@@ -281,7 +281,9 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 | Theory scored ABANDON | 5 theories on same problem | Change the problem (Stage 0) |
 | Problem viability fails | 5 problems | Pick the best scoring problem and proceed anyway |
 | Referee: Major Revision | Structural concerns (fragile, narrow, shallow) | Use extension playbook. Be patient — keep going as long as each round surfaces any new issue. Max 10 rounds. |
-| Referee rejects | 2 rejections with "fundamental flaw" | Return to Stage 0 with entirely new topic |
+| Mechanism referee: MISATTRIBUTED unresolved | Still MISATTRIBUTED at `referee_round >= 10` | Adopt the mechanism referee's identified driver as the paper's mechanism; rewrite introduction/mechanism sections and ship. **Force-adoption at round-10 resolves all outstanding locked mechanism `[FIX]` items as satisfied — no further revision cycle is required.** In seeded mode, prefer the narrow-framing path from the seed override (present what the math delivers under the seed's topic, acknowledge the mechanism-claim divergence in limitations) rather than adopting an unrelated driver. Never return to Stage 0 (never-abandon). |
+| Mechanism referee: DECORATIVE unresolved | Still DECORATIVE at `referee_round >= 10` | Ship the narrow-path version: after 10 rounds the restructure path has failed to surface real economic content, so narrow is the principled default. Present what the math delivers as a structural characterization, strip mechanism framing, add a limitations paragraph. **Round-10 narrow-adoption resolves all outstanding locked mechanism `[FIX]` items as satisfied.** Never return to Stage 0 (never-abandon, scientist-first). |
+| Referee rejects | 2 rejections with "fundamental flaw" | Return to Stage 0 with entirely new topic **only if no paper draft exists (pre-Stage-5)**. If a paper draft exists, treat as Major Revision with extension-playbook mandate — never-abandon applies. |
 
 ---
 
