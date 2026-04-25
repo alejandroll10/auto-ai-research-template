@@ -1,6 +1,6 @@
 # CLAUDE.md — Meta Project: Pipeline Template Development
 
-AFTER EVERY BIG CHANGE  SPAN A SONNET AGENT TO REVIE YOUR CHANGES FOR ISSUES. IF ANY ISSUES ARE FOUND, ADD A NEW ROUND OF AUDITING AFTER FIXING. ITERATE UNTIL DONE.
+AFTER EVERY BIG CHANGE  SPAN A SONNET AGENT TO REVIE YOUR CHANGES FOR ISSUES. IF ANY ISSUES ARE FOUND, ADD A NEW ROUND OF AUDITING AFTER FIXING THE CURRENT ROUND'S ISSUES (EVEN IF THERE ARE ONLY MINOR CHANGES). ITERATE UNTIL DONE.
 
 ## What this is
 
@@ -50,7 +50,15 @@ If a user asks to create/set up/start a new research project, run `setup.sh` for
 
 # Seeded idea + empirical
 ./setup.sh <project-name> --variant finance --seed --ext empirical
+
+# Manual mode (research toolkit — agents and skills only, no autonomous pipeline)
+./setup.sh <project-name> --variant finance --manual
+
+# Manual mode + empirical extension
+./setup.sh <project-name> --variant finance --manual --ext empirical
 ```
+
+`--manual` is mutually exclusive with `--seed`. It assembles `core_manual.md` instead of `core.md`, auto-generates an agent/skill catalog from the metadata files, swaps in per-runtime `session_manual.md` files, and skips creating `process_log/pipeline_state.json`, the `output/stage*` subdirs, and `dashboard.html`. Pipeline-only agents (`scribe`, `triager`, `puzzle-triager`, `branch-manager`) are still assembled into `.claude/agents/` etc. but flagged `pipeline_only: true` in metadata so `scripts/generate_catalog.py` hides them from the user-facing catalog.
 
 This creates a standalone project folder with assembled CLAUDE.md, AGENTS.md, GEMINI.md, agents for all runtimes, and skills. After setup, tell the user to:
 
@@ -85,14 +93,18 @@ PYTHONPATH=code python3 -c "from utils.wrds_client import wrds_ping; print(wrds_
 templates/
 ├── shared/
 │   ├── core.md              # Runtime-agnostic pipeline orchestrator template
+│   ├── core_manual.md       # Slim manual-mode runtime doc (no pipeline, just catalogs)
 │   └── seed.md              # Seeded-idea override block (injected when --seed is used)
 ├── runtime/
 │   ├── claude/
-│   │   └── session.md       # Claude-specific session guidance (injected as {{RUNTIME_SESSION_GUIDANCE}})
+│   │   ├── session.md           # Claude-specific session guidance (autonomous mode)
+│   │   └── session_manual.md    # Claude-specific session guidance (manual mode)
 │   ├── codex/
-│   │   └── session.md       # Codex orchestration discipline
+│   │   ├── session.md           # Codex orchestration discipline (autonomous mode)
+│   │   └── session_manual.md    # Codex toolkit guidance (manual mode)
 │   └── gemini/
-│       └── session.md       # Gemini orchestration discipline
+│       ├── session.md           # Gemini orchestration discipline (autonomous mode)
+│       └── session_manual.md    # Gemini toolkit guidance (manual mode)
 ├── agent_metadata/          # JSON metadata for agent assembly (tools, model, description)
 │   ├── claude_shared_agents.json
 │   ├── claude_finance_agents.json
@@ -123,7 +135,8 @@ scripts/
 ├── assemble_claude_skills.py   # Combines skill metadata + skill bodies → .claude/skills/*/SKILL.md
 ├── assemble_codex_skills.py    # Combines skill metadata + skill bodies → .agents/skills/*/SKILL.md
 ├── assemble_codex_subagents.py # Combines agent metadata + bodies → .codex/agents/*.toml
-└── assemble_gemini_agents.py   # Combines agent metadata + bodies → .gemini/agents/*.md
+├── assemble_gemini_agents.py   # Combines agent metadata + bodies → .gemini/agents/*.md
+└── generate_catalog.py         # Manual mode: emits agent/skill catalog markdown from metadata
 
 extensions/                  # Optional extensions (empirical, theory_llm)
 ├── empirical/
