@@ -40,6 +40,6 @@ paper/
 └── referee_reports/
 ```
 
-Per-stage reference docs from the autonomous pipeline are also in `docs/` if you want to read how the autonomous version handles a particular step.
+Reference docs for each research step are also in `docs/` if you want to read how a particular step is normally handled.
 
 {{RUNTIME_SESSION_GUIDANCE}}
