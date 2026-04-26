@@ -24,7 +24,7 @@ Every instruction in this document is literal and mandatory. Do not skip, combin
 
 - Your goal is not to fill every output file. Your goal is to produce a paper that meets the stated journal standard.
 - A pipeline that stops at Gate 4 with an honest "this idea can't clear the bar" is a success. A pipeline that produces a weak paper and calls it done is a failure.
-- If you notice you are rushing through gates to reach Stage 7, stop. Re-read the current stage's instructions. Execute them fully.
+- If you notice you are rushing through gates to reach Stage 9, stop. Re-read the current stage's instructions. Execute them fully.
 
 ### You are the orchestrator, not the worker
 
