@@ -638,12 +638,15 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "fix_empirics_rounds": 0,
   "bib_verify_round": 0,
   "polish_round": 0,
+  "regeneration_round": 0,
   "pivot_resolved": null,
   "pivot_history": [],
   "triaged_lit_implications": [],
   "status": "not_started",
   "seeded": true,
   "scores": {},
+  "stage3a_theory_version": null,
+  "stage1_candidates": [],
   "history": []
 }
 JSONEOF
@@ -660,11 +663,15 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "fix_empirics_rounds": 0,
   "bib_verify_round": 0,
   "polish_round": 0,
+  "regeneration_round": 0,
   "pivot_resolved": null,
   "pivot_history": [],
   "triaged_lit_implications": [],
+  "seeded": false,
   "status": "not_started",
   "scores": {},
+  "stage3a_theory_version": null,
+  "stage1_candidates": [],
   "history": []
 }
 JSONEOF

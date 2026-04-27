@@ -21,7 +21,7 @@ Read all of these before writing your report. The Stage 1 sketches files are cri
 
 A structured report with exactly five sections. Do not deviate from this structure. The structure is a forcing function: it prevents the report from degenerating into comfort-seeking narrative.
 
-Save to the path specified in your prompt.
+Save to the path specified in your prompt. **Conditional second output:** if and only if §E recommends **Regenerate**, also write `output/stage1/learnings_r{N}.md` per the "Allowed alternative type — Regenerate" spec in §D below.
 
 ```markdown
 # Branch-Manager Report — Gate 4, [Theory Version]
@@ -65,9 +65,11 @@ List 2-3 concrete alternatives to continuing the current path. For EACH:
 
 **Required:** At least one alternative must be a structural reframe of the existing work — keeping the core math but rebuilding the paper's headline around a different result. Identify which result should be promoted and why it is more honest or more publishable than the current headline.
 
+**Allowed alternative type — Regenerate.** When the current attempt succeeded but ceilinged (score 55-74 with diminishing returns), `regeneration_round == 0` in pipeline state, and the run is **not seeded** (`seeded != true`), you may recommend firing a fresh Stage 1 sketch round informed by what this attempt taught us. **Never recommend Regenerate on a seeded run** — the seed is the contract. If you select Regenerate as the recommended action in §E, you must **also** produce a second output file `output/stage1/learnings_r{N}.md` where N is the *new* `regeneration_round` value (current value + 1, so typically `learnings_r1.md` since regeneration is allowed at most once per problem). Required sections in that file: (a) **Findings** — empirical/theoretical results from this attempt, (b) **Ceiling dimension(s)** — the scorer dimension(s) capping the score, with evidence, (c) **Exhausted mechanisms** — bullet list of mechanism names already tried (cross-reference `stage1_candidates.sketch_name`), (d) **Wanted properties** — what a sharper mechanism would need to explain to clear 75. **Note for post-Stage-5 runs:** if a paper draft exists, recommending Regenerate triggers an archive-and-restore protocol (see `docs/stage_1.md` "Regeneration round"); flag this in your §E justification so the orchestrator knows to record the archived best score before re-entry. Do not produce the learnings file if §E does not recommend Regenerate.
+
 ## E. Recommendation
 
-- **Recommended action:** [Continue / Restructure around [specific result] / Restart with [specific sketch] / Other]
+- **Recommended action:** [Continue / Restructure around [specific result] / Restart with [specific sketch] / Regenerate (with learnings file) / Other]
 - **Why the other alternatives are worse:** [one sentence each]
 - **What would change this recommendation:** [specific conditions — e.g., "if the Importance dimension were above X" or "if the framing-content gap were closed by leading with result Y"]
 ```

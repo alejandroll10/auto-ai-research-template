@@ -144,8 +144,11 @@ Initial state (created by setup.sh):
   "fix_empirics_rounds": 0,
   "bib_verify_round": 0,
   "polish_round": 0,
+  "regeneration_round": 0,
   "pivot_resolved": null,
   "pivot_history": [],
+  "triaged_lit_implications": [],
+  "seeded": false,
   "status": "not_started",
   "scores": {},
   "stage3a_theory_version": null,
@@ -261,7 +264,7 @@ After the pipeline is complete (`"status": "complete"`), any new or modified pro
 
 ## Never-abandon rule
 
-**Once a paper draft exists (Stage 5+), the pipeline must produce a finished paper.** Do not loop back to Stage 0 after investing in paper writing. Instead, use the extension playbook below to strengthen the paper.
+**Once a paper draft exists (Stage 5+), the pipeline must produce a finished paper.** Do not loop back to Stage 0 after investing in paper writing. Instead, use the extension playbook below to strengthen the paper. A regeneration round per the escalation table is permitted post-Stage-5; it re-enters at Stage 1, not Stage 0.
 
 If the scorer plateaus in the 55-74 range or the referee gives Major Revision with structural concerns (result is fragile, too narrow, or shallow):
 
@@ -291,6 +294,7 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 | Scorer: delta < 3 (plateau/decline) | — | Escalate one level (REVISE → MAJOR REWORK → ABANDON) |
 | Scorer: hard ceiling | 8 total evaluations on same problem | If score ≥ 55: switch to extension playbook. If score < 55: escalate one level. |
 | Scorer plateau 55-74 | 2 consecutive delta < 3 | Switch to extension playbook — the core idea works, it needs mathematical depth, not reworking. |
+| Scorer plateau 55-74, branch-manager §E = Regenerate, no prior regen on this problem (`regeneration_round == 0`), **not seeded** | — | Fire regeneration round at Stage 1 (see `docs/stage_1.md` "Regeneration round"). Increment `regeneration_round` *before* re-entering Stage 1. **Takes precedence over the extension-playbook row above when both fire** — Regenerate is the §E verdict that supersedes the default plateau routing. **At most one regeneration per problem:** if the regenerated attempt also plateaus, this row no longer fires (`regeneration_round > 0`) and the "Scorer plateau 55-74" row directly above applies — switch to the extension playbook. |
 | Theory scored ABANDON | 5 theories on same problem | Change the problem (Stage 0) |
 | Problem viability fails | 5 problems | Pick the best scoring problem and proceed anyway |
 | Referee: Major Revision | Structural concerns (fragile, narrow, shallow) | Use extension playbook. Be patient — keep going as long as each round surfaces any new issue. Max 10 rounds. |

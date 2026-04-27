@@ -1,5 +1,7 @@
 # Stage 0: Problem Discovery
 
+**On every Stage 0 (re-)entry: reset `regeneration_round` to 0 in `pipeline_state.json` if it is non-zero.** Regeneration is scoped to a single problem; a new problem starts with a clean slate.
+
 ## Step 0a: Broad literature scan
 
 **Agent:** `literature-scout`

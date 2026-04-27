@@ -67,3 +67,4 @@ Save to the path specified in your prompt. For each idea, develop it enough that
 - **Be honest about risks.** Every idea has a weakness. Name it upfront — the reviewer will find it anyway.
 - **Diversity matters.** If all your ideas use the same friction or the same {{IDEA_GEN_DIVERSITY_TERM}}, you haven't brainstormed — you've just varied one idea.
 - **Build on the literature map.** Reference specific papers when explaining novelty or positioning.{{IDEA_GEN_EXTRA_RULE}}
+- **Regeneration round.** If your prompt names a learnings file (`output/stage1/learnings_r{N}.md`), read it and ensure your sketches do not repeat mechanisms listed there as exhausted.

@@ -2,6 +2,14 @@
 
 **Agents:** `idea-generator` + `idea-reviewer` (iterating)
 
+**Regeneration round.** A regeneration round fires when the prior theory attempt succeeded but ceilinged at 55-74, branch-manager §E recommends Regenerate, and `regeneration_round == 0` for this problem (see `core.md` escalation table). The orchestrator increments `regeneration_round` to N *before* entering Stage 1, so when this section is read, `regeneration_round` already equals the new N — and `learnings_r{N}.md` and `paper_archive/r{N}/` use the same N (the post-increment value). On a regeneration entry:
+- Pass `output/stage1/learnings_r{regeneration_round}.md` (produced by branch-manager) to **both** idea-generator and idea-reviewer alongside the lit map.
+- **At step 2 below, take the explicit Regeneration short-circuit** (added at the top of step 2) — do not consult the runner-up or unused-sketch priorities; the existing portfolio is by assumption exhausted.
+- Sketches must not repeat any mechanism in `stage1_candidates.sketch_name` or the learnings file's "exhausted mechanisms" list.
+- Idea-reviewer treats combination sketches (prior structural piece + new mechanism) as first-class — do not screen for "single mechanism."
+- **If post-Stage-5:** archive the current paper to `paper_archive/r{regeneration_round}/` before generation begins; record its best Gate 4 score as `archived_best_score_r{N}` in pipeline state (if not already written by stage_4.md). If the new attempt's eventual Gate 4 score does not strictly beat that archived value, restore the archived paper and ship it.
+- **Banned in seeded mode** — the seed is the contract. Branch-manager must not recommend Regenerate on seeded runs; the escalation row in core.md guards this with "not seeded."
+
 **How many ideas to generate:** More candidates when the pool is weaker — more failures mean more draws needed.
 
 | Context | Ideas per round |
@@ -11,7 +19,9 @@
 | Returning from a problem-level failure (Stage 0 re-run) | 10, and explicitly explore different territory |
 
 1. Read `output/stage0/problem_statement.md`, `output/stage0/literature_map.md`, and `output/data_inventory.md`
-2. **If returning from a failed attempt:** first reread all `output/stage1/idea_sketches_r*.md` files AND `pipeline_state.json:stage1_candidates` (which records every sketch previously screened at Gates 1b/1c along with its verdict). **Seeded-mode note:** in seeded mode this step does not apply — the orchestrator never re-nominates a different idea (the seeded-mode overrides at Gate 4 and puzzle-triage block Stage 1 re-entry for idea swapping). The re-entry logic below applies only to non-seeded runs. Selection priority on re-entry:
+2. **Regeneration short-circuit:** if `regeneration_round` was just incremented for this re-entry (per the "Regeneration round" section above), skip the priority list below entirely — proceed directly to step 3, launching idea-generator with the learnings file. The runner-up / unused-sketch priorities do not apply on a regeneration entry.
+
+   Otherwise — **if returning from a failed attempt:** first reread all `output/stage1/idea_sketches_r*.md` files AND `pipeline_state.json:stage1_candidates` (which records every sketch previously screened at Gates 1b/1c along with its verdict). **Seeded-mode note:** in seeded mode this step does not apply — the orchestrator never re-nominates a different idea (the seeded-mode overrides at Gate 4 and puzzle-triage block Stage 1 re-entry for idea swapping). The re-entry logic below applies only to non-seeded runs. Selection priority on re-entry:
    1. **Pre-screened runner-up** — an entry with `eliminated: false AND winner: false` (a TRACTABLE survivor that lost the tiebreak in a prior Round). These are already vetted by novelty + prototype and are the strongest fallback. If ≥1 exists, pick the highest-ranked one and **skip idea generation entirely**. To re-advance the runner-up:
       - (a) Start a new Round: increment `idea_round` in `pipeline_state.json` (the runner-up re-advance counts as a Round and is subject to the 5-round cap). Let N = new `idea_round`. Create `output/stage1/round_{N}/` and copy the runner-up's prior indexed file `output/stage1/round_{old_round}/selected_idea_{old_rank}.md` to `output/stage1/round_{N}/selected_idea_1.md` (K=1 for a runner-up re-advance). The prior Round's files remain in place as audit trail.
       - (b) Update the runner-up's `stage1_candidates` entry: set `round: N`, `rank: 1`, and reset `novelty`, `prototype`, `surprise` to `null` (they are about to be re-run). Do not touch `eliminated` or `winner` (both remain `false`).

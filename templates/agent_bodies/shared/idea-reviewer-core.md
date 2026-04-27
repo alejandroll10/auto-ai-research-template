@@ -108,3 +108,4 @@ When advancing, return all qualifying ideas as a ranked top-K list (up to 3). Pa
 - **Don't kill ideas for being simple.** Simple is good. Kill ideas for being vague, known, or unimportant.
 - **Score honestly.** Most ideas should score 2-3. A score of 5 means "this could be {{IDEA_TOP_PAPER_EXAMPLE}}." That's rare.
 - **Track improvement across rounds.** If an idea improved from round N-1, say so. If it didn't improve despite feedback, that's a signal to drop it.
+- **Regeneration rounds.** When invoked on a regeneration round (orchestrator passes a learnings file in the prompt), combination sketches that build on a prior structural piece and add a new mechanism are first-class candidates — do not screen them out for "single mechanism, single proof."
