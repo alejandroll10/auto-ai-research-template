@@ -8,6 +8,11 @@ When the user gives you a research task:
 
 When the user is unsure what to do next, do not guess. Read `paper/main.tex`, list `paper/sections/`, list `output/`, and list `references/`. Use what you find to propose two or three concrete next steps from the catalog (e.g., "theory draft exists but no math audit — launch `math-auditor`?"; "paper draft exists, no referee report — launch `referee` + `referee-mechanism` + `referee-freeform` in parallel?"; "no paper draft yet — launch `literature-scout` to start a fresh project?").
 
+Also detect which "shape" the paper is in by checking `paper/`:
+- **Empty `paper/sections/`, no `paper/.git`** → ask the user whether to import an existing paper into `paper/` or launch `paper-writer` to create one from scratch.
+- **`paper/.git` exists** → user has dropped in a separate paper repo. Confirm `.gitignore` contains `paper/` (replacing any `paper/*.foo` lines); if not, propose adding it so the outer git stops seeing the nested repo as untracked. Then proceed.
+- **`paper/sections/*.tex` files exist, no `paper/.git`** → paper is in place as flat files. Proceed.
+
 ### Agent launch and monitoring
 
 Subagents can hang indefinitely. Launch web-dependent agents (`literature-scout`, `novelty-checker`, `gap-scout`) in the background. Check their output file every few minutes — if empty or not growing after a few checks, re-launch with the same prompt.
