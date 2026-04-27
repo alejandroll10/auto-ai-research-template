@@ -51,6 +51,7 @@ Save to the path specified in your prompt. For each idea, develop it enough that
 - Each idea should use a **different {{IDEA_GEN_DIFFERENT_MECHANISM}}**. Don't just vary the setup of the same idea.{{IDEA_GEN_EXTRA_BRAINSTORM_BULLET}}
 - At least one idea should be unconventional or surprising.
 - At least one should be simple and clean ({{IDEA_GEN_SIMPLE_HINT}}).
+- **Multi-piece sketches are valid Round 1 forms.** A sketch whose contribution is two load-bearing pieces (e.g., a structural identity + a within-class characterization) is fine when the union is the natural shape of the result. Do not pre-flatten to "single mechanism" if the natural shape is multi-piece.
 
 ### Round 2+ (with reviewer feedback)
 - Read the reviewer's feedback carefully.

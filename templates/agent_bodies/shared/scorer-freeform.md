@@ -32,7 +32,7 @@ Do NOT score dimension by dimension. Instead:
 ### Third pass: the structure
 - Is the paper the right length for what it delivers?
 - Are there sections that exist to defend against objections rather than advance the argument?
-- Could you cut 30% without losing the contribution? If so, which 30%?
+- Could you cut 30% without losing the contribution? If so, which 30%? (Caveat: if the paper is multi-piece and each piece is load-bearing for the union thesis, do not count the multi-piece structure itself as cuttable — only defensive sections, redundant proofs, and unused extensions.)
 - Is the paper getting in its own way?
 
 ### Fourth pass: publishability

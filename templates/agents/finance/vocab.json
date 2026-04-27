@@ -68,7 +68,7 @@
 
   "SELF_ATTACK_EQUILIBRIUM_SECTION": "",
   "SELF_ATTACK_RESULT_BULLETS": "- Is the main result obvious once you see the setup? (\"Trivially follows from...\")\n- Is the result fragile — does it depend on a knife-edge case?\n- Does the result reverse with a small change in assumptions?\n- Are there counterexamples?",
-  "SELF_ATTACK_MECHANISM_BULLETS": "- Is the economic mechanism well-known from other papers?\n- Could you get the same result from a simpler model?\n- Is the mechanism realistic? Would practitioners recognize it?",
+  "SELF_ATTACK_MECHANISM_BULLETS": "- Is the economic mechanism well-known from other papers?\n- Could you get the same result from a simpler model? (Skip this attack if the contribution is multi-piece and each piece is load-bearing for the union thesis — see scorer-core's multi-piece exception.)\n- Is the mechanism realistic? Would practitioners recognize it?",
   "SELF_ATTACK_MACRO_SECTIONS": "",
   "SELF_ATTACK_DECISION_TERM": "decision",
   "SELF_ATTACK_COMPLETENESS_BULLETS": "- What obvious extensions or cases are missing?\n- Are there parameters ranges where the model breaks down?\n- What happens in the limit?",

@@ -43,7 +43,7 @@ Work through these questions as a skeptical economist would at a seminar:
 
 ### Is there a simpler mechanism?
 
-- Could a simpler model — fewer agents, fewer frictions, fewer state variables — deliver the same result? If so, the paper's complexity is not earning its keep, and the mechanism is either not what the paper thinks it is, or the paper is overclaiming generality.
+- Could a simpler model — fewer agents, fewer frictions, fewer state variables — deliver the same result? If so, the paper's complexity is not earning its keep, and the mechanism is either not what the paper thinks it is, or the paper is overclaiming generality. **Exception:** if the paper's contribution is genuinely multi-piece and each piece is load-bearing (the union thesis cannot be stated without it), the test is whether each *piece* could be replaced by a simpler version — not whether the whole paper could be flattened to a single piece.
 - Conversely, if the result requires all the complexity the paper deploys, what specifically breaks if you remove each piece?
 
 ### Does the mechanism generalize, or is it a special case?

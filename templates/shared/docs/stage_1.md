@@ -6,7 +6,6 @@
 - Pass `output/stage1/learnings_r{regeneration_round}.md` (produced by branch-manager) to **both** idea-generator and idea-reviewer alongside the lit map.
 - **At step 2 below, take the explicit Regeneration short-circuit** (added at the top of step 2) — do not consult the runner-up or unused-sketch priorities; the existing portfolio is by assumption exhausted.
 - Sketches must not repeat any mechanism in `stage1_candidates.sketch_name` or the learnings file's "exhausted mechanisms" list.
-- Idea-reviewer treats combination sketches (prior structural piece + new mechanism) as first-class — do not screen for "single mechanism."
 - **If post-Stage-5:** archive the current paper to `paper_archive/r{regeneration_round}/` before generation begins; record its best Gate 4 score as `archived_best_score_r{N}` in pipeline state (if not already written by stage_4.md). If the new attempt's eventual Gate 4 score does not strictly beat that archived value, restore the archived paper and ship it.
 - **Banned in seeded mode** — the seed is the contract. Branch-manager must not recommend Regenerate on seeded runs; the escalation row in core.md guards this with "not seeded."
 

@@ -63,7 +63,7 @@ A theory draft saved to the path specified in your prompt. Structure:
 ### Crossover (combining two attempts)
 - Read both theories and their evaluations.
 - What's the best idea from each? Can they be combined into one model?
-- The combination should be simpler than either parent, not more complex.
+- The combination should be simpler than either parent, not more complex. **Exception:** a multi-piece combination where each piece is load-bearing for the union thesis need not be simpler than either parent — the added complexity earns its keep when the union delivers content the strongest piece alone cannot.
 
 ## Rules
 
