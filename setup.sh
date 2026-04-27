@@ -252,7 +252,27 @@ if [ "$LOCAL" = "1" ]; then
     # Local test mode — no clone, no git, no prereq checks
     PROJECT_NAME="${PROJECT_NAME:-test_output/$VARIANT}"
     TEMPLATE_ROOT="$SCRIPT_DIR"
-    OUT_DIR="$SCRIPT_DIR/$PROJECT_NAME"
+
+    # Resolve OUT_DIR: absolute path stays absolute, relative anchors to SCRIPT_DIR
+    case "$PROJECT_NAME" in
+        /*) OUT_DIR="$PROJECT_NAME" ;;
+        *)  OUT_DIR="$SCRIPT_DIR/$PROJECT_NAME" ;;
+    esac
+
+    # Safety: refuse non-empty target unless it's under test_output/ (the dev scratch path).
+    # The previous unconditional rm -rf wiped a real folder — see git log.
+    if [ -d "$OUT_DIR" ] && [ "$(ls -A "$OUT_DIR" 2>/dev/null)" ]; then
+        case "$OUT_DIR" in
+            */test_output/*)
+                : # dev scratch — wipe and continue
+                ;;
+            *)
+                echo "Error: $OUT_DIR already exists and is not empty."
+                echo "Refusing to overwrite. Move or delete the directory first, or pick a different project name."
+                exit 1
+                ;;
+        esac
+    fi
 
     rm -rf "$OUT_DIR"
     mkdir -p "$OUT_DIR/$CLAUDE_AGENTS_REL"
