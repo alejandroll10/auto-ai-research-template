@@ -878,6 +878,35 @@ open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', '').rstrip()+'\n')
 " "$doc"
 done
 
+# Resolve THEORY_ONLY_GUARD markers in branch-manager across the three runtimes.
+# Empirical mode: strip the whole guarded block (body + markers).
+# Theory-only mode: strip just the marker lines, keep the rule text.
+EMPIRICAL_ENABLED=0
+for ext in "${EXTENSIONS[@]}"; do
+    [ "$ext" = "empirical" ] && EMPIRICAL_ENABLED=1
+done
+python3 - "$EMPIRICAL_ENABLED" "$AGENTS_OUT/branch-manager.md" "$CODEX_AGENTS_OUT/branch-manager.toml" "$GEMINI_AGENTS_OUT/branch-manager.md" <<'PYEOF'
+import re, sys
+emp = sys.argv[1] == "1"
+if emp:
+    pat = re.compile(r"<!-- THEORY_ONLY_GUARD_START -->\n.*?<!-- THEORY_ONLY_GUARD_END -->\n\n?", re.DOTALL)
+    repl = ""
+else:
+    pat = re.compile(r"<!-- THEORY_ONLY_GUARD_(?:START|END) -->\n")
+    repl = ""
+for p in sys.argv[2:]:
+    try:
+        with open(p) as f: t = f.read()
+    except OSError:
+        continue
+    new = pat.sub(repl, t)
+    if new != t:
+        try:
+            with open(p, "w") as f: f.write(new)
+        except OSError as e:
+            print(f"  warn: could not resolve guard in {p}: {e}", file=sys.stderr)
+PYEOF
+
 # Re-run seed-override substitution now that extension docs have been copied into $P/docs/.
 # Extensions may ship stage docs (e.g., stage_3b_empirical.md) containing {{SEED_OVERRIDE_*}} placeholders.
 apply_seed_overrides

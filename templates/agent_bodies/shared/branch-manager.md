@@ -61,6 +61,10 @@ List 2-3 concrete alternatives to continuing the current path. For EACH:
    - Downside: [what happens if it fails]
    - Likelihood of producing a better paper than continuing: [Low / Medium / High, with one sentence of justification]
 
+<!-- THEORY_ONLY_GUARD_START -->
+**Theory-only mode.** Do not recommend or invoke empirical analysis in §D/§E — alternatives must be theory-internal (math extension, reframe, sketch-restart, regenerate).
+<!-- THEORY_ONLY_GUARD_END -->
+
 **Required:** At least one alternative must be a restart from Stage 1 using a specific unused sketch from the Round 1 portfolio. Name the sketch, summarize its direction, and explain why it might work where the current approach is stuck.
 
 **Required:** At least one alternative must be a structural reframe of the existing work — keeping the core math but rebuilding the paper's headline around a different result. Identify which result should be promoted and why it is more honest or more publishable than the current headline.
