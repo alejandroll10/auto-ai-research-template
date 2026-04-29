@@ -40,6 +40,7 @@ echo "[codex-math] Sending to Codex (gpt-5.5, effort=$EFFORT)..."
 
 codex exec --full-auto --skip-git-repo-check \
     -c "model_reasoning_effort=\"$EFFORT\"" \
+    -c 'model_reasoning_summary="auto"' \
     -o "$TMP" \
     "You are a mathematical proof auditor at a top academic journal. Verify the following proof with extreme rigor.
 

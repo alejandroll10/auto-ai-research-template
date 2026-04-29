@@ -52,6 +52,7 @@ echo "[codex-math] Writing proof (gpt-5.5, effort=$EFFORT)..."
 
 codex exec --full-auto --skip-git-repo-check \
     -c "model_reasoning_effort=\"$EFFORT\"" \
+    -c 'model_reasoning_summary="auto"' \
     -o "$TMP" \
     "You are a mathematician writing a proof for a top economics journal. Write a complete, publication-ready proof.
 

@@ -90,6 +90,7 @@ Report format:
 
 codex exec --full-auto --skip-git-repo-check \
     -c "model_reasoning_effort=\"$EFFORT\"" \
+    -c 'model_reasoning_summary="auto"' \
     -o "$TMP" \
     "$PROMPT" 2>&1
 
