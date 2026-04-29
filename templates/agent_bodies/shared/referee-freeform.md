@@ -51,6 +51,9 @@ Save to the path specified in your prompt.
 [Accept / Minor Revision / Major Revision / Revise and Resubmit / Reject]
 
 [One sentence on why.]
+
+## What would be publishable
+[Required only if the recommendation is Reject; omit this section otherwise. Describe the type of paper — keeping the current core idea — that would have a good chance of clearing this journal's bar. Be specific: which result should be the centerpiece, what additional theory/economics or empirics would discipline the claim, what the headline contribution would look like.]
 ```
 
 ## Rules

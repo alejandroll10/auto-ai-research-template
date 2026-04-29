@@ -119,7 +119,9 @@ Stage 5: Paper Writing        ──→
 Stage 6: Referee Simulation   ──→ Gate 5: Referee Decision
                                    ├── Minor/Accept → Stage 7
                                    ├── Major Revision → revise, re-run Stage 6 (max 10×)
-                                   └── Reject → back to Stage 2 (fixable) or Stage 0 (fundamental)
+                                   └── Reject → triage → deepen directive → deepen the core
+                                                (theory or empirics; never extend); branch-manager
+                                                substantive/cosmetic check; cosmetic ×2 → theory failure
 Stage 7: Style Check          ──→
 Stage 8: Bibliography Verify  ──→
 Stage 9: Polish               ──→ Done (six parallel polish agents + triage + paper-writer; max 2 rounds)
@@ -140,6 +142,7 @@ Initial state (created by setup.sh):
   "theory_attempt": 1,
   "theory_version": 1,
   "referee_round": 0,
+  "reject_cosmetic_round": 0,
   "pivot_round": 0,
   "fix_empirics_rounds": 0,
   "bib_verify_round": 0,
@@ -152,6 +155,7 @@ Initial state (created by setup.sh):
   "status": "not_started",
   "scores": {},
   "stage3a_theory_version": null,
+{{EMPIRICAL_STATE_FIELDS}}
   "stage1_candidates": [],
   "history": []
 }
@@ -165,6 +169,9 @@ When you start the pipeline, set `"status": "running"` and begin appending to th
 
 **`stage3a_theory_version`:** Set to the `theory_version` that Stage 3a last fully explored. Before advancing at Gate 4, the orchestrator must verify this equals the current `theory_version`; if it is stale, re-run Stage 3a on the new content (see `docs/stage_2.md` Stage 3a step 5).
 
+**`reject_cosmetic_round`:** Tracks consecutive cosmetic-deepening attempts when responding to a Stage 6 Reject verdict. Increments when branch-manager (gate-5-reject context) returns COSMETIC on a deepen attempt; resets to 0 on a SUBSTANTIVE deepen, on a Regeneration Round entry, or on falling back to standard Major Revision after the deepen path is exhausted. See `docs/stage_6.md` Reject row for the full state machine.
+
+{{EMPIRICAL_STATE3E_DOC}}
 **`stage1_candidates`:** Records every sketch screened at Gates 1b/1c during Stage 1. Each entry: `{round, rank, sketch_name, novelty, prototype, surprise, eliminated, winner}` — `round` is the `idea_round` value when the entry was last written; `rank` is the idea-reviewer ADVANCE position (1..K) **within that round** (rank is unique per-round, NOT unique across the array); verdict fields are `null` until the agent runs. The flags mean:
 - `eliminated: true` — screened as dead. Set **only** for KNOWN at 1b or BLOCKED at 1c. Never re-nominate.
 - `winner: true` — the sketch whose theory is currently being developed downstream. If the theory later fails, this sketch has already been tried and should not be re-nominated.
@@ -273,6 +280,7 @@ If the scorer plateaus in the 55-74 range or the referee gives Major Revision wi
 When the core result is correct but thin, extend it with mathematically hard, economically interesting analyses that uncover new content the simple model hid. The goal is characterization, not robustness.
 
 **Extension types:** continuous time (HJB/SDEs), incomplete markets/heterogeneity (Bewley/HANK), learning/incomplete information, general preferences (CRRA/EZ/habits), higher dimensions (N assets, continuum of agents), perturbation/approximation (formal error bounds), dynamic/stochastic, moral hazard/agency, adverse selection, mechanism design, network/contagion.
+{{EMPIRICAL_PLAYBOOK_ADDENDUM}}
 
 **How to apply:** Identify the specific economic weakness from scorer/self-attack feedback. Pick 1-2 extensions that test whether the channel survives under realistic features. Prove the result or prove it breaks (a counterexample is as valuable as a positive result). Re-run Gate 2 + Gate 4 on extensions.
 
@@ -300,7 +308,7 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 | Referee: Major Revision | Structural concerns (fragile, narrow, shallow) | Use extension playbook. Be patient — keep going as long as each round surfaces any new issue. Max 10 rounds. |
 | Mechanism referee: MISATTRIBUTED unresolved | Still MISATTRIBUTED at `referee_round >= 10` | Adopt the mechanism referee's identified driver as the paper's mechanism; rewrite introduction/mechanism sections and ship. **Force-adoption at round-10 resolves all outstanding locked mechanism `[FIX]` items as satisfied — no further revision cycle is required.** In seeded mode, prefer the narrow-framing path from the seed override (present what the math delivers under the seed's topic, acknowledge the mechanism-claim divergence in limitations) rather than adopting an unrelated driver. Never return to Stage 0 (never-abandon). |
 | Mechanism referee: DECORATIVE unresolved | Still DECORATIVE at `referee_round >= 10` | Ship the narrow-path version: after 10 rounds the restructure path has failed to surface real economic content, so narrow is the principled default. Present what the math delivers as a structural characterization, strip mechanism framing, add a limitations paragraph. **Round-10 narrow-adoption resolves all outstanding locked mechanism `[FIX]` items as satisfied.** Never return to Stage 0 (never-abandon, scientist-first). |
-| Referee rejects | 2 rejections with "fundamental flaw" | Return to Stage 0 with entirely new topic **only if no paper draft exists (pre-Stage-5)**. If a paper draft exists, treat as Major Revision with extension-playbook mandate — never-abandon applies. |
+| Referee rejects | — | Stage 6 fires only post-Stage-5, so a paper draft always exists; never-abandon. Reject routes through triage → deepen directive → deepen mandate (see `docs/stage_6.md` Reject row for full procedure). The pre-Stage-5 "Stage 0 / Stage 2" branches do not exist at this point. On two consecutive cosmetic deepen attempts, the orchestrator routes through the Regeneration Round protocol if eligible (`regeneration_round == 0`, not seeded), otherwise falls back to standard Major Revision (never-abandon). |
 
 Before granting another iteration on a Δ≥3 score increase, the orchestrator classifies the v(N)→v(N−1) diff as substantive or cosmetic. Branch-manager emits this verdict at every Gate 4 (Section A); when it reports COSMETIC, the orchestrator escalates rather than continue. Definitions and the cosmetic-edit catalogue live in `docs/stage_4.md`.
 

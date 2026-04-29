@@ -634,6 +634,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "theory_attempt": 1,
   "theory_version": 1,
   "referee_round": 0,
+  "reject_cosmetic_round": 0,
   "pivot_round": 0,
   "fix_empirics_rounds": 0,
   "bib_verify_round": 0,
@@ -659,6 +660,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "theory_attempt": 1,
   "theory_version": 1,
   "referee_round": 0,
+  "reject_cosmetic_round": 0,
   "pivot_round": 0,
   "fix_empirics_rounds": 0,
   "bib_verify_round": 0,
@@ -859,6 +861,83 @@ open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', inject.rstrip()+'\n\n{
                 done
             fi
 
+            # Fill empirical-only placeholders in shared docs / runtime docs / scorer agent body.
+            # Theory-only runs leave these placeholders to be stripped by the post-extension cleanup.
+            python3 - \
+                "$TEMPLATE_ROOT/extensions/empirical/stage2_rerun_inject.md" \
+                "$TEMPLATE_ROOT/extensions/empirical/stage3e_gate_inject.md" \
+                "$TEMPLATE_ROOT/extensions/empirical/state_fields_inject.md" \
+                "$TEMPLATE_ROOT/extensions/empirical/state3e_doc_inject.md" \
+                "$TEMPLATE_ROOT/extensions/empirical/playbook_inject.md" \
+                "$TEMPLATE_ROOT/extensions/empirical/scorer_fertility_inject.md" \
+                "$P/docs/stage_2.md" \
+                "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" \
+                "$AGENTS_OUT/scorer.md" "$CODEX_AGENTS_OUT/scorer.toml" "$GEMINI_AGENTS_OUT/scorer.md" <<'PYEOF'
+import json, os, sys
+# Inject files are read raw — each file is responsible for its own leading/trailing
+# whitespace. The final newline left by the editor IS content (it determines whether
+# a blank line follows the substitution).
+stage2 = open(sys.argv[1]).read()
+stage3e = open(sys.argv[2]).read()
+state = open(sys.argv[3]).read()
+state3e_doc = open(sys.argv[4]).read()
+playbook = open(sys.argv[5]).read()
+fertility = open(sys.argv[6]).read()
+stage2_md = sys.argv[7]
+runtime_docs = sys.argv[8:11]
+scorer_files = sys.argv[11:14]
+
+def patch(path, pairs):
+    if not os.path.exists(path):
+        return
+    with open(path) as f: t = f.read()
+    new = t
+    for needle, repl in pairs:
+        new = new.replace(needle, repl)
+    if new != t:
+        with open(path, "w") as f: f.write(new)
+
+# Stage_2.md: two placeholders. Each placeholder lives on its own line; the
+# placeholder line's trailing newline is preserved by replacing only the
+# placeholder text (no extra "\n" appended).
+patch(stage2_md, [
+    ("{{EMPIRICAL_STAGE2_RERUN_ADDENDUM}}", stage2),
+    ("{{EMPIRICAL_STAGE3E_GATE_ADDENDUM}}", stage3e),
+])
+
+# Runtime docs (CLAUDE.md / AGENTS.md / GEMINI.md): state JSON field + state-doc paragraph + playbook addendum.
+for d in runtime_docs:
+    patch(d, [
+        ("{{EMPIRICAL_STATE_FIELDS}}", state),
+        ("{{EMPIRICAL_STATE3E_DOC}}", state3e_doc),
+        ("{{EMPIRICAL_PLAYBOOK_ADDENDUM}}", playbook),
+    ])
+
+# Scorer agent bodies: replace the comment marker with the empirical fertility addendum.
+for s in scorer_files:
+    patch(s, [
+        ("<!-- EMPIRICAL_FERTILITY_ADDENDUM -->", fertility),
+    ])
+
+# pipeline_state.json: add stage3e_theory_version field, mirroring stage3a_theory_version.
+# Manual mode skips state file creation (see setup.sh ~line 626), so guard on existence.
+state_path = os.path.join(os.path.dirname(stage2_md), "..", "process_log", "pipeline_state.json")
+state_path = os.path.normpath(state_path)
+if os.path.exists(state_path):
+    with open(state_path) as f: data = json.load(f)
+    if "stage3e_theory_version" not in data:
+        # Insert immediately after stage3a_theory_version to preserve key order in the file.
+        new = {}
+        for k, v in data.items():
+            new[k] = v
+            if k == "stage3a_theory_version":
+                new["stage3e_theory_version"] = None
+        data = new
+        with open(state_path, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+PYEOF
+
             echo "  ✓ Empirical extension applied (skills + agents)"
             ;;
         *)
@@ -877,6 +956,30 @@ content=open(d).read()
 open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', '').rstrip()+'\n')
 " "$doc"
 done
+
+# Theory-only cleanup: strip any unfilled {{EMPIRICAL_*}} placeholders and the
+# <!-- EMPIRICAL_FERTILITY_ADDENDUM --> marker. When --ext empirical is on, the
+# empirical block above already substituted real content; this is a no-op then.
+# When --ext empirical is off, this leaves the docs and scorer body identical to
+# the pre-edit baseline (lines containing only the placeholder are removed whole).
+python3 - \
+    "$P/docs/stage_2.md" \
+    "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" \
+    "$AGENTS_OUT/scorer.md" "$CODEX_AGENTS_OUT/scorer.toml" "$GEMINI_AGENTS_OUT/scorer.md" <<'PYEOF'
+import os, re, sys
+# Match a whole line that is just {{EMPIRICAL_*}} (with optional surrounding whitespace),
+# including its trailing newline. Inline (mid-line) occurrences are not used.
+LINE_PAT = re.compile(r"^[ \t]*\{\{EMPIRICAL_[A-Z0-9_]+\}\}[ \t]*\n", re.MULTILINE)
+MARKER_PAT = re.compile(r"^[ \t]*<!-- EMPIRICAL_FERTILITY_ADDENDUM -->[ \t]*\n", re.MULTILINE)
+for p in sys.argv[1:]:
+    if not os.path.exists(p):
+        continue
+    with open(p) as f: t = f.read()
+    new = LINE_PAT.sub("", t)
+    new = MARKER_PAT.sub("", new)
+    if new != t:
+        with open(p, "w") as f: f.write(new)
+PYEOF
 
 # Resolve THEORY_ONLY_GUARD markers in branch-manager across the three runtimes.
 # Empirical mode: strip the whole guarded block (body + markers).

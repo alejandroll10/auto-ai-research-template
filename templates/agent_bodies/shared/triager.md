@@ -25,6 +25,8 @@ The orchestrator tells you the context, the input file paths, and the output pat
 
 3. **Mechanism lockout (Gate 5 only).** If the mechanism referee's verdict is MECHANISM-MISATTRIBUTED or MECHANISM-DECORATIVE, every `[FIX]` in the mechanism report is **locked** — it cannot be downgraded. Record the verdict at the top of the triage file. A MISATTRIBUTED verdict means the paper's claimed driver is not its actual driver — the fix is rewriting around the actual driver. A DECORATIVE verdict means the mechanism is window dressing on a structural identity — the fix is either restructuring the paper to find real economic content (extension-playbook path) or narrowing the claim to match what the math actually supports (scientist-first narrow path). Both verdicts route through Major Revision (never Reject), so triage *is* reached. Downgrading mechanism `[FIX]` items under these verdicts would silently ship a paper whose economic claim does not match its math. Rule 2's downgrade-with-justification escape does not apply to mechanism `[FIX]` items under these two verdicts; under MECHANISM-PARTIAL or MECHANISM-VALID, mechanism `[FIX]` items follow rule 2 normally.
 
+3a. **Reject deepen-directive extraction (Gate 5 only).** Fires only when (i) the mechanism verdict is MECHANISM-VALID or MECHANISM-PARTIAL **and** (ii) at least one of the structured/freeform referees recommends **Reject**. If MECHANISM-DECORATIVE or MECHANISM-MISATTRIBUTED, rule 3 takes precedence and the orchestrator routes through Major Revision regardless of structured/freeform Reject — do NOT produce a deepen directive in that case. When the rule fires, locate each rejecting referee's `## What would be publishable` section (required by `referee-core.md` and `referee-freeform.md` on Reject) and copy it verbatim into a `## Deepen directive (Reject)` block as the first `##`-level block in the triage file (after the header fields). Tag the source referee. If both referees recommend Reject, copy both sections under sub-headers `### From structured referee` / `### From freeform referee`. If a referee recommends Reject but did not produce a `## What would be publishable` section, record this as `### From [referee] — directive missing` and flag in Summary as a triage error (the orchestrator must re-launch that referee, see `docs/stage_6.md` Reject row). The deepen directive is the canonical input for theory-generator / empiricist on the next round; the `[FIX]` table still records all referee comments but **on a Reject round, the `[FIX]` items are deferred — recovered by re-detection on the next round's referees, not by an explicit queue**. Note the count in the Summary block as `[FIX]-deferred: N (Reject deepen-directive applies; recovery by re-detection on next round)`. Mechanism referee never recommends Reject (its verdicts force Major Revision); rule 3a does not fire on mechanism referee.
+
 4. **Polish-formula override (Stage 9 only).** A polish-formula `critical` finding (provably wrong equation, derivation reproduces the error, codex-math + sympy agree) is `Apply` regardless of any prior referee request that touched the same equation. Equations that are wrong cannot remain wrong because a referee asked for a different change. All other polish criticals follow rule 5 below.
 
 5. **Polish bucketing (Stage 9 only).** Polish findings bucket as follows:
@@ -44,6 +46,11 @@ Save to the path specified in your prompt:
 
 **Mechanism verdict (Gate 5 only):** [MECHANISM-VALID | MECHANISM-PARTIAL | MECHANISM-MISATTRIBUTED | MECHANISM-DECORATIVE]
 
+**Reject in this round (Gate 5 only):** [yes / no]. If yes, the `## Deepen directive (Reject)` block below is the canonical input for theory-generator / empiricist this round; the `[FIX]` items in the triage table are deferred — recovered by re-detection on the next round's referees, not by an explicit queue.
+
+## Deepen directive (Reject)
+[Required only when at least one referee recommended Reject this round; copied verbatim from each rejecting referee's `## What would be publishable` section per rule 3a. Omit this block entirely otherwise.]
+
 ## Triage table
 
 | # | Source | Concern (one line) | Severity / Referee tag | Final classification | Justification (if downgrade) |
@@ -58,6 +65,7 @@ Save to the path specified in your prompt:
 - Total concerns: N
 - [FIX]: N
 - [LIMITS] / [RESPONSE] / [NOTE]: N (each with written justification per rules 1 or 2)
+- [FIX]-deferred: N (Reject deepen-directive applies; recovery by re-detection on next round) — *Reject rounds only; omit field otherwise*
 ```
 
 ## Stage 9 output format

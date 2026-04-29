@@ -84,6 +84,7 @@ Parsimony is measured relative to the paper's core result: how many of the assum
 - Does the model open new questions?
 {{FERTILITY_BULLETS}}
 - Calibration: {{FERTILITY_CALIBRATION}}
+<!-- EMPIRICAL_FERTILITY_ADDENDUM -->
 
 ## Aggregate
 

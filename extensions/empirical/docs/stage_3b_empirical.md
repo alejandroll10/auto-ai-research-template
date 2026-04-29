@@ -40,3 +40,24 @@ Before proceeding to Stage 4, you must check whether the empirical results contr
 5. Commit: `artifact: contradiction check — {NONE/CONTRADICTIONS FOUND}`
 
 This step is mandatory and may not be skipped — silently jumping to Stage 4 after empirics PASS bypasses the puzzle-pivot mechanism that exists to extract value from theory-empirics disagreements.
+
+## Re-fire on theory revision
+
+Stage 3e is not one-shot. When the theory revises after the first 3e pass — Gate 3 INCREMENTAL rework, Gate 4 REVISE→Stage 2, Stage 6 Major Revision triggering theory-generator work, or any substantive content change — the original `empirical_analysis.md` becomes stale relative to the current theory. The empiricist must re-run on the revised content before Gate 4 can advance again.
+
+**Trigger.** Any of:
+- `theory_version` advances and `stage3e_theory_version < theory_version`.
+- `implications.md` is overwritten (Gate 3 INCREMENTAL rework, PIVOT, or any path that re-runs Stage 3) and the new file contains NOVEL or PUZZLE-CANDIDATE implications not present in the prior version.
+- A referee identifies an empirical gap that wasn't addressed in the first 3e pass (e.g., "this prediction was deferred" or "the identification doesn't address X").
+- Stage 6 Reject verdict triggers a deepen directive (see `docs/stage_6.md` Reject row): the deepen directive's empirics requirements become the focus of the re-fire.
+
+**Procedure.**
+1. Launch `empiricist` with: the revised theory, the current `implications.md`, the prior `empirical_analysis.md` (so the agent knows what's already been tested), and a focused instruction listing the specific new content to test.
+2. Save targeted re-runs to `output/stage3b/empirical_analysis_vN.md` where N is the current `theory_version`. **Do not overwrite the original `empirical_analysis.md`** — combined coverage across files must span the version that will be written into the paper.
+3. Run `empirics-auditor` on the new analysis (same audit-fix loop as the first pass; same 5-attempt cap).
+4. **Re-run the puzzle-triage entry check** (above) on the combined evidence — a new contradiction triggers puzzle-triage as it would on the first pass.
+5. On audit PASS and contradiction-check complete, set `pipeline_state.json:stage3e_theory_version = theory_version`.
+
+**Gate 4 enforcement.** Before any Gate 4 advance, the orchestrator must verify `stage3e_theory_version == theory_version`. Stale empirics are a hard block, parallel to the `stage3a_theory_version` rule for theory-explorer.
+
+**Cap.** No hard cap on re-fires per problem — the constraint is the never-abandon rule plus the existing 10-round referee cap and the 8-evaluation hard ceiling. But re-fires that do not surface new evidence (auditor PASS with no new findings, no contradiction-check change) count toward the plateau-detection logic in Gate 4 (see `docs/stage_4.md`).

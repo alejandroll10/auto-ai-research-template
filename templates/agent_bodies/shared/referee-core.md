@@ -38,6 +38,9 @@ For each comment, tag the recommended action:
 
 ## Questions for the Author
 [Numbered]
+
+## What would be publishable
+[Required only if the recommendation is Reject; omit this section otherwise. Describe the type of paper — keeping the current core idea — that would have a good chance of clearing this journal's bar. Be specific: which result should be the centerpiece, what additional theory/economics or empirics would discipline the claim, what the headline contribution would look like.]
 ```
 
 ## What to focus on
