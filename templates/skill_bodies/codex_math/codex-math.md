@@ -6,7 +6,7 @@ Scripts are at `code/utils/codex_math/`. Three modes: verify, write, explore.
 
 ## The erratic genius caveat
 
-Codex is an excellent mathematician but produces a substantial fraction of false positives — historically observed near ~50% on `gpt-5.4`, and not separately recalibrated for the current default (`gpt-5.5`). It is brilliant and unreliable. Treat every output as a lead, not a verdict.
+Codex is an excellent mathematician but produces a substantial fraction of false positives. It is brilliant and unreliable. Treat every output as a lead, not a verdict.
 
 **Real catches:** concrete counterexamples, dimensional/sign errors, genuine logical gaps, missing existence arguments, incorrect domain specifications.
 
