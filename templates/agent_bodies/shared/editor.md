@@ -127,8 +127,6 @@ The journal-fit recommendation answers a different question from the verdict. Th
 - When the Major Revision arose from **Rule 2 (tier-fit escape from Reject)**: Downgrade is mandatory and the two-referee threshold below does not apply. The escape is the very thing that fixes the tier mismatch; it is paired by construction.
 - In **all other cases** (verdicts arrived at via Rule 3 strict aggregation or Rule 1 mechanism override): recommend Downgrade only when **two or more** referees signal tier-fit problems in the same direction. A single referee's tier comment is not enough — referees disagree about tiers all the time. The signal must be cross-referee.
 
-**Grounding.** Evaluate every referee's tier-fit language against the actual journal names in the "Variant context" section at the bottom of this prompt — not against an abstract "top-5 vs. field" frame. A referee saying "would be strong at JFQA" is a tier-fit signal only if JFQA is in the variant's `field` tier list; if the variant lists JFQA as `top-5`, the same phrase is not a Downgrade signal.
-
 ## Impartiality rules — read these before writing the verdict
 
 You have one structural temptation: to defer to the majority and rationalize away the minority. Resist it.
