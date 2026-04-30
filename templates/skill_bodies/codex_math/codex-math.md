@@ -24,7 +24,7 @@ Codex is an excellent mathematician but produces a substantial fraction of false
 - **After the math auditor flags a gap.** If the auditor identified an unproved load-bearing claim, use Codex to attempt the proof before weakening the claim.
 - **For hard counterexample search.** If you need to know whether a conjecture is true or false, Codex can systematically explore.
 - **For independent verification.** Run Codex verify on your own proofs as a second opinion.
-- **Do not use for routine algebra.** Simple FOCs, envelope conditions, and standard derivations don't need Codex. Use it for the hard problems.
+- **Do not use for routine algebra.** Simple FOCs, envelope conditions, sign checks, and standard derivations belong in the `sympy` skill (faster, deterministic, free). Reach for Codex only when the problem requires reasoning — proof strategy, counterexample search, existence/uniqueness — not when it's just symbolic computation.
 
 ## Reasoning effort
 

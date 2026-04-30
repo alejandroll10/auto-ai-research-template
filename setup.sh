@@ -367,6 +367,7 @@ if [ "$MANUAL" = "1" ]; then
         --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_variant_agents.json"
     )
     SKILL_METADATA_ARGS=(
+        --metadata "$TEMPLATE_ROOT/templates/skill_metadata/sympy_skills.json"
         --metadata "$TEMPLATE_ROOT/templates/skill_metadata/codex_math_skills.json"
         --metadata "$TEMPLATE_ROOT/templates/skill_metadata/bib_verify_skills.json"
         --metadata "$TEMPLATE_ROOT/templates/skill_metadata/openalex_skills.json"
@@ -707,6 +708,18 @@ else
     SKILLS_OUT="$CLAUDE_SKILLS_REL"
     CODEX_SKILLS_OUT="$CODEX_SKILLS_REL"
 fi
+
+# SymPy skill (available for all variants — preloaded into math-touching subagents)
+assemble_claude_skills \
+    "$TEMPLATE_ROOT" \
+    "$TEMPLATE_ROOT/templates/skill_metadata/sympy_skills.json" \
+    "$TEMPLATE_ROOT/templates/skill_bodies/sympy" \
+    "$SKILLS_OUT"
+
+python3 "$TEMPLATE_ROOT/scripts/assemble_codex_skills.py" \
+    --metadata "$TEMPLATE_ROOT/templates/skill_metadata/sympy_skills.json" \
+    --bodies-dir "$TEMPLATE_ROOT/templates/skill_bodies/sympy" \
+    --output-dir "$CODEX_SKILLS_OUT"
 
 # Codex math skill (available for all variants)
 assemble_claude_skills \

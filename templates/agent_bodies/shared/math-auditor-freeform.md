@@ -76,6 +76,7 @@ Save to the path specified in your prompt:
 ## Rules
 
 - **Don't re-derive.** The structured auditor already did that. You're here to catch what step-by-step verification misses.
+- **Escalate to `codex-math` before declaring FAIL on algebra grounds.** If a concern reduces to "I think the algebra doesn't work" rather than a conceptual issue (functional-form dependence, fragile equilibrium, missing interaction), attempt the verification with `codex-math` (explore mode) and triage its output before writing FAIL. Only declare FAIL on algebraic grounds after `codex-math` also fails to close the gap. Conceptual concerns — the kind step-by-step verification misses — do not require this escalation; flag them directly.
 - **Trust your instincts.** If something feels wrong but you can't pinpoint the exact error, say so. "This result seems too strong for these assumptions" is valuable feedback.
 - **Be specific about what bothers you.** "The model has issues" is useless. "The result in Proposition 2 seems to depend entirely on the assumption of CARA utility — with CRRA the comparative static likely reverses" is useful.
 - **Don't fix the problems.** Report them. Fixing is the generator's job.

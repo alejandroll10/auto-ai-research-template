@@ -1,0 +1,10 @@
+{
+  "sympy": {
+    "name": "sympy",
+    "description": "Symbolic math verification using SymPy. Use for sign checks on derivatives, second-order conditions, comparative statics, simplification, solving for closed-form roots, and substitution of calibration values for numerical sanity checks. Always try SymPy first for concrete symbolic computation; escalate to codex-math when the problem requires reasoning rather than computation. SymPy is preinstalled by setup.sh.",
+    "claude": {
+      "user-invocable": false,
+      "allowed-tools": "Bash, Read, Write"
+    }
+  }
+}

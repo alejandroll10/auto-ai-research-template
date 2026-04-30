@@ -30,7 +30,10 @@
   "referee": {
     "name": "referee",
     "description": "Simulated top-journal referee. The orchestrator launches this agent at Stage 6 of the pipeline. Always runs fresh with no knowledge of previous reports or changes.",
-    "tools": "Read, Glob, Grep, Write",
+    "tools": "Read, Glob, Grep, Write, Bash",
+    "skills": [
+      "sympy"
+    ],
     "model": "opus",
     "effort": "high",
     "codex": {
@@ -58,7 +61,11 @@
   "self-attacker": {
     "name": "self-attacker",
     "description": "Adversarial weakness finder. The orchestrator launches this agent at Stage 4 after novelty check passes. Finds every possible weakness before the referee does.",
-    "tools": "Read, Write",
+    "tools": "Read, Write, Bash",
+    "skills": [
+      "sympy",
+      "codex-math"
+    ],
     "model": "opus",
     "effort": "high",
     "codex": {
@@ -72,7 +79,11 @@
   "theory-generator": {
     "name": "theory-generator",
     "description": "Proposes new {{DOMAIN}} theory models. The orchestrator launches this agent at Stage 2 (Theory Development). Supports fresh, mutate, and crossover strategies based on attempt history.",
-    "tools": "Read, Write",
+    "tools": "Read, Write, Bash",
+    "skills": [
+      "sympy",
+      "codex-math"
+    ],
     "model": "opus",
     "effort": "xhigh",
     "codex": {

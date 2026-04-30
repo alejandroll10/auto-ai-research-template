@@ -19,7 +19,11 @@
   "idea-prototyper": {
     "name": "idea-prototyper",
     "description": "Quick mathematical prototype of a selected idea. Launched between idea selection and full theory development to verify tractability. Attempts the key derivation \u2014 if the main result doesn't go through, kills the idea before expensive theory investment.",
-    "tools": "Read, Write",
+    "tools": "Read, Write, Bash",
+    "skills": [
+      "sympy",
+      "codex-math"
+    ],
     "model": "opus",
     "effort": "high",
     "codex": {
@@ -50,7 +54,11 @@
   "math-auditor-freeform": {
     "name": "math-auditor-freeform",
     "description": "Free-form math verification agent. The orchestrator launches this agent at Gate 2 after the structured math audit passes. Reads the theory as a skeptical reader and flags anything that feels wrong, without following a step-by-step re-derivation protocol.",
-    "tools": "Read, Write",
+    "tools": "Read, Write, Bash",
+    "skills": [
+      "sympy",
+      "codex-math"
+    ],
     "model": "opus",
     "effort": "high",
     "codex": {
@@ -64,7 +72,11 @@
   "math-auditor": {
     "name": "math-auditor",
     "description": "Adversarial math verification agent. The orchestrator launches this agent at Gate 2 after theory development. Verifies all derivations step-by-step. Must pass before theory advances.",
-    "tools": "Read, Write",
+    "tools": "Read, Write, Bash",
+    "skills": [
+      "sympy",
+      "codex-math"
+    ],
     "model": "opus",
     "effort": "xhigh",
     "codex": {
@@ -185,7 +197,10 @@
   "referee-mechanism": {
     "name": "referee-mechanism",
     "description": "Mechanism-focused referee at Stage 6. Evaluates whether the paper's economic mechanism delivers the claimed result for the claimed reason \u2014 not whether the math is correct (math-auditor handles that) or whether the paper fits the journal (referee-freeform handles that). Returns a verdict on mechanism validity: VALID / PARTIAL / MISATTRIBUTED / DECORATIVE. Runs in parallel with the other two referees; sees neither their output nor prior reports.",
-    "tools": "Read, Write, Glob",
+    "tools": "Read, Write, Bash, Glob",
+    "skills": [
+      "sympy"
+    ],
     "model": "opus",
     "effort": "high",
     "codex": {
@@ -259,6 +274,9 @@
     "name": "theory-explorer",
     "description": "Computational exploration of a theory model. Launched after math audit passes (Stage 3a). Pokes the model numerically \u2014 what breaks, what's robust, where are the knife-edges. Produces diagnostic plots and a verification report.",
     "tools": "Bash, Read, Write, Glob",
+    "skills": [
+      "sympy"
+    ],
     "model": "opus",
     "effort": "high",
     "codex": {
@@ -272,7 +290,10 @@
   "polish-consistency": {
     "name": "polish-consistency",
     "description": "Reads the rendered paper end-to-end and flags places it contradicts itself: prose claims that don't match propositions, headings that contradict their text, intro framings that get qualified away later, label-vs-object mismatches (e.g., 'LP welfare' that computes gross fund return), corner-solution propositions whose comparative statics are then invoked downstream. Stage 9 polish agent; runs in parallel with the other five. Writes output/polish_consistency_r{N}.md where N is the current polish_round.",
-    "tools": "Read, Write, Glob, Grep",
+    "tools": "Read, Write, Bash, Glob, Grep",
+    "skills": [
+      "sympy"
+    ],
     "model": "opus",
     "effort": "high",
     "codex": {
@@ -288,6 +309,7 @@
     "description": "Re-derives every numbered equation, lemma, proposition, and corollary in the rendered paper from the surrounding text. Catches errors paper-writer introduced when typesetting (sign flips, wrong subscripts, spurious absolute values, FOCs missing endogenous derivatives). Distinct from math-auditor, which audited the theory file before the paper existed. Stage 9 polish agent. Uses codex-math + sympy. Writes output/polish_formula_r{N}.md where N is the current polish_round.",
     "tools": "Read, Write, Bash, Glob, Grep",
     "skills": [
+      "sympy",
       "codex-math"
     ],
     "model": "opus",
@@ -304,6 +326,9 @@
     "name": "polish-numerics",
     "description": "Re-does every numerical example, calibration, and back-of-envelope claim in the rendered paper. Catches stock-vs-flow errors, normalized-vs-unnormalized comparisons, ex-ante IR failures at the baseline, comparative-static arithmetic typos. Uses Python via Bash to recompute from stated parameters. Stage 9 polish agent. Writes output/polish_numerics_r{N}.md where N is the current polish_round.",
     "tools": "Read, Write, Bash, Glob, Grep",
+    "skills": [
+      "sympy"
+    ],
     "model": "sonnet",
     "effort": "medium",
     "codex": {
@@ -334,7 +359,10 @@
   "polish-equilibria": {
     "name": "polish-equilibria",
     "description": "Hunts subtle economic content the upstream pipeline missed: unstated multiple equilibria in fixed-point regions, missing LLN/continuum assumptions in nonlinear cost functions of expectations, reduced-form sections decoupled from the structural model, welfare benchmarks that aren't the right benchmark for the principal. Distinct from math-auditor-freeform (which read the theory file). Stage 9 polish agent. Writes output/polish_equilibria_r{N}.md where N is the current polish_round.",
-    "tools": "Read, Write, Glob, Grep",
+    "tools": "Read, Write, Bash, Glob, Grep",
+    "skills": [
+      "sympy"
+    ],
     "model": "opus",
     "effort": "high",
     "codex": {
