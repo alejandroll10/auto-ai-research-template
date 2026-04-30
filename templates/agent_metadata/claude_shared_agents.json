@@ -211,6 +211,21 @@
       "model": "gemini-3-preview"
     }
   },
+  "editor": {
+    "name": "editor",
+    "description": "Aggregates the three Stage 6 referee reports (structured + freeform + mechanism) into a single Gate 5 routing verdict, produces a canonical comment list for the triager, and emits a journal-fit verdict. Adversarial impartiality: any Reject vote not honored requires a written quote of the rejecting referee's tier-fit language; mechanism MISATTRIBUTED/DECORATIVE forces Major Revision. Sits between the referees and the triager. Does not score, triage, propose revisions, or recommend strategy.",
+    "tools": "Read, Write, Glob",
+    "model": "opus",
+    "effort": "high",
+    "codex": {
+      "model": "gpt-5.5",
+      "model_reasoning_effort": "high"
+    },
+    "gemini": {
+      "model": "gemini-3-preview"
+    },
+    "pipeline_only": true
+  },
   "branch-manager": {
     "name": "branch-manager",
     "description": "Strategic advisor launched at every Gate 4 after scorer(s) return. Diagnoses whether the current theoretical path has ceilinged, surfaces concrete alternatives from the Round 1 sketch portfolio, and recommends continue/restructure/restart. Produces a structured 5-section report; does not make the gate decision.",

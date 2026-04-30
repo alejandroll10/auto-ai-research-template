@@ -47,7 +47,7 @@
    - **Content score + content feedback**: determines the gate decision. Only substantive theory issues (new math needed, proofs to fix, mechanisms to clarify).
    - **Presentation notes**: expositional improvements (reframe abstract, soften claims, reorder sections). These do NOT affect the score or gate decision. Save them — they are forwarded to the paper-writer at Stage 5.
    Also read the **freeform scorer** output (`scorer_freeform_vN.md`) for holistic assessment; if the freeform scorer's score estimate diverges significantly (±10 points) from the structured score, note the discrepancy and factor it into the branch-manager review.
-9. Use the **content score** for state-dependent escalation:
+9. Use the **content score** for state-dependent escalation. **Read `target_journal_tier` from `process_log/pipeline_state.json`** to select the correct row of the table below — this field is initialized to `top-5` at setup but may be updated mid-run by the Stage 6 `editor` agent (Downgrade or Upgrade recommendations, see `docs/stage_6.md` "Journal-fit handling"). Do not assume the original target tier; always read the current value.
 
 **Scoring is absolute** — 80 means top-5 journal quality regardless of target. The advance threshold depends on the target journal tier. Default tiers:
 

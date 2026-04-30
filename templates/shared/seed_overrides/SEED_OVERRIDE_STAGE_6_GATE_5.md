@@ -1,10 +1,10 @@
 ### Seeded-mode override (applies because `seeded: true` in `pipeline_state.json`)
 
-Referees do not know this is a seeded project. They may recommend reframing the paper, switching to a different mechanism, or pursuing a "more important" adjacent question. **Filter referee recommendations against the seed's contract.**
+Referees do not know this is a seeded project. They may recommend reframing the paper, switching to a different mechanism, or pursuing a "more important" adjacent question. **When triaging the editor's canonical comment list at Gate 5, apply the seed-contract filters below in addition to the normal triage rules.** The filtering is the triager's job, not the editor's — the editor aggregates referee verdicts impartially per its own rules; the seed contract enters at the triage step.
 
-**Reject**: revise and resubmit with the seed's mechanism intact. Stop and write a post-mortem to `output/seed/abandon_report.md` only after **2 rejections citing genuinely fundamental flaws in the seed's own claims** (not in the choice of topic or framing). Do NOT return to Stage 0 or Stage 1.
+**Reject**: revise and resubmit with the seed's mechanism intact. Stop and write a post-mortem to `output/seed/abandon_report.md` only after **2 rounds where the editor's aggregated verdict was Reject (i.e., the Reject row in stage_6.md fired) and the rejection cites genuinely fundamental flaws in the seed's own claims** — not in the choice of topic or framing. A Reject vote that the editor escapes to Major Revision + Downgrade per its Rule 2 (tier-fit escape) does **not** count toward this 2-rejection threshold; the seed's mechanism was not judged fundamentally flawed in that case, only the journal target was. Do NOT return to Stage 0 or Stage 1.
 
-**Major Revision**: when triaging referee comments, apply these rules in addition to the normal `[FIX]`/`[LIMITS]`/`[RESPONSE]`/`[NOTE]` tags:
+**Major Revision**: when triaging the editor's canonical comment list, apply these rules in addition to the normal `[FIX]`/`[LIMITS]`/`[RESPONSE]`/`[NOTE]` tags:
 - "Paper would be stronger if about X instead" → `[RESPONSE]` (response letter only, no main-text change).
 - "The mechanism is wrong, try Y" → adopt Y ONLY if required for mathematical correctness. If Y is merely "more publishable," classify as `[RESPONSE]`.
 - "Scope is too narrow" → if the seed intentionally constrains scope, classify as `[LIMITS]` (one sentence in limitations) rather than `[FIX]`.

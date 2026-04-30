@@ -116,12 +116,17 @@ Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-base
                                    ├── MAJOR REWORK → back to Stage 1 (continue if Δ≥3, else escalate)
                                    └── ABANDON → back to Stage 0 (max 5×)
 Stage 5: Paper Writing        ──→
-Stage 6: Referee Simulation   ──→ Gate 5: Referee Decision
+Stage 6: Referee Simulation   ──→ editor (aggregates 3 reports → canonical comment list +
+                                                aggregated verdict + journal-fit verdict)
+                                Gate 5: Referee Decision (routed by editor verdict)
                                    ├── Minor/Accept → Stage 7
-                                   ├── Major Revision → revise, re-run Stage 6 (max 10×)
-                                   └── Reject → triage → deepen directive → deepen the core
+                                   ├── Major Revision → triage editor's canonical list, revise,
+                                                       re-run Stage 6 (max 10×)
+                                   ├── Reject → triage → deepen directive → deepen the core
                                                 (theory or empirics; never extend); branch-manager
                                                 substantive/cosmetic check; cosmetic ×2 → theory failure
+                                   └── (editor may also recommend Downgrade tier, which lowers
+                                       target_journal_tier and may immediately ship Accept/Minor)
 Stage 7: Style Check          ──→
 Stage 8: Bibliography Verify  ──→
 Stage 9: Polish               ──→ Done (six parallel polish agents + triage + paper-writer; max 2 rounds)
@@ -143,6 +148,7 @@ Initial state (created by setup.sh):
   "theory_version": 1,
   "referee_round": 0,
   "reject_cosmetic_round": 0,
+  "target_journal_tier": "top-5",
   "pivot_round": 0,
   "fix_empirics_rounds": 0,
   "bib_verify_round": 0,
@@ -170,6 +176,8 @@ When you start the pipeline, set `"status": "running"` and begin appending to th
 **`stage3a_theory_version`:** Set to the `theory_version` that Stage 3a last fully explored. Before advancing at Gate 4, the orchestrator must verify this equals the current `theory_version`; if it is stale, re-run Stage 3a on the new content (see `docs/stage_2.md` Stage 3a step 5).
 
 **`reject_cosmetic_round`:** Tracks consecutive cosmetic-deepening attempts when responding to a Stage 6 Reject verdict. Increments when branch-manager (gate-5-reject context) returns COSMETIC on a deepen attempt; resets to 0 on a SUBSTANTIVE deepen, on a Regeneration Round entry, or on falling back to standard Major Revision after the deepen path is exhausted. See `docs/stage_6.md` Reject row for the full state machine.
+
+**`target_journal_tier`:** The active journal tier for Gate 4 advance threshold and Stage 6 referee variant context. Initialized to `top-5`. The Stage 6 `editor` agent may recommend a tier change (Downgrade or Upgrade) based on cross-referee tier-fit signals; on Downgrade, the orchestrator updates this field and recomputes the Gate 4 advance threshold per `docs/stage_4.md`. Allowed values: `top-5` / `field` / `letters`. See `docs/stage_6.md` "Journal-fit handling" for the procedure.
 
 {{EMPIRICAL_STATE3E_DOC}}
 **`stage1_candidates`:** Records every sketch screened at Gates 1b/1c during Stage 1. Each entry: `{round, rank, sketch_name, novelty, prototype, surprise, eliminated, winner}` — `round` is the `idea_round` value when the entry was last written; `rank` is the idea-reviewer ADVANCE position (1..K) **within that round** (rank is unique per-round, NOT unique across the array); verdict fields are `null` until the agent runs. The flags mean:
@@ -305,10 +313,11 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 | Scorer plateau 55-74, branch-manager §E = Regenerate, no prior regen on this problem (`regeneration_round == 0`), **not seeded** | — | Fire regeneration round at Stage 1 (see `docs/stage_1.md` "Regeneration round"). Increment `regeneration_round` *before* re-entering Stage 1. **Takes precedence over the extension-playbook row above when both fire** — Regenerate is the §E verdict that supersedes the default plateau routing. **At most one regeneration per problem:** if the regenerated attempt also plateaus, this row no longer fires (`regeneration_round > 0`) and the "Scorer plateau 55-74" row directly above applies — switch to the extension playbook. |
 | Theory scored ABANDON | 5 theories on same problem | Change the problem (Stage 0) |
 | Problem viability fails | 5 problems | Pick the best scoring problem and proceed anyway |
-| Referee: Major Revision | Structural concerns (fragile, narrow, shallow) | Use extension playbook. Be patient — keep going as long as each round surfaces any new issue. Max 10 rounds. |
+| Editor: Major Revision (aggregated verdict) | Structural concerns (fragile, narrow, shallow) | Use extension playbook. Triage editor's canonical comment list; revise; re-run Stage 6. Be patient — keep going as long as each round surfaces any new issue. Max 10 rounds. |
 | Mechanism referee: MISATTRIBUTED unresolved | Still MISATTRIBUTED at `referee_round >= 10` | Adopt the mechanism referee's identified driver as the paper's mechanism; rewrite introduction/mechanism sections and ship. **Force-adoption at round-10 resolves all outstanding locked mechanism `[FIX]` items as satisfied — no further revision cycle is required.** In seeded mode, prefer the narrow-framing path from the seed override (present what the math delivers under the seed's topic, acknowledge the mechanism-claim divergence in limitations) rather than adopting an unrelated driver. Never return to Stage 0 (never-abandon). |
 | Mechanism referee: DECORATIVE unresolved | Still DECORATIVE at `referee_round >= 10` | Ship the narrow-path version: after 10 rounds the restructure path has failed to surface real economic content, so narrow is the principled default. Present what the math delivers as a structural characterization, strip mechanism framing, add a limitations paragraph. **Round-10 narrow-adoption resolves all outstanding locked mechanism `[FIX]` items as satisfied.** Never return to Stage 0 (never-abandon, scientist-first). |
-| Referee rejects | — | Stage 6 fires only post-Stage-5, so a paper draft always exists; never-abandon. Reject routes through triage → deepen directive → deepen mandate (see `docs/stage_6.md` Reject row for full procedure). The pre-Stage-5 "Stage 0 / Stage 2" branches do not exist at this point. On two consecutive cosmetic deepen attempts, the orchestrator routes through the Regeneration Round protocol if eligible (`regeneration_round == 0`, not seeded), otherwise falls back to standard Major Revision (never-abandon). |
+| Editor: Reject (aggregated verdict) | — | Stage 6 fires only post-Stage-5, so a paper draft always exists; never-abandon. Reject routes through triage → deepen directive → deepen mandate (see `docs/stage_6.md` Reject row for full procedure). The pre-Stage-5 "Stage 0 / Stage 2" branches do not exist at this point. On two consecutive cosmetic deepen attempts, the orchestrator routes through the Regeneration Round protocol if eligible (`regeneration_round == 0`, not seeded), otherwise falls back to standard Major Revision (never-abandon). |
+| Editor: Downgrade tier recommendation | — | Update `target_journal_tier` in pipeline state, recompute Gate 4 advance threshold per the new tier. If aggregated verdict is Accept/Minor Revision at the new tier (current paper clears the new threshold), proceed to Stage 7. If Major Revision, continue the loop targeting the lower tier; the next round's referees inherit the updated tier in their variant context. See `docs/stage_6.md` "Journal-fit handling". |
 
 Before granting another iteration on a Δ≥3 score increase, the orchestrator classifies the v(N)→v(N−1) diff as substantive or cosmetic. Branch-manager emits this verdict at every Gate 4 (Section A); when it reports COSMETIC, the orchestrator escalates rather than continue. Definitions and the cosmetic-edit catalogue live in `docs/stage_4.md`.
 
