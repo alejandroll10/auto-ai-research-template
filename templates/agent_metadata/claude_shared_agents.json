@@ -1,7 +1,7 @@
 {
   "bib-verifier": {
     "name": "bib-verifier",
-    "description": "Verifies the paper's bibliography against OpenAlex (and a WebSearch fallback for SSRN/recent papers). Launched after paper-writer drafts and after referee rounds that change citations, before marking the pipeline complete. Reports VERIFIED / RESOLVED / FABRICATED counts and a fix list; does not edit the bibliography itself.",
+    "description": "Verifies the paper's bibliography against OpenAlex (and a WebSearch fallback for SSRN/recent papers). Launched at (a) Stage 5 immediately after the initial paper draft (early-verify pass), (b) Stage 8 after every referee round that changes citations, and (c) Stage 9 as a final one-shot post-polish pass before marking the pipeline complete. Reports VERIFIED / RESOLVED / FABRICATED counts and a fix list; does not edit the bibliography itself.",
     "tools": "Bash, Read, Write, WebSearch, WebFetch",
     "skills": [
       "bib-verify"
@@ -106,7 +106,7 @@
   },
   "paper-writer": {
     "name": "paper-writer",
-    "description": "Writes the LaTeX paper from a scored theory draft. The orchestrator launches this agent at Stage 5 after the scorer returns ADVANCE. Produces publication-ready sections.",
+    "description": "Writes and revises the LaTeX paper. Launched at (a) Stage 5 after the scorer returns ADVANCE (initial draft), (b) Stage 6 Major Revision / Reject deepen rounds (revising sections per the triager's [FIX] list and any deepen directive), (c) Stage 8 after bib-verifier returns RESOLVED/FABRICATED items (citation fixes), and (d) Stage 9 polish rounds (applying the triaged polish-agent fixes). Produces publication-ready sections.",
     "tools": "Read, Write, Edit, Glob, Grep",
     "model": "opus",
     "effort": "medium",
@@ -151,7 +151,7 @@
   },
   "gap-scout": {
     "name": "gap-scout",
-    "description": "Deep literature search on a pre-selected gap. Launched at Stage 0 after the broad scan. Surveys adjacent literatures, identifies the closest competitor, maps open questions without pre-specifying a framework, and validates whether the gap is actually open.",
+    "description": "Deep literature search on a pre-selected gap or theoretical implication. Launched at (a) Stage 0 after the broad scan (gap validation) and (b) Stage 3 once per derived implication (K parallel launches) to lit-check each prediction and tag it NOVEL / PUZZLE-CANDIDATE / SUPPORTED / DEAD. Surveys adjacent literatures, identifies the closest competitor, and maps open questions without pre-specifying a framework.",
     "tools": "WebSearch, WebFetch, Bash, Read, Write, Glob, Grep",
     "skills": [
       "openalex"
@@ -287,7 +287,7 @@
   },
   "theory-explorer": {
     "name": "theory-explorer",
-    "description": "Computational exploration of a theory model. Launched after math audit passes (Stage 2b). Pokes the model numerically \u2014 what breaks, what's robust, where are the knife-edges. Produces diagnostic plots and a verification report.",
+    "description": "Computational exploration of a theory model. Launched at (a) Stage 2b after math audit passes (initial exploration), (b) Stage 2b re-runs on theory revisions (new propositions, new sections \u2014 see stage_2.md step 5; PIVOT and RECONCILE both re-fire), and (c) Stage 5 paper-writer requests, once per `[NEEDS THEORY-EXPLORER]` marker. Pokes the model numerically \u2014 what breaks, what's robust, where are the knife-edges. Produces diagnostic plots and a verification report.",
     "tools": "Bash, Read, Write, Glob",
     "skills": [
       "sympy"

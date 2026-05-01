@@ -163,6 +163,7 @@ Initial state (created by setup.sh):
   "status": "not_started",
   "scores": {},
   "stage2b_theory_version": null,
+  "archived_best_score_r1": null,
 {{EMPIRICAL_STATE_FIELDS}}
 {{THEORY_LLM_STATE_FIELDS}}
   "stage1_candidates": [],
@@ -181,6 +182,8 @@ When you start the pipeline, set `"status": "running"` and begin appending to th
 **`reject_cosmetic_round`:** Tracks consecutive cosmetic-deepening attempts when responding to a Stage 6 Reject verdict. Increments when branch-manager (gate-5-reject context) returns COSMETIC on a deepen attempt; resets to 0 on a SUBSTANTIVE deepen, on a Regeneration Round entry, or on falling back to standard Major Revision after the deepen path is exhausted. See `docs/stage_6.md` Reject row for the full state machine.
 
 **`target_journal_tier`:** The active journal tier for Gate 4 advance threshold and Stage 6 referee variant context. Initialized to `top-5`. The Stage 6 `editor` agent may recommend a tier change (Downgrade or Upgrade) based on cross-referee tier-fit signals; on Downgrade, the orchestrator updates this field and recomputes the Gate 4 advance threshold per `docs/stage_4.md`. Allowed values: `top-5` / `field` / `letters`. See `docs/stage_6.md` "Journal-fit handling" for the procedure.
+
+**`archived_best_score_r{N}`:** Records the best Gate 4 score achieved on the pre-regeneration paper at the moment Regeneration Round N begins. Initialized to `null` (key `archived_best_score_r1` is in the initial schema; for N>1 the orchestrator appends `archived_best_score_r{N}` dynamically at regeneration entry). Consumers in `docs/stage_1.md` step 2 (regeneration re-entry) read this to compare the regenerated attempt's eventual Gate 4 score against the archived value; if the regenerated attempt does not strictly beat the archive, restore the archived paper from `paper_archive/r{N}/` and ship. A `null` value means no archive comparison applies (no regeneration has fired on this branch).
 
 {{EMPIRICAL_STATE3A_DOC}}
 {{THEORY_LLM_STATE3B_DOC}}
