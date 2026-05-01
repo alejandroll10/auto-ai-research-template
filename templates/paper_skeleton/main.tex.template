@@ -1,11 +1,15 @@
 % =====================================================================
-% DO NOT MODIFY THE PIPELINE-MANAGED LINES BELOW.
-% Removing arpipeline.sty, the \usepackage{arpipeline} line, or the
-% PIPELINE-MANAGED markers may break downstream pipeline tooling
-% (dashboard, deployment audit, verification). Edit \title, \author,
-% \date, \begin{abstract}...\end{abstract}, the \input lines, and the
-% bibliography commands freely. paper-writer adds \input lines for new
-% section files under paper/sections/ as the paper grows.
+% DO NOT MODIFY LATEX SETUP, OTHERWISE PIPELINE MAY NOT WORK AS EXPECTED.
+%
+% Specifically: do not delete paper/arpipeline.sty, do not remove the
+% \usepackage{arpipeline} line, and do not modify lines marked
+% PIPELINE-MANAGED below. These are pipeline infrastructure (deployment
+% fingerprint, downstream verification, dashboard tracking).
+%
+% Edit \title, \author, \date, \begin{abstract}...\end{abstract}, the
+% \input lines, and the bibliography commands freely. paper-writer adds
+% \input lines for new section files under paper/sections/ as the paper
+% grows.
 % =====================================================================
 \documentclass[11pt]{article}
 

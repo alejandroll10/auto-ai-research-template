@@ -563,31 +563,11 @@ mkdir -p "$P/references"
 ARP_UUID=$(python3 -c 'import uuid; print(uuid.uuid4())')
 ARP_DATE=$(date -u +%Y-%m-%d)
 ARP_VERSION=$(cd "$TEMPLATE_ROOT" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-# Encode the UUID hex digits as a ZWSP/ZWNJ sequence (4 bits per hex digit).
-# This produces a literal string of zero-width characters that renders as
-# nothing but persists through \maketitle and PDF text extraction.
-ARP_ZWSP=$(python3 -c "
-uid = '$ARP_UUID'.replace('-', '')
-out = []
-for c in uid:
-    bits = bin(int(c, 16))[2:].zfill(4)
-    for b in bits:
-        out.append('​' if b == '0' else '‌')
-print(''.join(out), end='')
-")
 sed -e "s|{{ARP_UUID}}|$ARP_UUID|g" \
     -e "s|{{ARP_VERSION}}|$ARP_VERSION|g" \
     -e "s|{{ARP_DATE}}|$ARP_DATE|g" \
     "$TEMPLATE_ROOT/templates/paper_skeleton/arpipeline.sty.template" \
     > "$P/paper/arpipeline.sty"
-# ZWSP sequence contains literal zero-width chars; sed-substitute via stdin
-# to avoid shell-quoting issues.
-python3 -c "
-import sys
-sty = open('$P/paper/arpipeline.sty').read()
-zwsp = sys.stdin.read()
-open('$P/paper/arpipeline.sty', 'w').write(sty.replace('{{ARP_ZWSP_SEQUENCE}}', zwsp))
-" <<< "$ARP_ZWSP"
 cp "$TEMPLATE_ROOT/templates/paper_skeleton/main.tex.template" "$P/paper/main.tex"
 
 if [ "$MANUAL" = "1" ]; then
