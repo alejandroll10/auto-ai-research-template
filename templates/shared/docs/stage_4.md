@@ -2,7 +2,7 @@
 
 **Agent:** `self-attacker`
 
-1. Launch self-attacker on the theory draft + implications + theory exploration results (if available)
+1. Launch self-attacker on the theory draft + implications + theory exploration results (if available) **+ `output/stage1/negative_results.md` if it exists** (BLOCKED prototypes from prior Stage-1 rounds — orchestrator must pass this in explicitly; agent self-reads are defense-in-depth, not the primary delivery mechanism).
 2. Save result to `output/stage4/self_attack_vN.md`
 3. Commit: `artifact: self-attack v{N}`
 4. **Triage the concerns.** Launch `triager` with: input = `output/stage4/self_attack_vN.md`, output path = `output/stage4/triage_vN.md`, context = `gate-4`. Triager applies the rules (severity-≥7 defaults to `[FIX]`; downgrades require a written justification) and produces the triage file. Only `[FIX]` items feed into the theory-generator for revision; the rest are held for Stage 5 (paper-writer) or the response letter. Do not edit the triager's output — if you disagree with a classification, re-launch the triager with explicit instructions, do not silently override.
