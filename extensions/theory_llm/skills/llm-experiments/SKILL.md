@@ -80,6 +80,6 @@ Set one or both. The client auto-detects which is available.
 - **Reproducibility:** Set `temperature=0` for deterministic outputs when possible.
 
 ## Rules
-- **Save all raw outputs.** Write responses to `output/stage3b_experiments/raw_results/` as JSON.
+- **Save all raw outputs.** Write responses to `output/stage3b/raw_results/` as JSON.
 - **Log every call.** Record model, prompt, response, tokens, time.
 - **Set seeds where possible.** Use `temperature=0` for reproducible experiments.

@@ -833,6 +833,63 @@ open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', inject.rstrip()+'\n\n{
                 done
             fi
 
+            # Fill theory_llm-only placeholders in shared docs / runtime docs.
+            # Theory-only runs leave these placeholders to be stripped by the post-extension cleanup.
+            python3 - \
+                "$TEMPLATE_ROOT/extensions/theory_llm/stage2_rerun_inject.md" \
+                "$TEMPLATE_ROOT/extensions/theory_llm/stage3b_gate_inject.md" \
+                "$TEMPLATE_ROOT/extensions/theory_llm/state_fields_inject.md" \
+                "$TEMPLATE_ROOT/extensions/theory_llm/state3b_doc_inject.md" \
+                "$P/docs/stage_2.md" \
+                "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" <<'PYEOF'
+import json, os, sys
+stage2 = open(sys.argv[1]).read()
+stage3b_gate = open(sys.argv[2]).read()
+state = open(sys.argv[3]).read()
+state3b_doc = open(sys.argv[4]).read()
+stage2_md = sys.argv[5]
+runtime_docs = sys.argv[6:9]
+
+def patch(path, pairs):
+    if not os.path.exists(path):
+        return
+    with open(path) as f: t = f.read()
+    new = t
+    for needle, repl in pairs:
+        new = new.replace(needle, repl)
+    if new != t:
+        with open(path, "w") as f: f.write(new)
+
+patch(stage2_md, [
+    ("{{THEORY_LLM_STAGE2_RERUN_ADDENDUM}}", stage2),
+    ("{{THEORY_LLM_STAGE3B_GATE_ADDENDUM}}", stage3b_gate),
+])
+
+for d in runtime_docs:
+    patch(d, [
+        ("{{THEORY_LLM_STATE_FIELDS}}", state),
+        ("{{THEORY_LLM_STATE3B_DOC}}", state3b_doc),
+    ])
+
+# pipeline_state.json: add stage3b_theory_version field, mirroring stage2b_theory_version.
+state_path = os.path.join(os.path.dirname(stage2_md), "..", "process_log", "pipeline_state.json")
+state_path = os.path.normpath(state_path)
+if os.path.exists(state_path):
+    with open(state_path) as f: data = json.load(f)
+    if "stage3b_theory_version" not in data:
+        # Insert immediately after stage3a_theory_version (if --ext empirical) or stage2b_theory_version.
+        new = {}
+        anchor = "stage3a_theory_version" if "stage3a_theory_version" in data else "stage2b_theory_version"
+        for k, v in data.items():
+            new[k] = v
+            if k == anchor:
+                new["stage3b_theory_version"] = None
+        data = new
+        with open(state_path, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+PYEOF
+
             echo "  ✓ LLM experiment extension applied"
             ;;
         empirical)
@@ -970,19 +1027,21 @@ open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', '').rstrip()+'\n')
 " "$doc"
 done
 
-# Theory-only cleanup: strip any unfilled {{EMPIRICAL_*}} placeholders and the
-# <!-- EMPIRICAL_FERTILITY_ADDENDUM --> marker. When --ext empirical is on, the
-# empirical block above already substituted real content; this is a no-op then.
-# When --ext empirical is off, this leaves the docs and scorer body identical to
-# the pre-edit baseline (lines containing only the placeholder are removed whole).
+# Extension-disabled cleanup: strip any unfilled {{EMPIRICAL_*}} / {{THEORY_LLM_*}}
+# placeholders and the <!-- EMPIRICAL_FERTILITY_ADDENDUM --> marker. When the
+# corresponding extension is on, the inject blocks above already substituted real
+# content; this is a no-op for those placeholders. When an extension is off, this
+# leaves the docs and scorer body identical to the pre-edit baseline (lines
+# containing only the placeholder are removed whole).
 python3 - \
     "$P/docs/stage_2.md" \
     "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" \
     "$AGENTS_OUT/scorer.md" "$CODEX_AGENTS_OUT/scorer.toml" "$GEMINI_AGENTS_OUT/scorer.md" <<'PYEOF'
 import os, re, sys
-# Match a whole line that is just {{EMPIRICAL_*}} (with optional surrounding whitespace),
-# including its trailing newline. Inline (mid-line) occurrences are not used.
-LINE_PAT = re.compile(r"^[ \t]*\{\{EMPIRICAL_[A-Z0-9_]+\}\}[ \t]*\n", re.MULTILINE)
+# Match a whole line that is just {{EMPIRICAL_*}} or {{THEORY_LLM_*}} (with optional
+# surrounding whitespace), including its trailing newline. Inline (mid-line)
+# occurrences are not used.
+LINE_PAT = re.compile(r"^[ \t]*\{\{(EMPIRICAL|THEORY_LLM)_[A-Z0-9_]+\}\}[ \t]*\n", re.MULTILINE)
 MARKER_PAT = re.compile(r"^[ \t]*<!-- EMPIRICAL_FERTILITY_ADDENDUM -->[ \t]*\n", re.MULTILINE)
 for p in sys.argv[1:]:
     if not os.path.exists(p):

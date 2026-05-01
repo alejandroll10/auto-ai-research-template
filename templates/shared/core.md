@@ -101,7 +101,7 @@ Gate 3a-feasibility: Empirical Feasibility   (only if --ext empirical)
 Stage 3: Implications        ──→ derive predictions + gap-scout each → tag
                                    NOVEL / PUZZLE-CANDIDATE / SUPPORTED / DEAD
 Stage 3a: Empirical Analysis     (only if --ext empirical, full test + audit)
-Stage 3c/3d: Experiments         (only if --ext theory_llm, design + review)
+Stage 3b: Experiments         (only if --ext theory_llm, design + review)
 Puzzle Triage                ──→ fires if empirics/experiments contradict, OR Stage 3 PUZZLE-CANDIDATE
                                    ├── NORMAL-PROCEED → Stage 4
                                    ├── FIX-EMPIRICS → re-run empirics
@@ -162,6 +162,7 @@ Initial state (created by setup.sh):
   "scores": {},
   "stage2b_theory_version": null,
 {{EMPIRICAL_STATE_FIELDS}}
+{{THEORY_LLM_STATE_FIELDS}}
   "stage1_candidates": [],
   "history": []
 }
@@ -180,6 +181,7 @@ When you start the pipeline, set `"status": "running"` and begin appending to th
 **`target_journal_tier`:** The active journal tier for Gate 4 advance threshold and Stage 6 referee variant context. Initialized to `top-5`. The Stage 6 `editor` agent may recommend a tier change (Downgrade or Upgrade) based on cross-referee tier-fit signals; on Downgrade, the orchestrator updates this field and recomputes the Gate 4 advance threshold per `docs/stage_4.md`. Allowed values: `top-5` / `field` / `letters`. See `docs/stage_6.md` "Journal-fit handling" for the procedure.
 
 {{EMPIRICAL_STATE3A_DOC}}
+{{THEORY_LLM_STATE3B_DOC}}
 **`stage1_candidates`:** Records every sketch screened at Gates 1b/1c during Stage 1. Each entry: `{round, rank, sketch_name, novelty, prototype, surprise, eliminated, winner}` — `round` is the `idea_round` value when the entry was last written; `rank` is the idea-reviewer ADVANCE position (1..K) **within that round** (rank is unique per-round, NOT unique across the array); verdict fields are `null` until the agent runs. The flags mean:
 - `eliminated: true` — screened as dead. Set **only** for KNOWN at 1b or BLOCKED at 1c. Never re-nominate.
 - `winner: true` — the sketch whose theory is currently being developed downstream. If the theory later fails, this sketch has already been tried and should not be re-nominated.
@@ -334,7 +336,7 @@ output/                   # Pipeline outputs by stage
 ├── stage2b/              # theory exploration report + figures/
 ├── stage3/               # implications.md
 ├── stage3a/              # empirical feasibility + full analysis (if --ext empirical)
-├── stage3b_experiments/  # LLM experiments (if --ext theory_llm)
+├── stage3b/  # LLM experiments (if --ext theory_llm)
 ├── stage4/               # self-attack + scorer decision (versioned)
 ├── debug/                # debugger reports (launched on tool-execution failures)
 ├── post_pipeline/        # post-pipeline math audits

@@ -2,6 +2,6 @@
 
 ---
 
-## Stage 3c/3d: LLM Experiments
+## Stage 3b: LLM Experiments
 
-Read `docs/stage_3c_experiments.md` and proceed accordingly.
+Read `docs/stage_3b_experiments.md` and proceed accordingly.

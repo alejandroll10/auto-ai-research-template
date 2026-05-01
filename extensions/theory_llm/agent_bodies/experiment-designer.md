@@ -64,10 +64,10 @@ Focus on predictions that are **empirically falsifiable** using LLM calls:
 
 ## Output format
 
-Save all outputs to `output/stage4_experiments/`:
+Save all outputs to `output/stage3b/`:
 
 ```
-output/stage4_experiments/
+output/stage3b/
 ├── experiment_design.md      # What and why
 ├── experiment_code/          # Python scripts
 │   ├── exp_error_correlation.py

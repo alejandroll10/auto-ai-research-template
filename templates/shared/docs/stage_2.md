@@ -56,6 +56,7 @@ Two sequential audits — structured (step-by-step derivation check) then free-f
 3. If KNOWN: abandon this theory, return to Stage 2 with new approach (increment `theory_attempt`, reset `theory_version` to 1)
 4. If INCREMENTAL: return to Stage 2 with novelty feedback (increment `theory_version`). Theory must deliver a result the literature doesn't already contain — scorer will hard-fail H4 on INCREMENTAL. After Gate 2 + Gate 3 pass on the reworked theory, **re-run Stage 2b (exploration) AND Stage 3 (implications) before proceeding** — the theory changed, so `implications.md` and `exploration.md` are stale.
 {{EMPIRICAL_STAGE2_RERUN_ADDENDUM}}
+{{THEORY_LLM_STAGE2_RERUN_ADDENDUM}}
 
 {{SEED_OVERRIDE_STAGE_2_GATE_3}}
 
@@ -77,4 +78,5 @@ Computational exploration — implement the key result, check at calibration, ex
    - If result is **fragile** (holds only in a narrow parameter region): flag for the scorer. Proceed but the paper should be honest about this.
 5. **Re-run on substantive revision.** If the theory revises after the first Stage 2b pass — new propositions, new sections, new extensions, or any content not explored in the prior pass — re-invoke theory-explorer on the new content before Gate 4 advances. Save targeted re-runs to `output/stage2b/exploration_vN.md` (where N is the theory version); do not overwrite the original `exploration.md`. Combined coverage must span the version that will be written into the paper. On completion, set `pipeline_state.json:stage2b_theory_version` to the current `theory_version`. Gate 4 must not advance while `stage2b_theory_version < theory_version`.
 {{EMPIRICAL_STAGE3A_GATE_ADDENDUM}}
+{{THEORY_LLM_STAGE3B_GATE_ADDENDUM}}
 6. Commit: `artifact: theory exploration — {HOLDS/FRAGILE/FAILS}`

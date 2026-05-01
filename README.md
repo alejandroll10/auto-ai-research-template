@@ -159,7 +159,7 @@ You can also watch files appear in real time in your editor, or run `git log --o
 | Extension | Flag | What it adds |
 |-----------|------|-------------|
 | **empirical** | `--ext empirical` | Stage 3a: empirical analysis with real data (CRSP, Compustat, FRED, Ken French, Chen-Zimmerman, WRDS) |
-| **theory_llm** | `--ext theory_llm` | Stage 3b/3c: test predictions via LLM experiments using gpt-oss models (UF NaviGator) |
+| **theory_llm** | `--ext theory_llm` | Stage 3b: test predictions via LLM experiments using gpt-oss models (UF NaviGator) |
 
 Extensions are additive and combinable — they inject extra agents and skills without changing the core pipeline. Use multiple `--ext` flags to combine them.
 
@@ -186,6 +186,7 @@ Stage 2: Theory Development  → Gate 2: Math Audit (structured + free-form)
                                 Gate 3a-feasibility: Empirical Feasibility (optional)
 Stage 3: Implications
 Stage 3a: Full Empirical Analysis (optional, if --ext empirical)
+Stage 3b: LLM Experiments         (optional, if --ext theory_llm)
 Stage 4: Self-Attack          → Gate 4: Scorer Decision
 Stage 5: Paper Writing
 Stage 6: Referee Simulation   → Gate 5: Referee Decision
