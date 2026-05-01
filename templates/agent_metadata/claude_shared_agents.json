@@ -287,7 +287,7 @@
   },
   "theory-explorer": {
     "name": "theory-explorer",
-    "description": "Computational exploration of a theory model. Launched after math audit passes (Stage 3a). Pokes the model numerically \u2014 what breaks, what's robust, where are the knife-edges. Produces diagnostic plots and a verification report.",
+    "description": "Computational exploration of a theory model. Launched after math audit passes (Stage 2b). Pokes the model numerically \u2014 what breaks, what's robust, where are the knife-edges. Produces diagnostic plots and a verification report.",
     "tools": "Bash, Read, Write, Glob",
     "skills": [
       "sympy"

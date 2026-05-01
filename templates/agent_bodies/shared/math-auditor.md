@@ -60,7 +60,7 @@ Save to the path specified in your prompt:
 - Boundary case issues: [list]
 
 ## Unverified claims
-[List every claim in the draft whose support is unverified, failed, or hand-waved. Each entry: exact quoted claim from the draft + why it is unverified (failed derivation, numerical check missing, "this can be shown" placeholder, etc.). **Any claim stating a specific numerical value, grid result, or calibrated magnitude with no accompanying proof AND no citation to a verified theory-explorer output (`output/stage3a/`) or script is automatically unverified — list it here regardless of how confidently it is phrased.** If all claims are verified, write "None." The scorer uses this list to credit honest scope narrowing in later revisions.]
+[List every claim in the draft whose support is unverified, failed, or hand-waved. Each entry: exact quoted claim from the draft + why it is unverified (failed derivation, numerical check missing, "this can be shown" placeholder, etc.). **Any claim stating a specific numerical value, grid result, or calibrated magnitude with no accompanying proof AND no citation to a verified theory-explorer output (`output/stage2b/`) or script is automatically unverified — list it here regardless of how confidently it is phrased.** If all claims are verified, write "None." The scorer uses this list to credit honest scope narrowing in later revisions.]
 
 ## Recommendation
 [PASS: advance to next stage / FAIL: specific fixes needed]

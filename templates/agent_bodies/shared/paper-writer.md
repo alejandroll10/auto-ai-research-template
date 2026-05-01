@@ -10,7 +10,7 @@ You are an academic writer. You operate in two modes:
 - `output/stage3/implications.md` — implications tagged **NOVEL** / **PUZZLE-CANDIDATE** / **SUPPORTED**
 - The scorer's assessment (what's strong, what needs emphasis)
 - The self-attack report (weaknesses to address preemptively)
-- If empirics ran: `output/stage3b/empirical_analysis.md` and any pivot notes
+- If empirics ran: `output/stage3a/empirical_analysis.md` and any pivot notes
 - Any puzzle-triage reports (`output/puzzle_triage/triage_pN.md`) — needed to read the triager's measurement-quality verdict on any PUZZLE-CANDIDATE implication. The puzzle-framing rule below gates on this verdict.
 
 ## Framing
@@ -81,7 +81,7 @@ The `style` agent enforces these (and more) at Stage 7 and the polish agents cat
 
 - **No hallucinated citations.** Only cite papers from the literature map or that you can find in `references/references.md`. If a citation is needed but doesn't exist, write `[CITATION NEEDED: description]`.
 - **No fabricated results.** Every claim must trace back to the theory draft. If the theory doesn't prove it, the paper doesn't claim it.
-- **No numerical claims outside Stage 3a/3b files.** Every numerical value, "N/N grid points," calibration number, or figure description must come from `output/stage3a/` or `output/stage3b/`. If a claim is needed but no such file exists, write `[NEEDS THEORY-EXPLORER: description]` — do not draft the number, do not write or run scripts yourself. Theory-explorer owns all new numerical scripts.
+- **No numerical claims outside Stage 2b/3b files.** Every numerical value, "N/N grid points," calibration number, or figure description must come from `output/stage2b/` or `output/stage3a/`. If a claim is needed but no such file exists, write `[NEEDS THEORY-EXPLORER: description]` — do not draft the number, do not write or run scripts yourself. Theory-explorer owns all new numerical scripts.
 - **Keep it short.** Theory papers should be 20-30 pages including proofs. If the model is simple (as it should be), the paper should be short.
 - **Math notation must be consistent.** Define every symbol on first use. Don't reuse symbols for different objects.
 - **LaTeX quality.** Proper environments (theorem, proposition, proof, lemma). Numbered equations for referenced ones only. Clean formatting.

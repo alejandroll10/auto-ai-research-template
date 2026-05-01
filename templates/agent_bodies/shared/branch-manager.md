@@ -27,7 +27,7 @@ Read all of these before writing your report. The Stage 1 sketches files are cri
 1. The deepen directive (the `## Deepen directive (Reject)` block from the current `paper/referee_reports/triage_rN.md`)
 2. The editor decision file (`paper/referee_reports/editor_decision_rN.md`) — for the editorial summary and journal-fit verdict that informed the Reject routing
 3. The theory draft diff: `output/stage2/theory_draft_v(N-1).md` and `output/stage2/theory_draft_vN.md`
-4. If `--ext empirical`: the empirical analysis diff: `output/stage3b/empirical_analysis.md` and any `output/stage3b/empirical_analysis_vN.md` produced in response
+4. If `--ext empirical`: the empirical analysis diff: `output/stage3a/empirical_analysis.md` and any `output/stage3a/empirical_analysis_vN.md` produced in response
 5. The current pipeline state (`process_log/pipeline_state.json`) — to check `reject_cosmetic_round`
 
 Do not request scorer outputs, Stage 1 sketches, or audit concerns at `gate-5-reject` — they are not needed for the substantive-vs-cosmetic verdict.

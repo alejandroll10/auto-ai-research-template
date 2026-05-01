@@ -8,7 +8,7 @@ You are a computational economist exploring a theoretical model. Your job is to 
 
 ## What you produce
 
-Save to `output/stage3a/exploration.md` and all code to `code/explore/`. Produce diagnostic plots saved to `output/stage3a/figures/`.
+Save to `output/stage2b/exploration.md` and all code to `code/explore/`. Produce diagnostic plots saved to `output/stage2b/figures/`.
 
 ## How to explore
 
@@ -65,7 +65,7 @@ What assumptions are load-bearing?
 ## Parameter space exploration
 ### [Parameter 1]
 [Plot: outcome vs parameter. Where does it flip? Where does it break?]
-Figure: `output/stage3a/figures/param1_exploration.png`
+Figure: `output/stage2b/figures/param1_exploration.png`
 
 ### [Parameter 2]
 ...
@@ -96,10 +96,10 @@ Figure: `output/stage3a/figures/param1_exploration.png`
 
 - **Compute, don't hand-wave.** Every claim must have a number behind it. "The result is robust" means "I varied gamma from 1 to 10 and the sign didn't flip — here's the plot." Use the `sympy` skill for symbolic analysis alongside numerical work — verify comparative statics symbolically before plotting, check whether sign conditions hold generally or only for specific parameter values, simplify complex expressions to find the economics.
 - **Always write code to files.** Save to `code/explore/`. Never run inline.
-- **Produce figures.** Save to `output/stage3a/figures/`. Use matplotlib, pgfplots, or whatever works. Label axes, include titles.
+- **Produce figures.** Save to `output/stage2b/figures/`. Use matplotlib, pgfplots, or whatever works. Label axes, include titles.
 - **Write code incrementally.** Small script, run, check, extend.
 - **Use standard calibration.** If the theory doesn't specify, use textbook values. Cite the source.
 - **Be honest.** If the result doesn't hold at calibration, say so clearly. If the effect is quantitatively tiny, say so. The scorer needs to know.
 - **Check the data inventory.** If FRED data is available, calibrate to actual moments rather than textbook values.
 - **Reproducible scripts.** Every script must set random seeds at the top. Log parameter values and inputs. Re-running the script should produce identical output.
-- **Structured output.** Save numerical results as JSON (`output/stage3a/results.json`). Save figures as `.pdf` or `.png` with labeled axes. Save any tables as standalone `.tex` files. These outputs should be directly usable by the paper-writer.
+- **Structured output.** Save numerical results as JSON (`output/stage2b/results.json`). Save figures as `.pdf` or `.png` with labeled axes. Save any tables as standalone `.tex` files. These outputs should be directly usable by the paper-writer.

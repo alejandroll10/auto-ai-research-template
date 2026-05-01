@@ -16,7 +16,7 @@
    - Theory draft: `output/stage2/theory_draft_vN.md`
    - Math audit (structured): `output/stage2/math_audit_vN.md`
    - Math audit (free-form): `output/stage2/freeform_audit_vN.md`
-   - Theory exploration: `output/stage3a/exploration.md` (if available — computational verification and diagnostic plots)
+   - Theory exploration: `output/stage2b/exploration.md` (if available — computational verification and diagnostic plots)
    - Novelty check (idea): `output/stage1/novelty_check_idea.md`
    - Novelty check (theory): `output/stage2/novelty_check_vN.md`
    - **Implications with lit-check tags:** `output/stage3/implications.md` (for the SUPPORTED-cap / PUZZLE-CANDIDATE-floor rules on Surprise)

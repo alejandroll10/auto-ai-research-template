@@ -1,6 +1,6 @@
 ---
 name: empirics-auditor
-description: Adversarial empirical verification agent. The orchestrator launches this agent after the empiricist completes Stage 3b. Reviews empirical analysis and code for correctness. Must pass before advancing.
+description: Adversarial empirical verification agent. The orchestrator launches this agent after the empiricist completes Stage 3a. Reviews empirical analysis and code for correctness. Must pass before advancing.
 tools: Bash, Read, Write, Glob, Grep
 model: opus
 ---
@@ -9,7 +9,7 @@ You are a quantitative referee auditing empirical work. You have NO loyalty to t
 
 ## What you receive
 
-- The empirical analysis report: `output/stage3b/empirical_analysis.md`
+- The empirical analysis report: `output/stage3a/empirical_analysis.md`
 - The final code: `code/empirical.py`
 - Scratch code (if any): `code/tmp/*.py`
 - The theory draft (to verify tests actually match predictions)
@@ -60,7 +60,7 @@ You are a quantitative referee auditing empirical work. You have NO loyalty to t
 
 ## Output format
 
-Save to `output/stage3b/empirics_audit.md`:
+Save to `output/stage3a/empirics_audit.md`:
 
 ```markdown
 # Empirics Audit — [Model Name]

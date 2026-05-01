@@ -92,15 +92,15 @@ Stage 1: Idea Generation     ──→ Gate 1: Idea Review (iterates with genera
                                    └── ≥1 survives → proceed to Stage 2
 Stage 2: Theory Development  ──→ Gate 2: Math Audit (structured then free-form)
                                    Gate 3: Novelty Check on full theory
-                                   Stage 3a: Theory Exploration (compute, verify, plot)
+                                   Stage 2b: Theory Exploration (compute, verify, plot)
                                       ├── FAILS → back to Stage 2
                                       └── HOLDS/FRAGILE → proceed
-Gate 3b: Empirical Feasibility   (only if --ext empirical)
+Gate 3a-feasibility: Empirical Feasibility   (only if --ext empirical)
                                    ├── FALSIFIED → back to Stage 1
                                    └── OK → proceed
 Stage 3: Implications        ──→ derive predictions + gap-scout each → tag
                                    NOVEL / PUZZLE-CANDIDATE / SUPPORTED / DEAD
-Stage 3e: Empirical Analysis     (only if --ext empirical, full test + audit)
+Stage 3a: Empirical Analysis     (only if --ext empirical, full test + audit)
 Stage 3c/3d: Experiments         (only if --ext theory_llm, design + review)
 Puzzle Triage                ──→ fires if empirics/experiments contradict, OR Stage 3 PUZZLE-CANDIDATE
                                    ├── NORMAL-PROCEED → Stage 4
@@ -108,7 +108,7 @@ Puzzle Triage                ──→ fires if empirics/experiments contradict,
                                    ├── RECONCILE → add scope condition, Gate 2
                                    ├── BACK-TO-IDEA → Stage 1
                                    ├── PIVOT → rebuild theory around contradiction
-                                   │            (re-run Gate 2/3/3a/3/empirics; max 2 pivots)
+                                   │            (re-run Gate 2, Gate 3, Stage 2b, Stage 3, empirics; max 2 pivots)
                                    └── HONEST-NULL → Stage 5 with limits, or Stage 0
 Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-based)
                                    ├── ADVANCE (75+) → Stage 5
@@ -160,7 +160,7 @@ Initial state (created by setup.sh):
   "seeded": false,
   "status": "not_started",
   "scores": {},
-  "stage3a_theory_version": null,
+  "stage2b_theory_version": null,
 {{EMPIRICAL_STATE_FIELDS}}
   "stage1_candidates": [],
   "history": []
@@ -173,13 +173,13 @@ When you start the pipeline, set `"status": "running"` and begin appending to th
 
 **History array:** Append a `{ "timestamp": "ISO-8601", "event": "description" }` entry for every pipeline event. This feeds the dashboard. Use `date -u +%Y-%m-%dT%H:%M:%SZ` to get the timestamp. Never truncate or clear the history array.
 
-**`stage3a_theory_version`:** Set to the `theory_version` that Stage 3a last fully explored. Before advancing at Gate 4, the orchestrator must verify this equals the current `theory_version`; if it is stale, re-run Stage 3a on the new content (see `docs/stage_2.md` Stage 3a step 5).
+**`stage2b_theory_version`:** Set to the `theory_version` that Stage 2b last fully explored. Before advancing at Gate 4, the orchestrator must verify this equals the current `theory_version`; if it is stale, re-run Stage 2b on the new content (see `docs/stage_2.md` Stage 2b step 5).
 
 **`reject_cosmetic_round`:** Tracks consecutive cosmetic-deepening attempts when responding to a Stage 6 Reject verdict. Increments when branch-manager (gate-5-reject context) returns COSMETIC on a deepen attempt; resets to 0 on a SUBSTANTIVE deepen, on a Regeneration Round entry, or on falling back to standard Major Revision after the deepen path is exhausted. See `docs/stage_6.md` Reject row for the full state machine.
 
 **`target_journal_tier`:** The active journal tier for Gate 4 advance threshold and Stage 6 referee variant context. Initialized to `top-5`. The Stage 6 `editor` agent may recommend a tier change (Downgrade or Upgrade) based on cross-referee tier-fit signals; on Downgrade, the orchestrator updates this field and recomputes the Gate 4 advance threshold per `docs/stage_4.md`. Allowed values: `top-5` / `field` / `letters`. See `docs/stage_6.md` "Journal-fit handling" for the procedure.
 
-{{EMPIRICAL_STATE3E_DOC}}
+{{EMPIRICAL_STATE3A_DOC}}
 **`stage1_candidates`:** Records every sketch screened at Gates 1b/1c during Stage 1. Each entry: `{round, rank, sketch_name, novelty, prototype, surprise, eliminated, winner}` — `round` is the `idea_round` value when the entry was last written; `rank` is the idea-reviewer ADVANCE position (1..K) **within that round** (rank is unique per-round, NOT unique across the array); verdict fields are `null` until the agent runs. The flags mean:
 - `eliminated: true` — screened as dead. Set **only** for KNOWN at 1b or BLOCKED at 1c. Never re-nominate.
 - `winner: true` — the sketch whose theory is currently being developed downstream. If the theory later fails, this sketch has already been tried and should not be re-nominated.
@@ -331,9 +331,9 @@ output/                   # Pipeline outputs by stage
 ├── stage0/               # literature_map_broad.md, gap_selection.md, literature_map.md, problem_statement.md
 ├── stage1/               # idea sketches, reviews, selected_idea.md, novelty + prototype
 ├── stage2/               # theory drafts, math audits, novelty checks (versioned _v1, _v2…)
-├── stage3a/              # theory exploration report + figures/
+├── stage2b/              # theory exploration report + figures/
 ├── stage3/               # implications.md
-├── stage3b/              # empirical feasibility + full analysis (if --ext empirical)
+├── stage3a/              # empirical feasibility + full analysis (if --ext empirical)
 ├── stage3b_experiments/  # LLM experiments (if --ext theory_llm)
 ├── stage4/               # self-attack + scorer decision (versioned)
 ├── debug/                # debugger reports (launched on tool-execution failures)

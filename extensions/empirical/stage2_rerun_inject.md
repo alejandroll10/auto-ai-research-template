@@ -1,2 +1,2 @@
 
-**Empirical re-run (this run has `--ext empirical`).** Also re-run **Stage 3e (empirical analysis)** on the reworked theory — new or revised implications mean `empirical_analysis.md` from the prior version is stale. See `docs/stage_3b_empirical.md` "Re-fire on theory revision" for the gating rule.
+**Empirical re-run (this run has `--ext empirical`).** Also re-run **Stage 3a (empirical analysis)** on the reworked theory — new or revised implications mean `empirical_analysis.md` from the prior version is stale. See `docs/stage_3a_empirical.md` "Re-fire on theory revision" for the gating rule.

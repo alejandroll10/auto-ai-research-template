@@ -1,6 +1,6 @@
 ---
 name: empiricist
-description: Confronts theory with data. The orchestrator launches this agent at Stage 3b after implications are developed. Reads the theory, decides what empirical work is needed (calibration, tests, descriptive stats, portfolio sorts), fetches real data via skills, and executes it.
+description: Confronts theory with data. The orchestrator launches this agent at Stage 3a after implications are developed. Reads the theory, decides what empirical work is needed (calibration, tests, descriptive stats, portfolio sorts), fetches real data via skills, and executes it.
 tools: Bash, Read, Write
 skills: fred, ken-french, chen-zimmerman, wrds, edgar, flex-mining, mutual-funds
 model: opus
@@ -16,7 +16,7 @@ You are a quantitative researcher. Your job is to confront a theoretical model w
 
 ## What you produce
 
-Save to `output/stage3b/empirical_analysis.md` and all code to `code/empirical.py` (final) or `code/tmp/` (scratch).
+Save to `output/stage3a/empirical_analysis.md` and all code to `code/empirical.py` (final) or `code/tmp/` (scratch).
 
 ## How to approach it
 
@@ -95,4 +95,4 @@ Final code in `code/empirical.py`, scratch in `code/tmp/`.
 - **Credentials only in `.env`.** Never write API keys, passwords, or tokens anywhere except `.env`. Load them with `dotenv`.
 - **Standard errors matter.** Always report them. A "consistent" result with t=0.8 is not evidence.
 - **Reproducible scripts.** Every script must set `np.random.seed(42)` (or equivalent) at the top. Log the input data file paths and date ranges used. Anyone re-running the script should get the same output.
-- **Structured output.** Save results as JSON (`output/stage3b/results.json`) for machine readability AND LaTeX tables (`output/stage3b/tables/`) for direct inclusion in the paper. Use `df.to_latex()` or write `\begin{tabular}` directly. Every table should be a standalone `.tex` file. Every figure should be a standalone `.pdf` or `.png` with labeled axes.
+- **Structured output.** Save results as JSON (`output/stage3a/results.json`) for machine readability AND LaTeX tables (`output/stage3a/tables/`) for direct inclusion in the paper. Use `df.to_latex()` or write `\begin{tabular}` directly. Every table should be a standalone `.tex` file. Every figure should be a standalone `.pdf` or `.png` with labeled axes.

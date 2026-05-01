@@ -54,15 +54,15 @@ Two sequential audits — structured (step-by-step derivation check) then free-f
 1. Launch novelty-checker on `output/stage2/theory_draft_vN.md`
 2. Save result to `output/stage2/novelty_check_vN.md`
 3. If KNOWN: abandon this theory, return to Stage 2 with new approach (increment `theory_attempt`, reset `theory_version` to 1)
-4. If INCREMENTAL: return to Stage 2 with novelty feedback (increment `theory_version`). Theory must deliver a result the literature doesn't already contain — scorer will hard-fail H4 on INCREMENTAL. After Gate 2 + Gate 3 pass on the reworked theory, **re-run Stage 3a (exploration) AND Stage 3 (implications) before proceeding** — the theory changed, so `implications.md` and `exploration.md` are stale.
+4. If INCREMENTAL: return to Stage 2 with novelty feedback (increment `theory_version`). Theory must deliver a result the literature doesn't already contain — scorer will hard-fail H4 on INCREMENTAL. After Gate 2 + Gate 3 pass on the reworked theory, **re-run Stage 2b (exploration) AND Stage 3 (implications) before proceeding** — the theory changed, so `implications.md` and `exploration.md` are stale.
 {{EMPIRICAL_STAGE2_RERUN_ADDENDUM}}
 
 {{SEED_OVERRIDE_STAGE_2_GATE_3}}
 
-5. If NOVEL: proceed to Stage 3a (theory exploration)
+5. If NOVEL: proceed to Stage 2b (theory exploration)
 6. Commit: `artifact: novelty check v{N} — {NOVEL/INCREMENTAL/KNOWN}`
 
-## Stage 3a: Theory Exploration
+## Stage 2b: Theory Exploration
 
 **Agent:** `theory-explorer`
 
@@ -70,11 +70,11 @@ Computational exploration — implement the key result, check at calibration, ex
 
 1. Launch `theory-explorer` on the theory draft + math audit results + data inventory.
 2. The agent implements the key result computationally, checks it at calibration, explores the parameter space, verifies necessary conditions, and produces diagnostic plots.
-3. Save to `output/stage3a/exploration.md`, code to `code/explore/`, figures to `output/stage3a/figures/`.
+3. Save to `output/stage2b/exploration.md`, code to `code/explore/`, figures to `output/stage2b/figures/`.
 4. Read the verdict:
    - If main result **holds at calibration and is quantitatively meaningful**: proceed.
    - If result **doesn't hold** or the solver/script **failed** at calibration: launch `debugger` on the failure report before concluding. Debugger diagnoses whether the failure reflects tool-fit (wrong equilibrium concept, wrong indifference conditions, sparse seed grid, etc.) or a genuine substantive failure. Only after debugger returns `SUBSTANTIVE-FAILURE` should you return to Stage 2 with the result — and even then, the theory-generator should be told "the claim doesn't hold at these parameters," not "rescope the result away." If debugger returns `TOOL-FIT-ISSUE` with a proposed fix, apply the fix and re-run theory-explorer before concluding.
    - If result is **fragile** (holds only in a narrow parameter region): flag for the scorer. Proceed but the paper should be honest about this.
-5. **Re-run on substantive revision.** If the theory revises after the first Stage 3a pass — new propositions, new sections, new extensions, or any content not explored in the prior pass — re-invoke theory-explorer on the new content before Gate 4 advances. Save targeted re-runs to `output/stage3a/exploration_vN.md` (where N is the theory version); do not overwrite the original `exploration.md`. Combined coverage must span the version that will be written into the paper. On completion, set `pipeline_state.json:stage3a_theory_version` to the current `theory_version`. Gate 4 must not advance while `stage3a_theory_version < theory_version`.
-{{EMPIRICAL_STAGE3E_GATE_ADDENDUM}}
+5. **Re-run on substantive revision.** If the theory revises after the first Stage 2b pass — new propositions, new sections, new extensions, or any content not explored in the prior pass — re-invoke theory-explorer on the new content before Gate 4 advances. Save targeted re-runs to `output/stage2b/exploration_vN.md` (where N is the theory version); do not overwrite the original `exploration.md`. Combined coverage must span the version that will be written into the paper. On completion, set `pipeline_state.json:stage2b_theory_version` to the current `theory_version`. Gate 4 must not advance while `stage2b_theory_version < theory_version`.
+{{EMPIRICAL_STAGE3A_GATE_ADDENDUM}}
 6. Commit: `artifact: theory exploration — {HOLDS/FRAGILE/FAILS}`

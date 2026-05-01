@@ -556,7 +556,7 @@ mkdir -p "$P/references"
 if [ "$MANUAL" = "1" ]; then
     mkdir -p "$P/output"
 else
-    mkdir -p "$P/output/stage0" "$P/output/stage1" "$P/output/stage2" "$P/output/stage3" "$P/output/stage3a/figures" "$P/output/stage4" "$P/output/puzzle_triage" "$P/output/post_pipeline"
+    mkdir -p "$P/output/stage0" "$P/output/stage1" "$P/output/stage2" "$P/output/stage2b/figures" "$P/output/stage3" "$P/output/stage4" "$P/output/puzzle_triage" "$P/output/post_pipeline"
     mkdir -p "$P/process_log/sessions" "$P/process_log/decisions" "$P/process_log/discussions" "$P/process_log/patterns"
 fi
 
@@ -570,7 +570,7 @@ done
 
 # Function to substitute {{SEED_OVERRIDE_*}} placeholders in all docs in $P/docs/.
 # Called after shared docs copy AND after each extension copies its own docs, so
-# extension-specific stage docs (e.g., stage_3b_empirical.md) also get substituted.
+# extension-specific stage docs (e.g., stage_3a_empirical.md) also get substituted.
 apply_seed_overrides() {
     local override_dir="$TEMPLATE_ROOT/templates/shared/seed_overrides"
     [ -d "$override_dir" ] || return 0
@@ -647,7 +647,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "status": "not_started",
   "seeded": true,
   "scores": {},
-  "stage3a_theory_version": null,
+  "stage2b_theory_version": null,
   "stage1_candidates": [],
   "history": []
 }
@@ -673,7 +673,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "seeded": false,
   "status": "not_started",
   "scores": {},
-  "stage3a_theory_version": null,
+  "stage2b_theory_version": null,
   "stage1_candidates": [],
   "history": []
 }
@@ -878,9 +878,9 @@ open(d,'w').write(content.replace('{{EXTENSION_STAGES}}', inject.rstrip()+'\n\n{
             # Theory-only runs leave these placeholders to be stripped by the post-extension cleanup.
             python3 - \
                 "$TEMPLATE_ROOT/extensions/empirical/stage2_rerun_inject.md" \
-                "$TEMPLATE_ROOT/extensions/empirical/stage3e_gate_inject.md" \
+                "$TEMPLATE_ROOT/extensions/empirical/stage3a_gate_inject.md" \
                 "$TEMPLATE_ROOT/extensions/empirical/state_fields_inject.md" \
-                "$TEMPLATE_ROOT/extensions/empirical/state3e_doc_inject.md" \
+                "$TEMPLATE_ROOT/extensions/empirical/state3a_doc_inject.md" \
                 "$TEMPLATE_ROOT/extensions/empirical/playbook_inject.md" \
                 "$TEMPLATE_ROOT/extensions/empirical/scorer_fertility_inject.md" \
                 "$P/docs/stage_2.md" \
@@ -891,9 +891,9 @@ import json, os, sys
 # whitespace. The final newline left by the editor IS content (it determines whether
 # a blank line follows the substitution).
 stage2 = open(sys.argv[1]).read()
-stage3e = open(sys.argv[2]).read()
+stage3a_gate = open(sys.argv[2]).read()
 state = open(sys.argv[3]).read()
-state3e_doc = open(sys.argv[4]).read()
+state3a_doc = open(sys.argv[4]).read()
 playbook = open(sys.argv[5]).read()
 fertility = open(sys.argv[6]).read()
 stage2_md = sys.argv[7]
@@ -915,14 +915,14 @@ def patch(path, pairs):
 # placeholder text (no extra "\n" appended).
 patch(stage2_md, [
     ("{{EMPIRICAL_STAGE2_RERUN_ADDENDUM}}", stage2),
-    ("{{EMPIRICAL_STAGE3E_GATE_ADDENDUM}}", stage3e),
+    ("{{EMPIRICAL_STAGE3A_GATE_ADDENDUM}}", stage3a_gate),
 ])
 
 # Runtime docs (CLAUDE.md / AGENTS.md / GEMINI.md): state JSON field + state-doc paragraph + playbook addendum.
 for d in runtime_docs:
     patch(d, [
         ("{{EMPIRICAL_STATE_FIELDS}}", state),
-        ("{{EMPIRICAL_STATE3E_DOC}}", state3e_doc),
+        ("{{EMPIRICAL_STATE3A_DOC}}", state3a_doc),
         ("{{EMPIRICAL_PLAYBOOK_ADDENDUM}}", playbook),
     ])
 
@@ -932,19 +932,19 @@ for s in scorer_files:
         ("<!-- EMPIRICAL_FERTILITY_ADDENDUM -->", fertility),
     ])
 
-# pipeline_state.json: add stage3e_theory_version field, mirroring stage3a_theory_version.
+# pipeline_state.json: add stage3a_theory_version field, mirroring stage2b_theory_version.
 # Manual mode skips state file creation (see setup.sh ~line 626), so guard on existence.
 state_path = os.path.join(os.path.dirname(stage2_md), "..", "process_log", "pipeline_state.json")
 state_path = os.path.normpath(state_path)
 if os.path.exists(state_path):
     with open(state_path) as f: data = json.load(f)
-    if "stage3e_theory_version" not in data:
-        # Insert immediately after stage3a_theory_version to preserve key order in the file.
+    if "stage3a_theory_version" not in data:
+        # Insert immediately after stage2b_theory_version to preserve key order in the file.
         new = {}
         for k, v in data.items():
             new[k] = v
-            if k == "stage3a_theory_version":
-                new["stage3e_theory_version"] = None
+            if k == "stage2b_theory_version":
+                new["stage3a_theory_version"] = None
         data = new
         with open(state_path, "w") as f:
             json.dump(data, f, indent=2)
@@ -1024,7 +1024,7 @@ for p in sys.argv[2:]:
 PYEOF
 
 # Re-run seed-override substitution now that extension docs have been copied into $P/docs/.
-# Extensions may ship stage docs (e.g., stage_3b_empirical.md) containing {{SEED_OVERRIDE_*}} placeholders.
+# Extensions may ship stage docs (e.g., stage_3a_empirical.md) containing {{SEED_OVERRIDE_*}} placeholders.
 apply_seed_overrides
 
 echo "  ✓ Codex custom agents assembled"

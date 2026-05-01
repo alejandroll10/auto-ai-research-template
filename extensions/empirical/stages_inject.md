@@ -2,6 +2,6 @@
 
 ---
 
-## Stage 3b/3e: Empirical Analysis
+## Stage 3a: Empirical Analysis
 
-Read `docs/stage_3b_empirical.md` and proceed accordingly.
+Read `docs/stage_3a_empirical.md` and proceed accordingly.

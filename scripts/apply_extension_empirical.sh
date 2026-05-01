@@ -58,7 +58,7 @@ if [ -f "$EXT_ROOT/agent_metadata/${AGENT_DIR}_agents.json" ]; then
         --output-dir "$GEMINI_AGENTS_OUT" \
         "${MODEL_OVERRIDE_ARG[@]}"
 else
-    echo "  ⚠ No empiricist agent for variant '${AGENT_DIR}' — Stage 3b will be skipped at runtime"
+    echo "  ⚠ No empiricist agent for variant '${AGENT_DIR}' — Stage 3a will be skipped at runtime"
 fi
 
 mkdir -p "$PROJECT_ROOT/code/utils"
@@ -67,7 +67,7 @@ cp "$EXT_ROOT/utils/"*.sh "$PROJECT_ROOT/code/utils/" 2>/dev/null || true
 chmod +x "$PROJECT_ROOT/code/utils/"*.sh 2>/dev/null || true
 touch "$PROJECT_ROOT/code/utils/__init__.py"
 
-mkdir -p "$PROJECT_ROOT/output/stage3b"
+mkdir -p "$PROJECT_ROOT/output/stage3a"
 
 ENV_FILE="$PROJECT_ROOT/.env"
 if ! grep -q 'FRED_API_KEY' "$ENV_FILE" 2>/dev/null; then

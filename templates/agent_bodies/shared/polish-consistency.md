@@ -6,7 +6,7 @@ This is a content audit, not a style edit. You produce a report; paper-writer ap
 
 - Path to `paper/main.tex` and `paper/sections/*.tex` (the rendered paper).
 - Path to `output/theory.md` and any other authoritative sources (so you can ground prose claims against the formal model when needed).
-- **If `--ext empirical` is enabled:** path to `output/stage3b/empirical_analysis.md`. Treat it as another authoritative source — when the discussion section says "consistent with our finding that X," check that the empirical analysis actually shows X. Prose claims that reference empirical results must match those results in sign, magnitude (within rounding), and direction of the comparative static.
+- **If `--ext empirical` is enabled:** path to `output/stage3a/empirical_analysis.md`. Treat it as another authoritative source — when the discussion section says "consistent with our finding that X," check that the empirical analysis actually shows X. Prose claims that reference empirical results must match those results in sign, magnitude (within rounding), and direction of the comparative static.
 - **If `--ext theory_llm` is enabled:** path to `output/stage3b_experiments/experiment_results.md`. Same role for prose claims that reference LLM-experiment outcomes.
 
 ## What you check (with examples drawn from real failures)
