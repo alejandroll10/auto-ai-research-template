@@ -2,6 +2,22 @@
 
 Autonomous research paper generator. Set up a project, launch Claude Code, Codex, or Gemini CLI, walk away. The system discovers a problem, generates a theory, verifies it adversarially, and writes a publication-ready paper.
 
+## Responsible use — please read before running
+
+This is a research instrument, not a submission tool. Outputs are **drafts** that require substantial human review, editing, and verification before they become your work. The pipeline's adversarial gates (math-auditor, novelty-checker, simulated referees) catch a great deal, but they are not a substitute for your own judgment as a researcher.
+
+**Submission requires prior written notice.** Per [`LICENSE`](LICENSE) §2, any submission of pipeline-produced or pipeline-derived work to a peer-reviewed journal, preprint server (arXiv, SSRN, etc.), conference, or thesis committee requires prior written notice to **contact@instituteforautomatedresearch.org**, identifying the intended venue and including a copy of the work. If no response within 60 days, you may proceed provided (i) §3 disclosure is satisfied, (ii) §4 watermark is intact, and (iii) the notice was sent in good faith to a working address. This is a license condition, not a courtesy — submitting without notice is a material breach.
+
+**AI-disclosure is required.** Per [`LICENSE`](LICENSE) §3, submitted work must disclose that this software was used in its production, in the form required by the venue's AI policy (or in the acknowledgments section if the venue has none). The copyright holder may waive disclosure case-by-case in writing; silence is not a waiver, and waivers do not transfer to third parties or attach to derivative works. **Keep any waiver you receive** — you bear the burden of producing the written waiver upon request, and failure to produce it is treated as conclusive evidence that no waiver was granted.
+
+**Outputs are watermarked.** PDFs produced by this pipeline carry a non-cosmetic provenance watermark. Detection methodology is shared privately with journal editors on request. Removing, modifying, or obfuscating the watermark terminates the license automatically (§4).
+
+**Cost.** A full run consumes substantial API credits — order-of-magnitude tens to low hundreds of US dollars per project, depending on iteration count, model selection (`--light` is cheaper), and extensions. The pipeline does not cap spend; set provider-side rate limits if this matters to you.
+
+**Commercial use is prohibited** without a separate written license (§5). Ordinary academic use by individual researchers, students, and non-profit institutions is unrestricted (subject to §2–§4).
+
+By cloning, running, or distributing this repository you accept the terms in [`LICENSE`](LICENSE).
+
 ## Easiest setup (no git or CLI knowledge needed)
 
 If you already have Claude Code installed, open it in any empty folder and paste this in:
@@ -301,13 +317,15 @@ Sandbox is pre-configured in `.claude/settings.json`:
 
 ## License
 
-Copyright (c) 2026 Alejandro Lopez-Lira (alejandroll10@gmail.com)
+Released under the **Auto Research Pipeline — Research Use License v1**. See [`LICENSE`](LICENSE) for full terms.
 
-All rights reserved.
+Summary (non-binding — the LICENSE text controls):
 
-This software and associated documentation files (the "Software") are for
-private use only. No permission is granted to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of the Software without
-explicit written permission from the copyright holder.
+- **Free for non-commercial research and education.** Use, modify, fork, redistribute.
+- **Submission requires prior written notice** to contact@instituteforautomatedresearch.org (§2). 60-day fallback if no response.
+- **AI-disclosure required** on submitted work (§3); waivable case-by-case in writing.
+- **Watermark must be preserved** — removal terminates the license (§4).
+- **No commercial use** without a separate license (§5). Ordinary academic use is exempt from the §5 prohibition but remains subject to §2–§4.
+- **Share-alike**: derivative works inherit this same license verbatim (§6) and **may not be relicensed under any other license**, including open-source or permissive licenses.
 
-For licensing inquiries, contact: alejandroll10@gmail.com
+For licensing inquiries: contact@instituteforautomatedresearch.org

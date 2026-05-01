@@ -1,10 +1,108 @@
-Copyright (c) 2026 Alejandro Lopez-Lira (alejandroll10@gmail.com)
+Auto Research Pipeline — Research Use License v1
+Copyright (c) 2026 Alejandro Lopez-Lira (contact@instituteforautomatedresearch.org)
 
-All rights reserved.
+1. GRANT. Subject to the conditions below, and subject in particular to
+   the watermark-preservation requirement of section 4, permission is
+   granted, free of charge, to any person obtaining a copy of this
+   software (the "Software"), to use, copy, modify, and create derivative
+   works of the Software for non-commercial research and educational
+   purposes.
 
-This software and associated documentation files (the "Software") are for
-private use only. No permission is granted to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of the Software without
-explicit written permission from the copyright holder.
+2. SUBMISSION NOTIFICATION. Any work product produced with any use of the
+   Software, or any derivative or modified version of the Software, in
+   the research, drafting, or writing process ("Pipeline Output") —
+   including but not limited to academic papers, working papers,
+   preprints, theses, and conference submissions — may not be submitted
+   to any peer-reviewed journal, preprint server (including but not
+   limited to arXiv, SSRN), conference, thesis committee, or other
+   publication venue without PRIOR WRITTEN NOTICE to the copyright holder
+   at the email address above. Notice must identify the intended venue
+   and provide a copy of the Pipeline Output. The copyright holder will
+   endeavor to respond within 14 days, but is under no obligation to do
+   so; silence does not constitute approval. If no written response is
+   received within 60 days of the notice being sent to the email address
+   above, the licensee may proceed with submission, provided that (i) the
+   disclosure requirement of section 3 is satisfied, (ii) the watermark
+   requirement of section 4 is satisfied, and (iii) the original notice
+   was sent in good faith to a working address. Submission before either
+   a written response or the expiration of the 60-day period, without
+   satisfying conditions (i)–(iii), constitutes a material breach of this
+   license, is a condition of the grant in section 1 (not a mere
+   covenant), and terminates this license under section 8.
 
-For licensing inquiries, contact: alejandroll10@gmail.com
+3. DISCLOSURE. Any submission of Pipeline Output must clearly disclose
+   that the Software (or a derivative thereof) was used in its
+   production, in a form acceptable to the target venue's AI-disclosure
+   policy. If the venue has no such policy, disclosure must appear in
+   the acknowledgments section, in language naming the Software by name
+   ("Auto Research Pipeline") and, where available, the URL of its
+   canonical public repository. The copyright holder may waive or
+   modify this disclosure requirement on a per-submission basis in the
+   written response provided under section 2; absent such an explicit
+   written waiver, this section applies in full, and silence under
+   section 2 does not constitute a waiver. Any waiver is personal to
+   the named licensee and tied to the specific submission identified
+   in the section 2 notice; it does not transfer to any third party,
+   does not attach to any Derivative Work, and does not extend to any
+   other submission, even by the same licensee. Blanket or
+   forward-looking waivers are not permitted under this section. The
+   licensee bears the burden of producing the written waiver upon
+   request from the copyright holder; failure to produce a written
+   waiver shall be treated as conclusive evidence that no waiver was
+   granted.
+
+4. WATERMARK. The Software embeds a non-cosmetic provenance watermark in
+   its output. Removal, modification, suppression, or obfuscation of
+   this watermark, or of the mechanism that produces it, is prohibited
+   and terminates the license automatically. The right to "modify" the
+   Software granted in section 1 does not extend to the watermark
+   mechanism. Derivative works must preserve the watermark mechanism
+   intact and operative.
+
+5. NO COMMERCIAL USE. Use of the Software, of any derivative or modified
+   version, or of Pipeline Output, for direct commercial monetization —
+   including but not limited to (a) paid paper-generation, paper-drafting,
+   or paper-assistance services, (b) sale or licensing of Pipeline Output
+   as a product, (c) inclusion of the Software in a commercial product,
+   service, or SaaS offering, or (d) use by a for-profit entity where
+   the Software or Pipeline Output is a direct input into a
+   revenue-generating product, service, or deliverable — requires a
+   separate written
+   license from the copyright holder. Use by individual researchers,
+   students, and non-profit academic institutions for ordinary academic
+   purposes (including grant-funded research and unpaid consulting that
+   does not directly monetize Pipeline Output) is not "commercial" under
+   this section.
+
+6. SHARE-ALIKE / LICENSE INHERITANCE. Any derivative work, modification,
+   fork, port, translation, or work that incorporates a substantial
+   portion of the Software ("Derivative Work") must be licensed in its
+   entirety under the verbatim text of this license, with no additions,
+   deletions, or modifications to its terms. You may not relicense,
+   sublicense, or distribute a Derivative Work under any other license,
+   including any open-source or permissive license. The conditions in
+   sections 2, 3, 4, 5, and 8 of this license apply to all Derivative
+   Works and to all output produced by any Derivative Work.
+
+7. REDISTRIBUTION. Redistribution of the Software or any Derivative Work,
+   modified or unmodified, is permitted provided that (a) the verbatim
+   text of this license is included in full and unaltered, (b) the
+   watermark mechanism is preserved and operative, (c) the Derivative
+   Work carries this same license per section 6, and (d) prominent
+   notice is given of any changes made to the Software.
+
+8. TERMINATION. Violation of any condition above terminates the license
+   automatically and immediately. Continued use, distribution, or
+   submission of Pipeline Output after termination constitutes copyright
+   infringement. Reinstatement requires written consent of the copyright
+   holder.
+
+9. NO WARRANTY. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+   NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE
+   FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+   CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+For licensing inquiries: contact@instituteforautomatedresearch.org
