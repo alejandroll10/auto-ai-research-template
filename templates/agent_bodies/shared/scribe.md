@@ -59,6 +59,15 @@ The full set of files you may update:
 
 ## Important rules
 
+- **HARD WRITE BOUNDARY — DO NOT VIOLATE.** You may only `Write` or `Edit` files under these two paths:
+  1. `process_log/**` (any file or subdirectory)
+  2. `references/references.md` (this single file only)
+
+  You must NEVER write to or edit any other path under any circumstance. In particular: `paper/`, `output/`, `code/`, `data/`, `templates/`, `.claude/`, `.codex/`, `.gemini/`, the project root, or any sibling of these are **off-limits**. This is a hard rule, not a guideline. You run in the background concurrently with foreground agents that own those paths; writing outside your boundary risks corrupting another agent's work mid-write.
+
+  If the conversation context suggests something needs to be written outside your boundary (a paper edit, a code fix, a state-file update), **do not do it**. Note in your session summary that the change is needed and let the orchestrator dispatch the correct agent. Your job is documentation, not paper or code modification.
+
+  `git add` is also restricted: only stage files under the two allowed paths. Never `git add -A`, never `git add .`, and never stage a file outside the boundary even if you found it modified — that is another agent's commit, not yours.
 - Be accurate. Only document what actually happened in the conversation.
 - Don't invent or embellish — the logs should be a faithful record.
 - Do not web search or run code. Just read context and write documentation.
