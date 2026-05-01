@@ -283,11 +283,11 @@ After the pipeline is complete (`"status": "complete"`), any new or modified pro
 
 ## Never-abandon rule
 
-**Once a paper draft exists (Stage 5+), the pipeline must produce a finished paper.** Do not loop back to Stage 0 after investing in paper writing. Instead, use the extension playbook below to strengthen the paper. A regeneration round per the escalation table is permitted post-Stage-5; it re-enters at Stage 1, not Stage 0.
+**Once a paper draft exists (Stage 5+), the pipeline must produce a finished paper.** Do not loop back to Stage 0 after investing in paper writing. Instead, use the deepening playbook below to strengthen the paper. A regeneration round per the escalation table is permitted post-Stage-5; it re-enters at Stage 1, not Stage 0.
 
 If the scorer plateaus in the 55-74 range or the referee gives Major Revision with structural concerns (result is fragile, too narrow, or shallow):
 
-### Extension playbook
+### Deepening playbook
 
 When the core result is correct but thin, extend it with mathematically hard, economically interesting analyses that uncover new content the simple model hid. The goal is characterization, not robustness.
 
@@ -312,12 +312,12 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 | Scorer: delta ≥ 3 with substantive content change | — | Allow one more iteration in current band |
 | Scorer: delta ≥ 3 from reframing only | — | Treat as plateau — escalate. Reframing is not progress (see `stage_4.md`). |
 | Scorer: delta < 3 (plateau/decline) | — | Escalate one level (REVISE → MAJOR REWORK → ABANDON) |
-| Scorer: hard ceiling | 8 total evaluations on same problem | If score ≥ 55: switch to extension playbook. If score < 55: escalate one level. |
-| Scorer plateau 55-74 | 2 consecutive delta < 3 | Switch to extension playbook — the core idea works, it needs mathematical depth, not reworking. |
-| Scorer plateau 55-74, branch-manager §E = Regenerate, no prior regen on this problem (`regeneration_round == 0`), **not seeded** | — | Fire regeneration round at Stage 1 (see `docs/stage_1.md` "Regeneration round"). Increment `regeneration_round` *before* re-entering Stage 1. **Takes precedence over the extension-playbook row above when both fire** — Regenerate is the §E verdict that supersedes the default plateau routing. **At most one regeneration per problem:** if the regenerated attempt also plateaus, this row no longer fires (`regeneration_round > 0`) and the "Scorer plateau 55-74" row directly above applies — switch to the extension playbook. |
+| Scorer: hard ceiling | 8 total evaluations on same problem | If score ≥ 55: switch to deepening playbook. If score < 55: escalate one level. |
+| Scorer plateau 55-74 | 2 consecutive delta < 3 | Switch to deepening playbook — the core idea works, it needs mathematical depth, not reworking. |
+| Scorer plateau 55-74, branch-manager §E = Regenerate, no prior regen on this problem (`regeneration_round == 0`), **not seeded** | — | Fire regeneration round at Stage 1 (see `docs/stage_1.md` "Regeneration round"). Increment `regeneration_round` *before* re-entering Stage 1. **Takes precedence over the deepening-playbook row above when both fire** — Regenerate is the §E verdict that supersedes the default plateau routing. **At most one regeneration per problem:** if the regenerated attempt also plateaus, this row no longer fires (`regeneration_round > 0`) and the "Scorer plateau 55-74" row directly above applies — switch to the deepening playbook. |
 | Theory scored ABANDON | 5 theories on same problem | Change the problem (Stage 0) |
 | Problem viability fails | 5 problems | Pick the best scoring problem and proceed anyway |
-| Editor: Major Revision (aggregated verdict) | Structural concerns (fragile, narrow, shallow) | Use extension playbook. Triage editor's canonical comment list; revise; re-run Stage 6. Be patient — keep going as long as each round surfaces any new issue. Max 10 rounds. |
+| Editor: Major Revision (aggregated verdict) | Structural concerns (fragile, narrow, shallow) | Use deepening playbook. Triage editor's canonical comment list; revise; re-run Stage 6. Be patient — keep going as long as each round surfaces any new issue. Max 10 rounds. |
 | Mechanism referee: MISATTRIBUTED unresolved | Still MISATTRIBUTED at `referee_round >= 10` | Adopt the mechanism referee's identified driver as the paper's mechanism; rewrite introduction/mechanism sections and ship. **Force-adoption at round-10 resolves all outstanding locked mechanism `[FIX]` items as satisfied — no further revision cycle is required.** In seeded mode, prefer the narrow-framing path from the seed override (present what the math delivers under the seed's topic, acknowledge the mechanism-claim divergence in limitations) rather than adopting an unrelated driver. Never return to Stage 0 (never-abandon). |
 | Mechanism referee: DECORATIVE unresolved | Still DECORATIVE at `referee_round >= 10` | Ship the narrow-path version: after 10 rounds the restructure path has failed to surface real economic content, so narrow is the principled default. Present what the math delivers as a structural characterization, strip mechanism framing, add a limitations paragraph. **Round-10 narrow-adoption resolves all outstanding locked mechanism `[FIX]` items as satisfied.** Never return to Stage 0 (never-abandon, scientist-first). |
 | Editor: Reject (aggregated verdict) | — | Stage 6 fires only post-Stage-5, so a paper draft always exists; never-abandon. Reject routes through triage → deepen directive → deepen mandate (see `docs/stage_6.md` Reject row for full procedure). The pre-Stage-5 "Stage 0 / Stage 2" branches do not exist at this point. On two consecutive cosmetic deepen attempts, the orchestrator routes through the Regeneration Round protocol if eligible (`regeneration_round == 0`, not seeded), otherwise falls back to standard Major Revision (never-abandon). |
