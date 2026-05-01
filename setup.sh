@@ -556,19 +556,30 @@ mkdir -p "$P/references"
 
 # ---------------------------------------------------------------------
 # Pipeline fingerprint: arpipeline.sty + main.tex skeleton
-# Bakes a deployment-unique UUID into three layers (LaTeX commands,
-# PDF metadata via hyperref, zero-width Unicode in the title) so every
-# paper produced by this deployment carries an invisible identifier.
+# Bakes a deployment-unique UUID into four layers (LaTeX source commands,
+# hyperref PDF metadata, custom /Info dict entries, and per-page white-
+# on-white grep marker) so every paper produced by this deployment
+# carries the magic prefix ARPIPELINE-FP-V1 for distribution detection.
 # ---------------------------------------------------------------------
-ARP_UUID=$(python3 -c 'import uuid; print(uuid.uuid4())')
+ARP_UUID=$(python3 -c 'import uuid; print(uuid.uuid4())' 2>/dev/null)
 ARP_DATE=$(date -u +%Y-%m-%d)
 ARP_VERSION=$(cd "$TEMPLATE_ROOT" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+if [ -z "$ARP_UUID" ]; then
+    echo "ERROR: failed to generate fingerprint UUID (python3 unavailable or stdlib broken)." >&2
+    echo "       Aborting setup; install python3 and retry." >&2
+    exit 1
+fi
 sed -e "s|{{ARP_UUID}}|$ARP_UUID|g" \
     -e "s|{{ARP_VERSION}}|$ARP_VERSION|g" \
     -e "s|{{ARP_DATE}}|$ARP_DATE|g" \
     "$TEMPLATE_ROOT/templates/paper_skeleton/arpipeline.sty.template" \
     > "$P/paper/arpipeline.sty"
-cp "$TEMPLATE_ROOT/templates/paper_skeleton/main.tex.template" "$P/paper/main.tex"
+# Don't clobber an existing main.tex (e.g. --seed mode where the user has
+# pre-populated paper/main.tex). The .sty above is always overwritten —
+# it is pipeline infrastructure with a fresh UUID per deployment.
+if [ ! -f "$P/paper/main.tex" ]; then
+    cp "$TEMPLATE_ROOT/templates/paper_skeleton/main.tex.template" "$P/paper/main.tex"
+fi
 
 if [ "$MANUAL" = "1" ]; then
     mkdir -p "$P/output"

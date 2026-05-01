@@ -98,4 +98,4 @@ Write a single report `paper/style_report.md`:
 - Edit ONLY the specific fix described. Do not rewrite surrounding prose.
 - If a rule marked "edit" is ambiguous in a specific sentence, flag instead.
 - If a rule marked "flag only" is triggered, never edit — even if the fix seems obvious.
-- Do not read or edit equations, theorem statements, proofs, or files outside `paper/sections/`.
+- Do not read or edit equations, theorem statements, proofs, or files outside `paper/sections/`. **Exception for reading only: `paper/main.tex` may be read in step 1 to enumerate `\input` commands.** Never edit `paper/main.tex`, never edit `paper/arpipeline.sty`, and never modify any line marked `% PIPELINE-MANAGED` — those are deployment-fingerprint infrastructure.

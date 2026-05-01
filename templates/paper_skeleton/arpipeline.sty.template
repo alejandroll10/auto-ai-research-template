@@ -22,6 +22,16 @@
 % Payload format wherever this string appears:
 %   ARPIPELINE-FP-V1[uuid={UUID},ver={VERSION},date={DATE}]
 %
+% Required packages — loaded defensively so this .sty works regardless of
+% what main.tex has already imported. xcolor is hoisted via
+% \PassOptionsToPackage so a later \usepackage[opts]{xcolor} from the user
+% does not trigger an option clash. atbegshi provides \AtBeginShipout /
+% \AtBeginShipoutUpperLeft on TeX Live ≤ 2020; on newer distributions it
+% is folded into l3backend and the \RequirePackage no-ops.
+\PassOptionsToPackage{}{xcolor}
+\RequirePackage{xcolor}
+\RequirePackage{atbegshi}
+%
 % Layer 1 — fingerprint constants in source (not expanded into output)
 \newcommand{\arpFingerprint}{{{ARP_UUID}}}
 \newcommand{\arpVersion}{{{ARP_VERSION}}}
@@ -31,6 +41,9 @@
 %
 % Layer 2 — PDF metadata via hyperref. The magic prefix is prepended to
 % pdfsubject so `pdfinfo paper.pdf | grep ARPIPELINE-FP-V1` finds it.
+% Caveat: if the document class or a later-loaded package issues its own
+% \hypersetup inside \AtBeginDocument, hook order is FIFO and a class-
+% level call may overwrite these settings. Layer 3 and Layer 4 still hold.
 \AtBeginDocument{%
   \makeatletter%
   \@ifpackageloaded{hyperref}{%
@@ -46,12 +59,17 @@
 % Layer 3 — custom /Info dictionary entries via \pdfinfo. Values are
 % prefixed with the magic string so a raw PDF dump also catches them
 % via `qpdf --qdf - paper.pdf - | grep ARPIPELINE-FP-V1`.
+% Engine guard: \pdfinfo is a pdfTeX primitive; absent under XeTeX and
+% LuaTeX. Skip Layer 3 silently when the primitive is undefined; Layers
+% 1, 2, and 4 still carry the fingerprint under those engines.
 \AtBeginDocument{%
-  \pdfinfo{%
-    /arpFingerprint (ARPIPELINE-FP-V1::{{ARP_UUID}})%
-    /arpVersion (ARPIPELINE-FP-V1::{{ARP_VERSION}})%
-    /arpDeployed (ARPIPELINE-FP-V1::{{ARP_DATE}})%
-  }%
+  \ifx\pdfinfo\undefined\else
+    \pdfinfo{%
+      /arpFingerprint (ARPIPELINE-FP-V1::{{ARP_UUID}})%
+      /arpVersion (ARPIPELINE-FP-V1::{{ARP_VERSION}})%
+      /arpDeployed (ARPIPELINE-FP-V1::{{ARP_DATE}})%
+    }%
+  \fi
 }
 %
 % Layer 4 — white-on-white text injected on EVERY shipped page via
@@ -64,8 +82,9 @@
 % Placed at upper-left of paper (offset by \put(0,0)) where it sits over
 % the page margin in white text, invisible against a white page.
 % Caveats: visible under dark-mode PDF readers, on non-white backgrounds,
-% and when page text is selected.
-\RequirePackage{xcolor}
+% when page text is selected, and on zero-margin classes (e.g. beamer
+% submission templates) where the upper-left coord is inside the text
+% area.
 \AtBeginShipout{%
   \AtBeginShipoutUpperLeft{%
     \put(0,0){\smash{\hbox{\color{white}\tiny\arpPayload}}}%
