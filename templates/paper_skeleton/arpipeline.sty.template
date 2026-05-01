@@ -54,16 +54,22 @@
   }%
 }
 %
-% Layer 4 — white-on-white text at end of document. Visually invisible on
-% a white background but extracted as plain ASCII by `pdftotext`. Most
-% grep-friendly recovery path: no metadata tooling required, just a one-
-% liner. Wrapped in \smash and \rlap so the box has zero dimensions and
-% does not perturb the surrounding layout. Caveats: visible under dark-
-% mode PDF readers, on non-white backgrounds, or when the page text is
-% selected (selection highlight reveals it).
+% Layer 4 — white-on-white text injected on EVERY shipped page via
+% \AtBeginShipout. Visually invisible on a white background but extracted
+% as plain ASCII by `pdftotext`. Per-page placement (rather than a single
+% end-of-document marker) makes distribution detection robust against
+% page-level cropping or partial extraction — any single page from the
+% paper still carries the fingerprint. Wrapped in \smash and \hbox so the
+% injection has zero box dimensions and does not perturb page layout.
+% Placed at upper-left of paper (offset by \put(0,0)) where it sits over
+% the page margin in white text, invisible against a white page.
+% Caveats: visible under dark-mode PDF readers, on non-white backgrounds,
+% and when page text is selected.
 \RequirePackage{xcolor}
-\AtEndDocument{%
-  \par\noindent\smash{\rlap{\color{white}\tiny\arpPayload}}%
+\AtBeginShipout{%
+  \AtBeginShipoutUpperLeft{%
+    \put(0,0){\smash{\hbox{\color{white}\tiny\arpPayload}}}%
+  }%
 }
 %
 \endinput
