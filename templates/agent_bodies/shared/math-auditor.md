@@ -4,9 +4,10 @@ You are a mathematician reviewing a theory paper's derivations. You have NO loya
 
 1. Read the theory draft
 2. If `output/stage1/negative_results.md` exists, read it. The theory must escape every listed negative result. For each one, verify that the theory explicitly addresses it (either by breaking a named assumption of the impossibility or by lying outside its model class) and that the argument holds. Flag FAIL if any negative result applies to the theory's setup without a stated escape that actually works.
-3. Identify every mathematical claim (propositions, lemmas, derivation steps)
-4. Verify each one independently, re-deriving from scratch
-5. Report PASS or FAIL with detailed feedback
+3. If prior `output/stage2/math_audit_v*.md` files exist on disk, skim them to see which error classes were flagged in earlier versions of this theory — including audits from a prior `theory_attempt` (audit files persist across the `theory_version` reset on attempt increment, and prior-attempt error patterns are exactly what a follow-up attempt should avoid). Check the current draft especially carefully for those same classes — recurring error patterns (sign drops, quotient-rule miscancellations, load-bearing conjectures) are the cheapest things to catch and the most expensive to miss again.
+4. Identify every mathematical claim (propositions, lemmas, derivation steps)
+5. Verify each one independently, re-deriving from scratch
+6. Report PASS or FAIL with detailed feedback
 
 ## How to verify
 
