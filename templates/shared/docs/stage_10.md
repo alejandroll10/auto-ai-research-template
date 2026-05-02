@@ -15,9 +15,7 @@ Stage 10 owns the `"status": "complete"` flag. The pipeline is not done until bo
 1. **Write `LESSONS_PAPER.md` at the project root.** Answer, in your own voice and as honestly as you can:
    - **How do you feel about the paper?**
    - **Did it achieve the desired quality (the target journal tier set in `pipeline_state.json`)?**
-   - **If not, which journal would be the best fit?**
-
-   Read the final `paper/main.tex` + `paper/sections/*.tex`, the scorer/branch-manager/referee history, and the polish reports before answering. Be specific — name results, sections, weaknesses by anchor. Vague output ("the paper is reasonable") is not enough; if you cannot say what specifically works and what specifically does not, re-read the artifacts and try again.
+   - **If not, which journal(s) would be the best fit? Explain for every tier in the pipeline (`top-5`, `field`, `letters`) why the paper would or would not be a good fit at that tier.**
 
    Commit: `lessons: paper reflection`.
 
@@ -25,18 +23,12 @@ Stage 10 owns the `"status": "complete"` flag. The pipeline is not done until bo
    - **How do you feel about the pipeline?**
    - **What helped vs. what hurt the paper — keeping cost/time impact separate from quality impact?**
 
-   Read `process_log/pipeline_state.json`, the stage outputs, the triage files, and the commit history before answering. The cost/quality separation is the point: an agent that is slow but high-quality is worth keeping; an agent that is fast but low-quality is not; an agent that is slow *and* low-quality is a kill candidate. Name agents and stages by name and cite specific findings (or specific silent rounds) when making each call.
-
    Commit: `lessons: pipeline reflection`.
 
 3. **Mark complete.** Update `process_log/pipeline_state.json` with `"status": "complete"`. Final commit: `pipeline: COMPLETE — paper ready for submission`.
 
 ## Notes
 
-- **No structural template for the docs.** Free-form prose. The questions are the discipline; resist the temptation to add headings, bullet rubrics, or fill-in-the-blank scaffolds. The documents are short reflections, not reports.
+Free-form prose. 
 
-- **Honesty over diplomacy.** If the paper plateaued below the target tier, say so and name the tier it does fit. If a polish round did not move quality, say so and name it. The audience for `LESSONS_PIPELINE.md` is template maintenance — diplomatic non-answers are useless feedback.
-
-- **Aggregation across runs.** `LESSONS_PIPELINE.md` is the per-run input to a multi-run signal on which agents are net-positive. Mention specific agents and findings so the aggregation can pick them up. Generic praise of "the pipeline" is not actionable; "polish-equilibria r2 caught the σ_u/A1 isotropy mismatch that nothing upstream surfaced" is.
-
-- **Length.** Each doc is one screen of prose, not a report. If you are over 600 words on either, you are over-explaining.
+- **Honesty over diplomacy.** If the paper plateaued below the target tier, say so and name the tier it does fit. If a polish round did not move quality, say so and name it. Name specific agents and specific findings, not impressions. The audience for `LESSONS_PIPELINE.md` is template maintenance.
