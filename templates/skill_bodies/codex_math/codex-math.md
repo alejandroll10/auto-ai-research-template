@@ -135,7 +135,7 @@ Result saved to `output/codex_explorations/`.
 
 ## Sandbox model
 
-Codex with `--full-auto` runs in the `workspace-write` sandbox:
+Codex with `--sandbox workspace-write` runs in the workspace-write sandbox:
 
 - **Shell + Python available.** `cat`, `grep`, `sed`, `python3` (including `sympy`) all work.
 - **Read access everywhere** the user can read.

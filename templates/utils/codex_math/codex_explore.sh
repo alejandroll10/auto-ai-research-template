@@ -88,7 +88,7 @@ Report format:
 [what is proved, what is conjectured, what is open]
 ## LaTeX propositions (if any new results)"
 
-codex exec --full-auto --skip-git-repo-check \
+codex exec --sandbox workspace-write --skip-git-repo-check \
     -c "model_reasoning_effort=\"$EFFORT\"" \
     -c 'model_reasoning_summary="auto"' \
     -o "$TMP" \
