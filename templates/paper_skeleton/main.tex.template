@@ -11,7 +11,7 @@
 % \input lines for new section files under paper/sections/ as the paper
 % grows.
 % =====================================================================
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
 
 % PIPELINE-MANAGED — DO NOT MODIFY
 \usepackage[utf8]{inputenc}
@@ -25,6 +25,8 @@
 \usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{setspace}
+\doublespacing
 
 \title{TITLE PLACEHOLDER}
 \author{AUTHOR PLACEHOLDER}
