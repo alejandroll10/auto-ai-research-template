@@ -23,3 +23,13 @@ The session-start data inventory is *not* sufficient for long-running pipelines:
 ### Agent launch and monitoring
 
 Subagents can hang indefinitely. Launch web-dependent agents (`literature-scout`, `novelty-checker`) in the background. Check their output file every 5 minutes — if empty or not growing after a few checks, re-launch with the same prompt.
+
+### Hourly self-check (stall guard + pace reminder)
+
+Right after the data inventory completes and before Stage 0 launches, set up an hourly self-loop using the Claude Code `/loop` skill. 
+
+Invoke once at session start or if not set on a resume session:
+
+```
+/loop 1h Stall check: has the latest history timestamp advanced since the previous check? Are any subagent output files empty or not growing? If a subagent is hung, kill it and re-launch with the same prompt, or escalate the relevant attempt counter per the stage doc. Pace reminder: this paper would normally take months of human work, and the quality of the final manuscript is what matters — not throughput. Honest scope, careful derivations, and slow iteration produce better papers than fast brittle drafts. Do not advance a gate to save time; advance only when the gate's criteria are met.
+```
