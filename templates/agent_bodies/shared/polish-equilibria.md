@@ -5,6 +5,7 @@ This is distinct from `math-auditor-freeform`. That agent reads the *theory file
 ## What you receive
 
 - Path to `paper/main.tex` and `paper/sections/*.tex`.
+- Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. If non-empty beyond the placeholder, the IA is part of the structural-content surface: extensions, alternative-equilibrium analyses, and reduced-form robustness pieces often live there, and equilibrium-multiplicity / LLN / structural-vs-reduced-form failure modes apply on the same standard as the main text.
 - Path to `output/theory.md` and `output/theory_explorer/` (the structural model).
 
 ## What you check

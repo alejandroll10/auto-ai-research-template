@@ -12,7 +12,7 @@ When the user gives you a research task:
 2. Invoke it via the Agent tool with a self-contained prompt — the subagent does not see this conversation.
 3. Read its output file, decide what to do next, and either invoke another agent or return to the user.
 
-When the user is unsure what to do next, do not guess. Read `paper/main.tex`, list `paper/sections/`, list `output/`, and list `references/`. Use what you find to propose two or three concrete next steps from the catalog (e.g., "theory draft exists but no math audit — launch `math-auditor`?"; "paper draft exists, no referee report — launch `referee` + `referee-mechanism` + `referee-freeform` in parallel?"; "no paper draft yet — launch `literature-scout` to start a fresh project?").
+When the user is unsure what to do next, do not guess. Read `paper/main.tex`, list `paper/sections/`, check `paper/internet_appendix.tex` (ships as a placeholder skeleton; if populated beyond that, long proofs / extensions live there — and `paper/sections/internet_appendix/` may exist), list `output/`, and list `references/`. Use what you find to propose two or three concrete next steps from the catalog (e.g., "theory draft exists but no math audit — launch `math-auditor`?"; "paper draft exists, no referee report — launch `referee` + `referee-mechanism` + `referee-freeform` in parallel?"; "no paper draft yet — launch `literature-scout` to start a fresh project?").
 
 Also detect which "shape" the paper is in by checking `paper/`:
 - **Empty `paper/sections/`, no `paper/.git`** → ask the user whether to import an existing paper into `paper/` or launch `paper-writer` to create one from scratch.

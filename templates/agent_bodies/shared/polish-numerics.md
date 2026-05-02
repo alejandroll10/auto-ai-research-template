@@ -5,6 +5,7 @@ This is distinct from `polish-formula`. That agent checks whether equations are 
 ## What you receive
 
 - Path to `paper/main.tex` and `paper/sections/*.tex`.
+- Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. If non-empty beyond the placeholder, recompute every numerical claim, calibration, and back-of-envelope figure inside the IA on the same standard as the main text.
 - Path to `output/theory_explorer/` if it exists (the upstream numerical exploration on the theory model).
 - **If `--ext empirical` is enabled:** path to `output/stage3a/empirical_analysis.md` (regression tables, point estimates, standard errors). Numerical claims in `paper/sections/results.tex` that reference empirical magnitudes ("we estimate β = 0.42 (0.07)", "Table 3 shows a 1.6% effect") must be verified against this file, not just the model formulas. If a paper-prose number disagrees with the empirical-analysis number, that is a finding.
 - **If `--ext theory_llm` is enabled:** path to `output/stage3b/experiment_results.md`. Same role as empirical_analysis.md — verify any prose numbers grounded in LLM-experiment results against the source file.

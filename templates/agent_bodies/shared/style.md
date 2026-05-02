@@ -7,7 +7,7 @@ When uncertain, flag — never guess. Never touch equations, theorem statements,
 
 ## Style rules
 
-Apply to every sentence in `paper/sections/*.tex`. For each rule, edit when the fix is mechanical; flag when judgment is required.
+Apply to every sentence in `paper/sections/*.tex` and `paper/sections/internet_appendix/*.tex` (when the directory exists). Also apply to any non-proof prose in `paper/internet_appendix.tex` itself (typically just section openers and connecting paragraphs — most of that file is preamble or `\input` directives, which you skip). Most IA content is theorem statements and proofs, which the standing rule forbids you to touch; in practice your IA work is light. For each rule, edit when the fix is mechanical; flag when judgment is required.
 
 ### Filler before "that"
 Strike the filler and keep the rest. Common offenders: "It should be noted that," "It is easy to show that," "It is important to note that," "It turns out that," "The reason is that," "The fact that," "One can see that," "It is worth noting that," "A comment is in order at this point," "Note that," "This implies that," "This means that." Relative-clause "that" ("the portfolio that has...") stays. "Recall that" — flag and assess.
@@ -70,8 +70,9 @@ Flag "large," "small," "substantial," "non-trivial," "significant" used without 
 
 1. Start with `paper/main.tex`. Identify all `\input` commands.
 2. Process each section file in order. Skip files that don't exist.
-3. Edit in place as you go for mechanical fixes.
-4. Accumulate flagged items in a report.
+3. Then check `paper/internet_appendix.tex`: if non-empty beyond the placeholder skeleton, identify its `\input` commands and process each `paper/sections/internet_appendix/*.tex` file in turn, plus any non-proof prose in `internet_appendix.tex` itself.
+4. Edit in place as you go for mechanical fixes.
+5. Accumulate flagged items in a report.
 
 ## Output
 
@@ -98,4 +99,4 @@ Write a single report `paper/style_report.md`:
 - Edit ONLY the specific fix described. Do not rewrite surrounding prose.
 - If a rule marked "edit" is ambiguous in a specific sentence, flag instead.
 - If a rule marked "flag only" is triggered, never edit — even if the fix seems obvious.
-- Do not read or edit equations, theorem statements, proofs, or files outside `paper/sections/`. **Exception for reading only: `paper/main.tex` may be read in step 1 to enumerate `\input` commands.** Never edit `paper/main.tex`, never edit `paper/arpipeline.sty`, and never modify any line marked `% PIPELINE-MANAGED` — those are deployment-fingerprint infrastructure.
+- Do not read or edit equations, theorem statements, or proofs. You may edit non-proof prose in `paper/sections/`, `paper/sections/internet_appendix/`, and `paper/internet_appendix.tex`. **Exception for reading only: `paper/main.tex` may be read in step 1 to enumerate `\input` commands.** Never edit `paper/main.tex`, never edit `paper/arpipeline.sty`, and never modify any line marked `% PIPELINE-MANAGED` — those are deployment-fingerprint infrastructure (the same `% PIPELINE-MANAGED` discipline applies to `paper/internet_appendix.tex`'s preamble; you may edit prose there but never the fingerprint block).

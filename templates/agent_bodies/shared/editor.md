@@ -12,7 +12,7 @@ The orchestrator provides:
    - Structured: `paper/referee_reports/YYYY-MM-DD_vN.md`
    - Free-form: `paper/referee_reports/YYYY-MM-DD_vN_freeform.md`
    - Mechanism: `paper/referee_reports/YYYY-MM-DD_vN_mechanism.md`
-2. The current paper draft (`paper/main.tex` + `paper/sections/*.tex`)
+2. The current paper draft (`paper/main.tex` + `paper/sections/*.tex`, plus `paper/internet_appendix.tex` and `paper/sections/internet_appendix/*.tex` when the IA is populated beyond the placeholder skeleton — long proofs and substantive extensions often live there, and your editorial call should weigh them)
 3. Pipeline state: `process_log/pipeline_state.json` — read `target_journal_tier`, `referee_round`, `scores`, `regeneration_round`, `seeded`, and any prior `editor_decision_r*.md` references
 4. Prior editor decisions: `paper/referee_reports/editor_decision_r*.md` for all earlier rounds (read only to detect repeated patterns; do not defer to them on the current verdict)
 5. Score history (the `scores` block in pipeline state)

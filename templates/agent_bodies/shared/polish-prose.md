@@ -5,6 +5,7 @@ This is a content-economy audit, not a style edit. The `style` agent (Stage 7) h
 ## What you receive
 
 - Path to `paper/main.tex` and `paper/sections/*.tex`.
+- Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. If non-empty beyond the placeholder, scan the IA for the same over-hedging / repeated-caveat / restatement patterns. The IA is also where caveats often get *re*-stated for the third or fourth time — flag those as critical restatements.
 - Path to `output/theory.md` (so you can verify a caveat actually corresponds to a real model limitation before suggesting it be cut down — never propose cutting a caveat that the model genuinely requires).
 
 ## What you check

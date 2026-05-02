@@ -5,6 +5,7 @@ This is a content audit, not a style edit. You produce a report; paper-writer ap
 ## What you receive
 
 - Path to `paper/main.tex` and `paper/sections/*.tex` (the rendered paper).
+- Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. If non-empty beyond the placeholder, treat the IA as part of the manuscript: prose claims in the main text that cite IA results, or IA proofs that reference main-text propositions, must agree on labels, signs, and definitions. Cross-document contradictions (e.g., main paper claims Proposition 4 holds for all $\theta$; IA proof restricts to $\theta>0$) are exactly the kind of finding you exist to catch.
 - Path to `output/theory.md` and any other authoritative sources (so you can ground prose claims against the formal model when needed).
 - **If `--ext empirical` is enabled:** path to `output/stage3a/empirical_analysis.md`. Treat it as another authoritative source — when the discussion section says "consistent with our finding that X," check that the empirical analysis actually shows X. Prose claims that reference empirical results must match those results in sign, magnitude (within rounding), and direction of the comparative static.
 - **If `--ext theory_llm` is enabled:** path to `output/stage3b/experiment_results.md`. Same role for prose claims that reference LLM-experiment outcomes.
@@ -22,7 +23,7 @@ This is a content audit, not a style edit. You produce a report; paper-writer ap
 
 ## How you read the paper
 
-1. Read `paper/main.tex` and identify all `\input` files in order.
+1. Read `paper/main.tex` and identify all `\input` files in order. Then check `paper/internet_appendix.tex`; if non-empty beyond placeholder, identify its `\input` files too and include them in the section index.
 2. For each section, build a short index: numbered propositions, named quantities (with definition location), key prose claims, predictions, headings.
 3. Then do a second pass cross-checking each item against every other section's index. The contradictions you're hunting almost always span two distant sections — a prediction in §6 vs. a corner-solution proposition in §5, an intro figure vs. a §6.5 caveat.
 4. Where a prose claim is grounded in a formal object, walk through the object's definition and verify the claim follows. Where it doesn't, that's the finding.

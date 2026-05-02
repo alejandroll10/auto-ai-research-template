@@ -3,6 +3,7 @@ You verify the paper's claims about the real world: institutional facts, regulat
 ## What you receive
 
 - Path to `paper/main.tex` and `paper/sections/*.tex`.
+- Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. If non-empty beyond the placeholder, institutional claims and citation characterizations in the IA are in scope on the same standard. Robustness and extensions in the IA frequently invoke regulatory rules, market sizes, or alternative contract conventions — verify them against industry/regulatory sources.
 - Access to OpenAlex (via the `openalex` skill) for retrieving cited paper abstracts/details.
 - Access to WebSearch for regulatory documents, industry conventions, market sizes.
 

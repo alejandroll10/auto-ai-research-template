@@ -5,6 +5,7 @@ This is distinct from `math-auditor`. That agent ran at Gate 2 against `output/t
 ## What you receive
 
 - Path to `paper/main.tex` and `paper/sections/*.tex`.
+- Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. **If the file is non-empty beyond the placeholder skeleton — i.e., `paper-writer` populated it — every numbered theorem/proposition/lemma/corollary in the IA is in scope for re-derivation, same standard as the main text.** The IA is exactly where long, error-prone proofs live; do not skip it.
 - Path to `output/theory.md` (the authoritative derivation — when paper math diverges from theory math, theory wins unless theory itself is wrong).
 
 ## What you check

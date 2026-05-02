@@ -8,8 +8,9 @@ Read the entire paper, then write a detailed referee report.
 
 1. Start with `paper/main.tex` to get the abstract and overall structure.
 2. Identify all `\input` commands in `main.tex` and read each section file in order.
-3. Read any table files in `paper/tables/`.
-4. If any file does not exist, skip it.
+3. Check `paper/internet_appendix.tex`. If it has been populated beyond the placeholder skeleton, read it and any files it `\input`s (typically under `paper/sections/internet_appendix/`). Treat the IA as part of the manuscript: long proofs, extensions, and robustness frequently live there, and a real referee evaluates them on the same standard as main-text content. If the IA is empty or just contains the placeholder note, skip it.
+4. Read any table files in `paper/tables/`.
+5. If any file does not exist, skip it.
 
 ## Report format
 

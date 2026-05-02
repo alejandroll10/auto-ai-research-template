@@ -597,6 +597,13 @@ sed -e "s|{{ARP_UUID}}|$ARP_UUID|g" \
 if [ ! -f "$P/paper/main.tex" ]; then
     cp "$TEMPLATE_ROOT/templates/paper_skeleton/main.tex.template" "$P/paper/main.tex"
 fi
+# Internet appendix skeleton. paper-writer only populates it when a proof
+# exceeds ~3 pages or the in-paper appendix would otherwise blow past ~30%
+# of main-text length; otherwise it stays a no-op placeholder. Same skip-
+# if-exists guard as main.tex above.
+if [ ! -f "$P/paper/internet_appendix.tex" ]; then
+    cp "$TEMPLATE_ROOT/templates/paper_skeleton/internet_appendix.tex.template" "$P/paper/internet_appendix.tex"
+fi
 
 if [ "$MANUAL" = "1" ]; then
     mkdir -p "$P/output"

@@ -58,10 +58,25 @@ Write each section to a separate file in `paper/sections/`:
 - Proof details that interrupt the flow
 - Extensions or robustness
 - Only if necessary — prefer proofs in the main text
+- If you populate the internet appendix substantively (see below), this in-paper appendix may shrink to nothing. Do not pad it for symmetry — empty is fine.
+
+### `paper/internet_appendix.tex` (only when triggered)
+
+A separate LaTeX document (own `\documentclass`, own compile, shared `bib.bib`) for material that is too long to fit in the main paper or its in-paper appendix. The skeleton ships with the deploy and uses `xr-hyper` to cross-reference the main paper's labels — write `\ref{prop:main_result}` (or whatever label `main.tex` defines) and `\externaldocument{main}` resolves the number from `main.aux`.
+
+**Only populate the internet appendix when one of these triggers fires:**
+
+- A single proof exceeds ~3 pages, OR
+- The in-paper `appendix.tex` would otherwise exceed ~30% of main-text length.
+
+Evaluate the trigger *within this same invocation*, after you have drafted the main text and in-paper appendix and before you finalize your output files — the 30% comparison is a post-draft judgment, not a pre-draft gate. The `~` qualifiers signal these are judgment thresholds, not precise cutoffs. If neither trigger fires once the draft is written, leave `paper/internet_appendix.tex` as the placeholder skeleton and put proofs in the main text or in `paper/sections/appendix.tex`. If a trigger does fire, move the qualifying proof(s) into the IA before you finish the invocation — the orchestrator does not re-launch you to do the relocation, so the trigger evaluation and the move both happen inside this single Stage-5 write pass. The internet appendix is **not** a default home for "anything that didn't fit"; the right answer for borderline material is usually to compress, not to relocate.
+
+When you do populate it, structure as: brief `\tableofcontents`, `\appendix`, then a sequence of `\section{...}` blocks, each with a clear topical title (e.g., "Proof of Proposition 4", "Continuous-time extension"). Cite the main paper's results explicitly (e.g., "Proposition~\ref{prop:main} of the main paper"). Long sections may be factored into `paper/sections/internet_appendix/<topic>.tex` files and `\input` from `internet_appendix.tex`.
 
 ## Also update
 
 - `paper/main.tex` — add `\input` commands for all section files. **The skeleton ships with a `% PIPELINE-MANAGED` block in the preamble that loads `arpipeline.sty`. Do not modify or remove the lines marked `PIPELINE-MANAGED`, do not delete `paper/arpipeline.sty`, and do not remove the `\usepackage{arpipeline}` line.** These are pipeline infrastructure (deployment fingerprint, downstream verification); removing them may break dashboard/audit tooling. Edit `\title`, `\author`, `\date`, the abstract, the `\input` lines, and the bibliography commands freely.
+- `paper/internet_appendix.tex` — if (and only if) you triggered the internet appendix, fill in `\title{Internet Appendix for ``...''}` and `\author{...}` to match `main.tex`. Same `PIPELINE-MANAGED` discipline as `main.tex`. If you do not trigger it, leave the file untouched.
 - `references/references.md` — ensure every cited paper is listed
 
 ## Style rules (mandatory)
@@ -93,7 +108,7 @@ Stage 9 launches you with a single triaged input file: `output/polish_triage_r{N
 - **Inputs you read:** `output/polish_triage_r{N}.md` (authoritative — only the `Apply` table is binding) and the source polish reports it cites (`output/polish_*_r{N}.md`) for context. Do NOT re-derive the theory or re-read the literature map; the paper is in its final form and you are applying surgical fixes.
 - **Pre-processing pass (do this BEFORE applying any Apply rows).** Scan the `Apply` table once for any polish-prose row whose suggested fix is a *cut* or *deletion* (e.g., "drop the abstract instance entirely", "delete this restatement"). For each such row, check whether the prose to be cut qualifies, restricts, or is otherwise relied on by any *other* section of the paper (a §6 prediction whose validity depends on a §2 caveat the row asks you to delete; a corner-case exception that is referenced downstream). When a dependency exists, decide *now*, before applying any row, whether you will (a) preserve the qualification inline in the dependent section as a parenthetical or short clause, or (b) skip the cut and append a one-sentence note to `## Investigate decisions`. Mark the row in your working notes as either "apply with inline preservation" or "skip — see Investigate decisions". Only after this pass do you proceed to the Apply-table loop. The triager's removal-vs-fix precedence catches obvious same-anchor conflicts; this pass catches polish-prose cuts that affect anchors no other agent flagged. When in doubt, skip the cut.
 - **What you do for each row in the `Apply` table:**
-  - Locate the anchor (section, equation number, line) in `paper/sections/*.tex`.
+  - Locate the anchor (section, equation number, line) in `paper/sections/*.tex` *or* `paper/internet_appendix.tex` / `paper/sections/internet_appendix/*.tex` if the finding is anchored in the IA. Polish reports cite IA anchors with the same path conventions as main-text anchors.
   - Apply the suggested fix as-written when it is concrete (a one-token swap, a replaced equation, a rephrased sentence). When the suggested fix requires more judgment (e.g., "add a remark formalizing the multiple-equilibria structure"), draft the addition and keep it as small as the finding warrants.
   - Do NOT introduce new content beyond what the finding calls for. Polish fixes are surgical, not rewrites.
 - **What you do for each row in the `Investigate` table:** draft a candidate fix in the section file, then append a one-sentence note to `output/polish_triage_r{N}.md` under a new `## Investigate decisions` heading explaining what you drafted. The orchestrator will read it.

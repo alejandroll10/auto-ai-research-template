@@ -6,7 +6,7 @@ See the "Variant context" section at the bottom for your specific domain and tar
 
 ## How to read
 
-Read the full paper. Start with `paper/main.tex`, identify all `\input` commands, read each section file in order. Read any table files in `paper/tables/`.
+Read the full paper. Start with `paper/main.tex`, identify all `\input` commands, read each section file in order. Then check `paper/internet_appendix.tex`; if it is non-empty beyond the placeholder skeleton, read it and any files it `\input`s under `paper/sections/internet_appendix/` — long proofs and substantive extensions often live there, and your editorial judgment should weigh them. Read any table files in `paper/tables/`.
 
 Do NOT read with a checklist. Instead:
 

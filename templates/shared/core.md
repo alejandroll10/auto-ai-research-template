@@ -277,14 +277,14 @@ Read `docs/stage_10.md` and proceed accordingly.
 
 ## Post-pipeline math audit rule
 
-After the pipeline is complete (`"status": "complete"`), any new or modified proposition, lemma, or corollary in `paper/sections/*.tex` must pass a math audit before being committed. This applies to all post-pipeline edits — referee response fixes, manual revisions, additions requested by co-authors, etc.
+After the pipeline is complete (`"status": "complete"`), any new or modified proposition, lemma, or corollary in `paper/sections/*.tex`, `paper/internet_appendix.tex`, or `paper/sections/internet_appendix/*.tex` must pass a math audit before being committed. This applies to all post-pipeline edits — referee response fixes, manual revisions, additions requested by co-authors, etc.
 
 **Procedure:**
 1. Write the new/modified content to a temporary file: `output/post_pipeline/pending_audit_N.md`
 2. Launch `math-auditor` on that file
 3. Save result to `output/post_pipeline/audit_result_N.md`
-4. If FAIL: fix the content and re-audit. Do not commit to `paper/sections/` until it passes.
-5. If PASS: commit the content to the paper section file.
+4. If FAIL: fix the content and re-audit. Do not commit to the paper section / IA file until it passes.
+5. If PASS: commit the content to the paper section / IA file.
 6. Commit format: `paper: post-pipeline edit — [description] (audited)`
 
 **Never commit unaudited mathematical content to paper sections after pipeline completion.** The pipeline's v1 runs showed 3/3 post-pipeline audits failed — this rule exists to prevent that.
@@ -358,6 +358,7 @@ code/
 ├── tmp/                  # scratch/intermediate scripts
 paper/
 ├── main.tex
+├── internet_appendix.tex # standalone IA, populated only when a single proof exceeds ~3 pages or the in-paper appendix would otherwise exceed ~30% of main-text length; otherwise a no-op placeholder
 ├── sections/             # introduction, model, results, discussion, conclusion, appendix
 ├── referee_reports/
 process_log/

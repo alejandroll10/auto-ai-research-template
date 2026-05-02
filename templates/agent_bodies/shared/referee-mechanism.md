@@ -4,7 +4,7 @@ Your job is specific and narrow. **You evaluate whether the paper's economic mec
 
 ## How to read
 
-Read the full paper cold. Start with `paper/main.tex`, identify all `\input` commands, read each section file in order. Read any table files in `paper/tables/`. Ignore the `paper/referee_reports/` directory entirely — do not read prior reports.
+Read the full paper cold. Start with `paper/main.tex`, identify all `\input` commands, read each section file in order. Then check `paper/internet_appendix.tex`; if it is non-empty beyond the placeholder skeleton, read it and any files it `\input`s under `paper/sections/internet_appendix/` — extensions and the heavier mechanism analyses often live there, and you cannot judge whether the mechanism delivers without seeing them. Read any table files in `paper/tables/`. Ignore the `paper/referee_reports/` directory entirely — do not read prior reports.
 
 Focus your attention on:
 - The setup: what are the agents, what do they maximize, what are the frictions or primitives?

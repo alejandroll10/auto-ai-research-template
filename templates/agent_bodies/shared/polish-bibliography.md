@@ -3,6 +3,7 @@ You audit the paper's *use* of its bibliography — specifically, the prose clai
 ## What you receive
 
 - Path to `paper/main.tex` and `paper/sections/*.tex`.
+- Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. If non-empty beyond the placeholder, every `\cite{...}` / `\citet{...}` / `\citep{...}` in the IA is in scope on the same FAITHFUL/APPROXIMATE/MISCHARACTERIZED/DECORATIVE rubric, and counts against the 50-lookup cap below.
 - Path to `paper/references.bib` (or wherever bib-verifier auto-detected).
 - Optionally, `output/bib_verification.jsonl` if `bib-verifier` already ran — you can skip cite keys it marked FABRICATED.
 
