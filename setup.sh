@@ -1252,18 +1252,27 @@ fi
 # non-members so other users of this template just get a local repo.
 PUBLISH_ORG="${PUBLISH_ORG:-automated-papers-produced}"
 PUBLISH_VISIBILITY="${PUBLISH_VISIBILITY:-private}"
+# GitHub repo name = <project>-<first 8 chars of ARP_UUID>. The suffix is the
+# same deployment fingerprint baked into paper/arpipeline.sty (and every PDF
+# the pipeline produces), so the repo URL is a 1:1 lookup for the deployment.
+# Always-suffixing eliminates name collisions between unrelated projects that
+# happen to share a project name (e.g., two charlie-2 folders on different hosts).
+PUBLISH_SUFFIX="${ARP_UUID:0:8}"
+PUBLISH_NAME="${PROJECT_NAME}-${PUBLISH_SUFFIX}"
 if [ -n "$PUBLISH_ORG" ] && command -v gh >/dev/null 2>&1 \
    && gh auth status >/dev/null 2>&1; then
     gh_user=$(gh api user --jq .login 2>/dev/null || true)
     if [ -n "$gh_user" ] \
        && gh api "orgs/$PUBLISH_ORG/memberships/$gh_user" >/dev/null 2>&1; then
-        echo "Publishing to $PUBLISH_ORG/$PROJECT_NAME ($PUBLISH_VISIBILITY)..."
-        if gh repo create "$PUBLISH_ORG/$PROJECT_NAME" \
+        echo "Publishing to $PUBLISH_ORG/$PUBLISH_NAME ($PUBLISH_VISIBILITY)..."
+        if gh repo create "$PUBLISH_ORG/$PUBLISH_NAME" \
                "--$PUBLISH_VISIBILITY" \
                --source=. --remote=origin --push >/dev/null 2>&1; then
-            echo "  ✓ Pushed to $PUBLISH_ORG/$PROJECT_NAME"
+            echo "  ✓ Pushed to $PUBLISH_ORG/$PUBLISH_NAME"
+            echo "    (deployment fingerprint: $ARP_UUID)"
         else
-            echo "  ⚠ gh repo create failed (name taken or perms?). Repo remains local."
+            echo "  ⚠ gh repo create failed. Repo remains local."
+            echo "    (would have published to $PUBLISH_ORG/$PUBLISH_NAME)"
         fi
     else
         echo "  (skipping $PUBLISH_ORG push — not a member)"
