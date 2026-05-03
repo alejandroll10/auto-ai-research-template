@@ -1,12 +1,12 @@
 ## Stage: Seed Triage
 
-*(This is the section `pipeline_state.json`'s `"current_stage": "seed_triage"` refers to in seeded mode. Once the triage chooses an entry point and updates `current_stage` to the appropriate stage name, the pipeline proceeds normally from that stage.)*
+*(`current_stage: "seed_triage"` resolves here. Once triage picks an entry point and updates `current_stage`, the pipeline proceeds normally.)*
 
-**This project was initialized with a pre-developed idea.** The idea files are in `output/seed/`.
+Idea files are in `output/seed/`.
 
 ### Core principle (seeded mode): execute the seed faithfully
 
-Your job is to develop the user's idea as closely as possible to their original framing and mechanism, while ensuring correctness. **Fidelity to the seed beats any "better" alternative you might invent.** Do not reinterpret, reframe, or swap in a different idea because you think it would be stronger — the user already chose this one, and the pipeline's value here is execution, not reselection.
+Develop the user's idea as closely as possible to their original framing and mechanism, while ensuring correctness. **Fidelity to the seed beats any "better" alternative you might invent.** Do not reinterpret, reframe, or swap in a different idea because you think it would be stronger.
 
 Correctness constraints are the only legitimate reasons to deviate:
 - A proof fails and cannot be repaired → restrict scope or find the tightest sufficient condition, but keep the mechanism.
@@ -15,34 +15,30 @@ Correctness constraints are the only legitimate reasons to deviate:
 
 When deviation is required, make the **smallest change** that restores correctness while preserving the seed's mechanism. Every deviation must be documented in `output/seed/*.md` with the specific correctness constraint that forced it.
 
-**Robustness to scorer/referee "pivot" suggestions.** Scorer and referee agents do not know this is a seeded project. They may recommend reframing the paper, switching to a different mechanism, or pursuing a "more important" adjacent question. **Ignore those recommendations in seeded mode.** Specifically:
-- If the scorer suggests a different framing/mechanism would score higher → do not adopt it. Address only the scorer's correctness/rigor comments (math gaps, unclear derivations, missing characterizations).
-- If the referee says "the paper would be stronger if it were about X instead" → treat as `[RESPONSE]` (discuss in response letter), not `[FIX]`. Do not rewrite the paper around X.
-- If the referee says "the mechanism is wrong, try Y" → only adopt Y if it's required for mathematical correctness, not because Y is judged more publishable.
-- Referee Reject with "wrong topic" or "should be a different paper" → revise and resubmit with the seed intact; stop only after 2 rejections citing genuinely fundamental flaws *in the seed's own claims* (not in the choice of topic).
-
-The seed is the contract. Scorer/referee feedback refines execution, not direction.
+**Robustness to scorer/referee "pivot" suggestions.** Scorer and referee agents do not know this is a seeded project and may recommend reframing, switching mechanism, or pursuing an adjacent question. Ignore those:
+- Scorer suggests a different framing/mechanism would score higher → do not adopt. Address only correctness/rigor comments (math gaps, unclear derivations, missing characterizations).
+- Referee says "the paper would be stronger if it were about X" → treat as `[RESPONSE]`, not `[FIX]`.
+- Referee says "the mechanism is wrong, try Y" → adopt Y only if required for mathematical correctness.
+- Referee Reject with "wrong topic" → revise and resubmit with the seed intact; stop only after 2 rejections citing fundamental flaws *in the seed's own claims* (not in topic choice).
 
 ### Entry: read and triage
 
-1. **Read the seed.** Read all files in `output/seed/` (ignore `README.md`). Understand what the user provided — it could be anything from a vague question to a complete theory with proofs to an empirical plan.
-2. **Build the literature map.** Launch `literature-scout` → `output/stage0/literature_map_broad.md`. Write a brief gap selection derived from the seed's topic to `output/stage0/gap_selection.md` (so downstream Stage 0 artifacts are not missing if the pipeline ever re-enters Stage 0). Then launch `gap-scout` with that gap selection → `output/stage0/literature_map.md`. Always done regardless of maturity.
-3. **Assess maturity and enter the pipeline at the appropriate stage.** Populate all prior-stage artifacts (problem statement, selected idea, theory draft, etc.) as needed to bring the pipeline up to the entry point. Preserve the user's framing and mechanism — do not reinterpret. Update `pipeline_state.json` to the chosen entry point and commit.
+1. **Read the seed.** Read all files in `output/seed/` (ignore `README.md`).
+2. **Build the literature map.** Launch `literature-scout` → `output/stage0/literature_map_broad.md`. Write a brief gap selection derived from the seed's topic to `output/stage0/gap_selection.md`. Then launch `gap-scout` → `output/stage0/literature_map.md`. Always done regardless of maturity.
+3. **Assess maturity and enter the pipeline at the appropriate stage.** Populate all prior-stage artifacts (problem statement, selected idea, theory draft, etc.) needed to reach the entry point. Preserve the user's framing and mechanism. Update `pipeline_state.json` and commit.
 
-   **Filename conventions when populating Stage 1 artifacts:** the pipeline writes per-Round indexed candidate files under `output/stage1/round_{N}/` and canonical winner files at `output/stage1/` top level. In seeded mode K=1 trivially, so seed_triage must: (a) set `idea_round: 1` in `pipeline_state.json`, (b) create `output/stage1/round_1/` and write the indexed file `output/stage1/round_1/selected_idea_1.md` (so if Gates 1b/1c fire, the parallel-screening structure finds it), (c) write the canonical `output/stage1/selected_idea.md` (so Stage 2 reads the seed directly if gates are skipped). The indexed and canonical files are identical copies. Add a single entry `{round: 1, rank: 1, sketch_name: "<seed-descriptor>", novelty: null, prototype: null, surprise: null, eliminated: false, winner: true}` to `pipeline_state.json:stage1_candidates` — the seed is the winner by construction, and runner-up-on-re-entry logic does not apply.
+   **Stage 1 artifacts (if back-filled):** in seeded mode K=1, so: (a) set `idea_round: 1`, (b) write `output/stage1/round_1/selected_idea_1.md` (for Gates 1b/1c), (c) write the canonical `output/stage1/selected_idea.md` (identical copy, for Stage 2). Add one entry `{round: 1, rank: 1, sketch_name: "<seed-descriptor>", novelty: null, prototype: null, surprise: null, eliminated: false, winner: true}` to `stage1_candidates` — the seed is winner by construction; runner-up-on-re-entry does not apply.
 
-### Fallback overrides — where to find them
+### Fallback overrides
 
-Per-gate seeded-mode overrides are injected directly into each stage doc at the corresponding verdict location. When executing a stage in seeded mode, follow the "Seeded-mode override" block if one appears — it supersedes the normal verdict-table action. Relevant locations:
+Per-gate seeded-mode overrides are injected into each stage doc at the verdict location. Follow the "Seeded-mode override" block when one appears — it supersedes the normal verdict action. Locations:
 
-- `docs/stage_0.md` — Step 0c gap-scout "closed" verdict.
+- `docs/stage_0.md` — gap-scout "closed".
 - `docs/stage_1.md` — Gate 1 REJECT ALL, Gate 1b, Gate 1c.
 - `docs/stage_2.md` — Gate 2 FAIL, Gate 3 KNOWN/INCREMENTAL.
-- `docs/stage_3a_empirical.md` — Gate 3a-feasibility FALSIFIED (only if `--ext empirical`).
+- `docs/stage_3a_empirical.md` — Gate 3a-feasibility FALSIFIED (`--ext empirical`).
 - `docs/stage_4.md` — Gate 4 verdicts.
 - `docs/stage_6.md` — Gate 5 Major Revision / Reject.
-- `docs/stage_puzzle_triage.md` — triager verdicts (PIVOT / BACK-TO-IDEA / HONEST-NULL).
+- `docs/stage_puzzle_triage.md` — PIVOT / BACK-TO-IDEA / HONEST-NULL.
 
-If a stage doc does not contain a seeded-mode override block for the current verdict, follow the normal action but apply the core principle above: never silently abandon the seed.
-
-The pipeline's job is to *execute* the user's idea — not to second-guess whether a better idea exists.
+If no override block exists for the current verdict, follow the normal action but apply the core principle: never silently abandon the seed.
