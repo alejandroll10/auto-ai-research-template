@@ -1065,9 +1065,17 @@ if os.path.exists(state_path):
             if k == "stage2b_theory_version":
                 new["stage3a_theory_version"] = None
         data = new
-        with open(state_path, "w") as f:
-            json.dump(data, f, indent=2)
-            f.write("\n")
+    if "identification_plan_revision_round" not in data:
+        # Insert immediately after stage3a_theory_version. Initial value 0 (counter, not version).
+        new = {}
+        for k, v in data.items():
+            new[k] = v
+            if k == "stage3a_theory_version":
+                new["identification_plan_revision_round"] = 0
+        data = new
+    with open(state_path, "w") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
 PYEOF
 
             echo "  ✓ Empirical extension applied (skills + agents)"
@@ -1149,6 +1157,89 @@ PYEOF
 apply_seed_overrides
 
 echo "  ✓ Codex custom agents assembled"
+
+# ── Emit deployment manifest ──
+# Records what setup.sh produced as "infrastructure" — paths that update.sh
+# may overwrite when refreshing a deployed project against a newer template.
+# Anything not in this manifest is preserved on update (paper content,
+# output/, process_log/, .env values, references.bib, git history, paper/
+# arpipeline.sty fingerprint, paper/main.tex, paper/internet_appendix.tex).
+EXT_JSON=$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1:]))' "${EXTENSIONS[@]}")
+# Capitalised for Python literal substitution into the heredoc below.
+SEEDED_BOOL=$([ "$SEEDED" = "1" ] && echo True || echo False)
+MANUAL_BOOL=$([ "$MANUAL" = "1" ] && echo True || echo False)
+LIGHT_BOOL=$([ "$LIGHT" = "1" ] && echo True || echo False)
+
+python3 <<PYEMIT
+import json
+from pathlib import Path
+
+project = Path("$P")
+manifest_path = project / ".deploy_manifest.json"
+
+# Allow-list of paths setup.sh produces. update.sh nukes-and-replaces each
+# present entry; absent entries are skipped. Only well-known infrastructure
+# paths belong here. Adding a new agent dir / script dir to setup.sh? Add
+# it here too.
+candidate_dirs = [
+    ".claude/agents",
+    ".claude/skills",
+    ".codex/agents",
+    ".agents/skills",
+    ".gemini/agents",
+    "docs",
+    "code/utils/codex_math",
+    "code/utils/bib_verify",
+    "code/utils/openalex",
+]
+candidate_files = [
+    "CLAUDE.md",
+    "AGENTS.md",
+    "GEMINI.md",
+    ".claude/settings.json",
+    ".gemini/settings.json",
+    ".gitignore",
+    "dashboard.html",
+]
+
+# Extension-installed files. The empirical extension drops *.py / *.sh
+# directly into code/utils/ (flat, alongside the codex_math/bib_verify/
+# openalex subdirs that core setup creates). The theory_llm extension
+# drops llm_client.py at the project root. Both are setup-managed
+# infrastructure that update.sh must refresh.
+extensions = $EXT_JSON
+if "empirical" in extensions:
+    utils = project / "code" / "utils"
+    if utils.is_dir():
+        for f in sorted(utils.iterdir()):
+            if f.is_file() and f.suffix in {".py", ".sh"}:
+                candidate_files.append(str(f.relative_to(project)))
+if "theory_llm" in extensions:
+    if (project / "llm_client.py").is_file():
+        candidate_files.append("llm_client.py")
+
+manifest = {
+    "manifest_version": 1,
+    "template_version": "$ARP_VERSION",
+    "deploy_date": "$ARP_DATE",
+    "deploy_fingerprint": "$ARP_UUID",
+    "variant": "$VARIANT",
+    "extensions": extensions,
+    "flags": {
+        "seeded": $SEEDED_BOOL,
+        "manual": $MANUAL_BOOL,
+        "light": $LIGHT_BOOL,
+    },
+    "infrastructure": {
+        "dirs_replace": [d for d in candidate_dirs if (project / d).is_dir()],
+        "files_replace": [f for f in candidate_files if (project / f).is_file()],
+        "files_env_merge": [".env"] if (project / ".env").is_file() else [],
+    },
+}
+
+manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+PYEMIT
+echo "  ✓ deployment manifest written: .deploy_manifest.json"
 
 # ── Local mode: summary and exit ──
 if [ "$LOCAL" = "1" ]; then
