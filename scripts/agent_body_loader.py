@@ -47,19 +47,26 @@ def load_vocab(vocab_paths):
     return merged
 
 
-def load_body(agent_id, bodies_dir, shared_bodies_dirs=None, vocab=None):
+def load_body(agent_id, bodies_dirs, shared_bodies_dirs=None, vocab=None):
     """Return the body text for `agent_id` with optional vocab substitution.
 
-    `shared_bodies_dirs` may be None, a single path string (legacy), or a list
-    of paths. Lookup order:
+    Both `bodies_dirs` and `shared_bodies_dirs` may be a single path string
+    (legacy) or a list. Lookup order:
       1. For each entry in `shared_bodies_dirs` (in order),
          `{entry}/{agent_id}-core.md`. First match wins.
-      2. `{bodies_dir}/{agent_id}.md`.
+      2. For each entry in `bodies_dirs` (in order),
+         `{entry}/{agent_id}.md`. First match wins.
 
     The list form lets `setup.sh` pass a `--mode` overlay dir before the base
-    shared-bodies dir; an agent that has a mode-specific override (e.g.
-    `theory-generator-core.md` under `shared_modes/empirical_first/`) is taken
-    from the overlay, while every other agent falls through to the base.
+    dir on either tier:
+      - Variant agent overrides (whose canonical body lives at
+        `templates/agent_bodies/shared/{id}-core.md` and is composed with a
+        variant vocab) live under `shared_bodies_dirs` as `{id}-core.md`.
+      - Shared agent overrides (whose canonical body lives at
+        `templates/agent_bodies/shared/{id}.md` with no vocab composition)
+        live under `bodies_dirs` as `{id}.md`.
+    Both kinds can coexist in the same mode-overlay dir without colliding —
+    the suffix discriminates them.
 
     If `vocab` is provided, every `{{KEY}}` in the loaded body is replaced by
     `vocab[KEY]`. An unresolved key raises KeyError with a pointer to the
@@ -67,7 +74,8 @@ def load_body(agent_id, bodies_dir, shared_bodies_dirs=None, vocab=None):
     at setup time rather than silently shipping a literal `{{KEY}}` to an
     agent.
     """
-    bodies_dir = Path(bodies_dir)
+    if isinstance(bodies_dirs, (str, type(None))):
+        bodies_dirs = [bodies_dirs] if bodies_dirs else []
     if shared_bodies_dirs is None:
         shared_bodies_dirs = []
     elif isinstance(shared_bodies_dirs, str):
@@ -80,7 +88,18 @@ def load_body(agent_id, bodies_dir, shared_bodies_dirs=None, vocab=None):
             source = candidate
             break
     if source is None:
-        source = bodies_dir / f"{agent_id}.md"
+        for bd in bodies_dirs:
+            candidate = Path(bd) / f"{agent_id}.md"
+            if candidate.exists():
+                source = candidate
+                break
+    if source is None:
+        searched = [f"{sbd}/{agent_id}-core.md" for sbd in shared_bodies_dirs]
+        searched += [f"{bd}/{agent_id}.md" for bd in bodies_dirs]
+        raise FileNotFoundError(
+            f"Body not found for agent '{agent_id}'. Searched: "
+            + ", ".join(searched)
+        )
     body = source.read_text()
     if vocab is not None:
         body = _apply_vocab(body, vocab, source)

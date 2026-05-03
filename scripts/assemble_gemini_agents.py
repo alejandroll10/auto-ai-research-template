@@ -82,7 +82,9 @@ def render_agent(metadata, body, model_override=None):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--metadata", required=True)
-    parser.add_argument("--bodies-dir", required=True)
+    parser.add_argument("--bodies-dir", action="append", default=[], required=True,
+                        help="Directory for variant/extension bodies ({id}.md). "
+                             "Repeatable; checked in order, first match wins.")
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--shared-bodies-dir", action="append", default=[],
                         help="Directory for shared core bodies ({id}-core.md). "

@@ -204,10 +204,29 @@ fi
 assemble_claude_shared_agents() {
     local template_root="$1"
     local dest_dir="$2"
+    # Mode overlay reaches shared agents too: a mode-specific {id}.md in
+    # MODE_BODIES_OVERLAY shadows the base shared body for that one agent
+    # (e.g., a future mode-specific referee-mechanism), and MODE_VOCAB_OVERLAY
+    # supplies any vocab keys the override references. Variant-agent shared
+    # bodies (theory-generator-core.md etc.) live in the same overlay dir
+    # under -core.md and are picked up by the variant assembler, not here.
+    #
+    # Vocab boundary: shared-agent bodies must not reference base variant
+    # vocab keys ({{DOMAIN}}, {{SUBMISSION_TIER}}, etc.) — the variant vocab
+    # is intentionally not passed here. If a future shared body needs vocab
+    # composition, the substitution must come from MODE_VOCAB_OVERLAY only,
+    # which means it can only differ across modes, not across variants.
+    # KeyError fires loudly on unresolved {{KEY}}, so the boundary is enforced.
+    local bodies_args=()
+    [ -n "$MODE_BODIES_OVERLAY" ] && bodies_args+=(--bodies-dir "$MODE_BODIES_OVERLAY")
+    bodies_args+=(--bodies-dir "$template_root/templates/agent_bodies/shared")
+    local vocab_args=()
+    [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
 
     python3 "$template_root/scripts/assemble_claude_agents.py" \
         --metadata "$template_root/templates/agent_metadata/claude_shared_agents.json" \
-        --bodies-dir "$template_root/templates/agent_bodies/shared" \
+        "${bodies_args[@]}" \
+        "${vocab_args[@]}" \
         --output-dir "$dest_dir" \
         "${MODEL_OVERRIDE_ARGS[@]}"
 }
@@ -235,40 +254,22 @@ assemble_claude_variant_agents() {
         "${MODEL_OVERRIDE_ARGS[@]}"
 }
 
-assemble_codex_subagents_from_parts() {
-    local template_root="$1"
-    local metadata_file="$2"
-    local bodies_dir="$3"
-    local dest_dir="$4"
-
-    python3 "$template_root/scripts/assemble_codex_subagents.py" \
-        --metadata "$metadata_file" \
-        --bodies-dir "$bodies_dir" \
-        --output-dir "$dest_dir"
-}
-
-assemble_claude_agents_from_parts() {
-    local template_root="$1"
-    local metadata_file="$2"
-    local bodies_dir="$3"
-    local dest_dir="$4"
-
-    python3 "$template_root/scripts/assemble_claude_agents.py" \
-        --metadata "$metadata_file" \
-        --bodies-dir "$bodies_dir" \
-        --output-dir "$dest_dir" \
-        "${MODEL_OVERRIDE_ARGS[@]}"
-}
-
 assemble_codex_shared_agents() {
     local template_root="$1"
     local dest_dir="$2"
+    # Mirrors assemble_claude_shared_agents — see comment there for the
+    # MODE_BODIES_OVERLAY / MODE_VOCAB_OVERLAY threading rationale.
+    local bodies_args=()
+    [ -n "$MODE_BODIES_OVERLAY" ] && bodies_args+=(--bodies-dir "$MODE_BODIES_OVERLAY")
+    bodies_args+=(--bodies-dir "$template_root/templates/agent_bodies/shared")
+    local vocab_args=()
+    [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
 
-    assemble_codex_subagents_from_parts \
-        "$template_root" \
-        "$template_root/templates/agent_metadata/claude_shared_agents.json" \
-        "$template_root/templates/agent_bodies/shared" \
-        "$dest_dir"
+    python3 "$template_root/scripts/assemble_codex_subagents.py" \
+        --metadata "$template_root/templates/agent_metadata/claude_shared_agents.json" \
+        "${bodies_args[@]}" \
+        "${vocab_args[@]}" \
+        --output-dir "$dest_dir"
 }
 
 assemble_codex_variant_agents() {
@@ -291,28 +292,23 @@ assemble_codex_variant_agents() {
         --output-dir "$dest_dir"
 }
 
-assemble_gemini_agents_from_parts() {
-    local template_root="$1"
-    local metadata_file="$2"
-    local bodies_dir="$3"
-    local dest_dir="$4"
-
-    python3 "$template_root/scripts/assemble_gemini_agents.py" \
-        --metadata "$metadata_file" \
-        --bodies-dir "$bodies_dir" \
-        --output-dir "$dest_dir" \
-        "${MODEL_OVERRIDE_ARGS[@]}"
-}
-
 assemble_gemini_shared_agents() {
     local template_root="$1"
     local dest_dir="$2"
+    # Mirrors assemble_claude_shared_agents — see comment there for the
+    # MODE_BODIES_OVERLAY / MODE_VOCAB_OVERLAY threading rationale.
+    local bodies_args=()
+    [ -n "$MODE_BODIES_OVERLAY" ] && bodies_args+=(--bodies-dir "$MODE_BODIES_OVERLAY")
+    bodies_args+=(--bodies-dir "$template_root/templates/agent_bodies/shared")
+    local vocab_args=()
+    [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
 
-    assemble_gemini_agents_from_parts \
-        "$template_root" \
-        "$template_root/templates/agent_metadata/claude_shared_agents.json" \
-        "$template_root/templates/agent_bodies/shared" \
-        "$dest_dir"
+    python3 "$template_root/scripts/assemble_gemini_agents.py" \
+        --metadata "$template_root/templates/agent_metadata/claude_shared_agents.json" \
+        "${bodies_args[@]}" \
+        "${vocab_args[@]}" \
+        --output-dir "$dest_dir" \
+        "${MODEL_OVERRIDE_ARGS[@]}"
 }
 
 assemble_gemini_variant_agents() {
