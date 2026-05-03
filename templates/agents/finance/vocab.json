@@ -12,6 +12,7 @@
   "H3_FAIL_ROUTING": "REVISE with specific fixes from math audit",
   "H3_OUTPUT_LABEL": "Math correct",
   "H3_OUTPUT_EVIDENCE": "[from math audit]",
+  "EMPIRICS_AUDITOR_MODE_BLOCK": "",
   "H5_CHECK": "The \"mechanism\" section explains WHY in economics, not algebra",
 
   "IMPORTANCE_100": "changes a first-order decision that practitioners or policymakers make routinely (e.g., asset pricing model choice, core regulatory design, optimal contract form). Requires generality and immediate consequence.",

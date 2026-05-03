@@ -1061,7 +1061,10 @@ PYEOF
                 "$SKILLS_OUT" \
                 "$AGENT_DIR" \
                 "$LOCAL" \
-                "$LIGHT_MODEL"
+                "$LIGHT_MODEL" \
+                "$MODE_BODIES_OVERLAY" \
+                "$MODE_VOCAB_OVERLAY" \
+                "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}/vocab.json"
 
             python3 "$TEMPLATE_ROOT/scripts/assemble_codex_skills.py" \
                 --metadata "$TEMPLATE_ROOT/templates/skill_metadata/empirical_skills.json" \
