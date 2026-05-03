@@ -111,4 +111,46 @@ Purpose: late-bind the final idea selection. Instead of committing to idea-revie
    Keep the per-round indexed files under `round_{N}/` as well (do not delete them) — they are the audit trail for this Round's screening.
 5. **INCREMENTAL forwarding:** if the winner's novelty verdict is INCREMENTAL, extract the "escape the obvious version" instruction — *"This idea was flagged INCREMENTAL — the obvious version of this model already exists in the literature. Your job is to find a result within this framework that the existing papers do not imply: a sign reversal, an unexpected threshold, a case where the standard intuition breaks. Do not formalize the obvious version."* — and include it verbatim in the Stage 2 theory-generator prompt. Gate 3 will hard-fail INCREMENTAL on the full theory, so the theory must escape incrementality during development.
 6. **OBVIOUS forwarding:** if the winner's prototype verdict is TRACTABLE + OBVIOUS, instruct the theory-generator to find a non-obvious result within the model (unexpected comparative static, interaction effect, parameter regime where the sign flips). If the full theory also scores low on surprise at Gate 4, the idea will not advance.
-7. Update `pipeline_state.json` and commit: `pipeline: stage 1 complete — winner selected from {K} candidates`.
+7. Update `pipeline_state.json`.
+<!-- THEORY_FIRST_START -->
+8. Commit: `pipeline: stage 1 complete — winner selected from {K} candidates`.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+8. **Set `pipeline_state.json:current_stage = "stage_1_identification_design"`** — this is the resume marker. The session-level resume path reads `current_stage` and routes to Step 4 below as long as it holds this value. Without setting this, an interruption between this commit and Step 4 would leave `current_stage = "stage_1"` and the orchestrator could plausibly re-run the whole tiebreak or skip to Stage 2 reading the commit message alone.
+9. Commit: `pipeline: stage 1 tiebreak complete — winner selected from {K} candidates; identification design pending`. (The "stage 1 complete" commit is held until Step 4 below finishes — a resume between this commit and Step 4 must therefore re-enter Stage 1 at Step 4, not skip ahead to Stage 2; `current_stage` makes that routing automatic.)
+
+## Step 4: Identification design (empirical-first mode)
+
+**Agent:** `identification-designer`
+
+In empirical-first mode the identification design is a Stage 1 deliverable, not a Stage 3a check. The selected idea names the empirical question; the identification-designer now decides how to answer it credibly. Stage 2 (mechanism mode) reads this artifact and writes a mechanism whose channel matches the design's recovered estimand.
+
+The `identification-designer` agent body is theory-anchored by default (it expects `output/stage2/theory_v*.md` and `output/stage3/implications.md` and writes to `output/stage3a/identification_menu.md`). At Stage 1 those files do not exist yet, so the launch prompt below explicitly overrides the body's input list, output path, and "ranked menu of ≥3" convention.
+
+1. Read the canonical idea files written in Step 3:
+   - `output/stage1/selected_idea.md`
+   - `output/stage1/idea_prototype.md`
+   - `output/data_inventory.md`
+   - `output/stage0/literature_map.md`
+2. Launch `identification-designer` with the override instruction below. **Pass the quoted block verbatim** as the agent's opening message — do not paraphrase, summarize, or re-style it. The override redirects the agent's hard-coded Stage-3a defaults; paraphrasing risks losing one of the redirects (input list, output path, or single-design rule) and falling back to the body's defaults.
+
+   > "You are operating under `--mode empirical-first` at Stage 1. **Override these defaults from your body:**
+   > - **Inputs:** read `output/stage1/selected_idea.md`, `output/stage1/idea_prototype.md`, `output/data_inventory.md`, and `output/stage0/literature_map.md`. There is no theory document or implications file yet. Treat the selected idea's stated empirical question as the theoretical object to identify; treat the idea-prototyper's predicted relationship (sign, channel, population) as the substantive content the design must support.
+   > - **Output path:** save to `output/stage1/identification_design.md` (NOT `output/stage3a/identification_menu.md`).
+   > - **Output structure:** the paper commits to one design at this stage — produce a single primary design (using your body's per-strategy template: variation exploited, identifying assumptions, diagnostics, estimand, theory match, anticipated auditor concerns, software, references) plus a `## Alternative designs considered` section listing the top-2 alternatives with one paragraph each on why they were not selected. Do not produce a ranked menu of three.
+   > - **Theory-match section:** rather than asking 'does this estimand correspond to the theoretical object?' (no theory exists yet), ask 'does this estimand correspond to the empirical question the selected idea poses?' Flag any mismatch the Stage 2 mechanism writer will need to handle.
+   > - All other rules (`N/A` and `OUT-OF-SCOPE` semantics, finance scope, 2026 standards, the toolkit) apply unchanged."
+3. The artifact at `output/stage1/identification_design.md` must answer:
+   - Which design class (RD, IV, DiD, narrative, RCT, event study, asset-pricing test, etc.) and why
+   - The named identifying assumptions and the diagnostics that defend each one
+   - The estimand the design recovers, in the language of the empirical question
+   - The data sources required (cross-referenced with `data_inventory.md`)
+   - Top-2 alternative designs with why they were not selected
+4. **Handle non-design outcomes.** If the designer returns `N/A — no causal claim` (the question is purely descriptive / calibration / model-fit despite empirical-first framing), `OUT-OF-SCOPE` (macro toolkit required), or `N/A — no design feasible from the available data variation`: do **not** route to `puzzle-triager` (its entry check requires `output/stage3/implications.md` and `output/stage3a/empirical_analysis.md`, neither of which exists yet). Instead, treat as a Stage-1 escalation:
+   - Save the designer's verdict to `output/stage1/identification_design.md`.
+   - Launch `branch-manager` with context = `stage-1-empirical-first-no-design`, the designer's verdict, the selected idea's content, and `data_inventory.md`. Branch-manager produces a recommendation: (a) **Re-enter Stage 1** with a new idea sketch from `stage1_candidates` (a runner-up sketch may be more identifiable on this data), (b) **Re-enter Stage 0** because no idea on this problem will identify cleanly (the data inventory is the bottleneck and a different problem is needed), or (c) **Escalate to the operator** because empirical-first mode appears incoherent for this problem and theory-first may be the right deployment instead (the operator must rerun `setup.sh` / `update.sh` without `--mode empirical-first` to convert; this cannot be done mid-run).
+   - Apply branch-manager's recommendation. Reset `current_stage` to whichever stage is being re-entered. Commit the verdict and the routing.
+5. Set `current_stage = "stage_2"`. Commit: `pipeline: stage 1 complete — identification design saved`.
+
+The Stage 2 mechanism-mode `theory-generator` consumes `output/stage1/identification_design.md` directly (its body says "consult docs/stage_1.md in this deployment" — that pointer resolves here). Stage 3a's identification-designer step is skipped on first pass since the design already exists; it re-fires only if a Stage 3a re-fire on theory revision introduces a new causal claim or changes the theoretical object the empirics must identify.
+<!-- EMPIRICAL_FIRST_END -->

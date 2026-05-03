@@ -1250,6 +1250,42 @@ for p in sys.argv[2:]:
             print(f"  warn: could not resolve guard in {p}: {e}", file=sys.stderr)
 PYEOF
 
+# Resolve EMPIRICAL_FIRST / THEORY_FIRST guard markers in stage docs.
+# Pattern mirrors THEORY_ONLY_GUARD: pairs of HTML-comment markers wrap
+# alternative content for theory-first vs. empirical-first orchestration.
+# When --mode empirical-first is set:
+#   - EMPIRICAL_FIRST blocks: keep content, strip just the marker lines
+#   - THEORY_FIRST blocks: strip the whole block (markers + content)
+# When --mode is unset:
+#   - EMPIRICAL_FIRST blocks: strip the whole block
+#   - THEORY_FIRST blocks: keep content, strip just the marker lines
+# Applied to docs/ only (agent-side mode-conditional content goes via vocab
+# overlays in phase 4, not markers).
+EMPIRICAL_FIRST_ON=0
+[ "$MODE" = "empirical-first" ] && EMPIRICAL_FIRST_ON=1
+# Resolver runs over both stage docs and the three runtime docs (CLAUDE.md /
+# AGENTS.md / GEMINI.md, assembled from templates/shared/core.md). core.md
+# has mode-conditional content too (e.g., the stage2b_theory_version Gate 4
+# rule that doesn't apply under empirical-first).
+python3 - "$EMPIRICAL_FIRST_ON" "$P/docs/"*.md "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" <<'PYEOF'
+import os, re, sys
+ef = sys.argv[1] == "1"
+if ef:
+    keep_marker = re.compile(r"<!-- EMPIRICAL_FIRST_(?:START|END) -->\n")
+    strip_block = re.compile(r"<!-- THEORY_FIRST_START -->\n.*?<!-- THEORY_FIRST_END -->\n\n?", re.DOTALL)
+else:
+    keep_marker = re.compile(r"<!-- THEORY_FIRST_(?:START|END) -->\n")
+    strip_block = re.compile(r"<!-- EMPIRICAL_FIRST_START -->\n.*?<!-- EMPIRICAL_FIRST_END -->\n\n?", re.DOTALL)
+for p in sys.argv[2:]:
+    if not os.path.exists(p):
+        continue
+    with open(p) as f: t = f.read()
+    new = strip_block.sub("", t)
+    new = keep_marker.sub("", new)
+    if new != t:
+        with open(p, "w") as f: f.write(new)
+PYEOF
+
 # Re-run seed-override substitution now that extension docs have been copied into $P/docs/.
 # Extensions may ship stage docs (e.g., stage_3a_empirical.md) containing {{SEED_OVERRIDE_*}} placeholders.
 apply_seed_overrides

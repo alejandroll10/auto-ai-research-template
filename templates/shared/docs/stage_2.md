@@ -10,6 +10,7 @@
 4. Save result to `output/stage2/theory_draft_vN.md` where **N = `theory_version`** from `pipeline_state.json`. On a fresh `theory_attempt`, reset `theory_version` to 1. On each mutation (including re-launches after Gate 2 FAIL within the same attempt), increment `theory_version` and save to the new version file. N is a within-attempt counter — it does not reset across attempts within the same pipeline run, but it can collide across attempts; this is fine because attempts overwrite prior files and only the latest version matters downstream.
 5. Commit: `artifact: theory draft v{N}`
 
+<!-- THEORY_FIRST_START -->
 ## Gate 2: Math Audit (structured + free-form)
 
 **Agents:** `math-auditor` then `math-auditor-freeform`
@@ -44,6 +45,18 @@ Two sequential audits — structured (step-by-step derivation check) then free-f
    - After mutation, re-run **both** audits from Step 1 (the fix may have introduced new algebraic errors)
    - Same rule: keep iterating while progress is being made, escalate if concerns plateau or increase
 5. If PASS: proceed to Gate 3
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+## Gate 2: Math Audit — skipped in empirical-first mode
+
+In empirical-first mode `theory-generator` runs in **mechanism mode** and produces a prose+DAG mechanism with at most reduced-form posits — there are no structural derivations, FOCs, or equilibrium proofs. `math-auditor` and `math-auditor-freeform` have nothing to verify and are not launched.
+
+The "audit equivalent" for a mechanism document is a freeform skeptical read covering: is the channel sharp, does the DAG match the prose, does the posit deliver the documented effect at plausible parameter values, is the mechanism consistent with the Stage 1 identification design? In v1 this read happens at Stage 6 via `referee-mechanism` (which is recalibrated for mechanism mode in phase 4 — see `templates/agents/finance_modes/empirical_first/vocab.json:_comment_pending`). The orchestrator does **not** insert a separate Gate 2 audit here.
+
+Proceed directly from Stage 2 step 5 (theory draft committed) to Gate 3 (novelty check).
+
+**Re-launch on revision.** When `referee-mechanism`, `self-attacker`, or `scorer` flags a content failure that requires the mechanism to be revised, re-launch `theory-generator` in **mutate** mode with the relevant report attached. The version-counter rules (`theory_version`, `theory_attempt`) and branch-manager every-3rd-version trigger from theory-first mode all carry over. Sketch-swap authority pre-Stage-5 also carries over.
+<!-- EMPIRICAL_FIRST_END -->
 
 ## Gate 3: Novelty Check on Full Theory
 
@@ -63,6 +76,7 @@ Two sequential audits — structured (step-by-step derivation check) then free-f
 5. If NOVEL: proceed to Stage 2b (theory exploration)
 6. Commit: `artifact: novelty check v{N} — {NOVEL/INCREMENTAL/KNOWN}`
 
+<!-- THEORY_FIRST_START -->
 ## Stage 2b: Theory Exploration
 
 **Agent:** `theory-explorer`
@@ -77,6 +91,19 @@ Computational exploration — implement the key result, check at calibration, ex
    - If result **doesn't hold** or the solver/script **failed** at calibration: launch `debugger` on the failure report before concluding. Debugger diagnoses whether the failure reflects tool-fit (wrong equilibrium concept, wrong indifference conditions, sparse seed grid, etc.) or a genuine substantive failure. Only after debugger returns `SUBSTANTIVE-FAILURE` should you return to Stage 2 with the result — and even then, the theory-generator should be told "the claim doesn't hold at these parameters," not "rescope the result away." If debugger returns `TOOL-FIT-ISSUE` with a proposed fix, apply the fix and re-run theory-explorer before concluding.
    - If result is **fragile** (holds only in a narrow parameter region): flag for the scorer. Proceed but the paper should be honest about this.
 5. **Re-run on substantive revision.** If the theory revises after the first Stage 2b pass — new propositions, new sections, new extensions, or any content not explored in the prior pass — re-invoke theory-explorer on the new content before Gate 4 advances. Save targeted re-runs to `output/stage2b/exploration_vN.md` (where N is the theory version); do not overwrite the original `exploration.md`. Combined coverage must span the version that will be written into the paper. On completion, set `pipeline_state.json:stage2b_theory_version` to the current `theory_version`. Gate 4 must not advance while `stage2b_theory_version < theory_version`.
-{{EMPIRICAL_STAGE3A_GATE_ADDENDUM}}
 {{THEORY_LLM_STAGE3B_GATE_ADDENDUM}}
 6. Commit: `artifact: theory exploration — {HOLDS/FRAGILE/FAILS}`
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+## Stage 2b: Theory Exploration — skipped in empirical-first mode
+
+The mechanism document has no equilibrium objects to compute, no parameter space to grid-search, and no diagnostic plots that aren't already produced by the empirical analysis at Stage 3a. `theory-explorer` is not launched.
+
+The empirical-first analogue of "does the result hold at calibration?" is the sanity check rule already inside the mechanism body: the mechanism's reduced-form posit must produce a predicted effect magnitude that matches the documented coefficient in `output/stage3a/empirical_analysis.md`. That check is in-body in `theory-generator` mechanism mode, and the body itself qualifies it for first-launch vs. mutate/pivot — at first launch the empirical results may not exist yet, in which case the mechanism states predicted magnitudes from literature/calibration that downstream Stage 3a will test; on a mutate or pivot re-launch (post-Stage-3a), the documented coefficients are the binding comparison. The Gate-4-blocking `stage2b_theory_version` rule from theory-first mode does not apply here; the analogous Gate 4 rule under empirical-first is `stage3a_theory_version == theory_version` (see `docs/stage_3a_empirical.md` "Gate 4 enforcement").
+
+**On Gate 3 INCREMENTAL re-work:** the unguarded INCREMENTAL routing instruction earlier in this file says "re-run Stage 2b (exploration) AND Stage 3 (implications)." Under empirical-first, **skip the Stage 2b re-run** (already permanently skipped per this section) and re-run only Gate 3 + Stage 3 + Stage 3a. The theory-version increment + `stage3a_theory_version` re-fire trigger handles the empirics side.
+
+Proceed directly from Gate 3 (novelty check on the mechanism) to Stage 3 (implications).
+<!-- EMPIRICAL_FIRST_END -->
+
+{{EMPIRICAL_STAGE3A_GATE_ADDENDUM}}

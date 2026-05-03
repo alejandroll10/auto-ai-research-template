@@ -178,7 +178,12 @@ When you start the pipeline, set `"status": "running"` and begin appending to th
 
 **History array:** Append a `{ "timestamp": "ISO-8601", "event": "description" }` entry for every pipeline event. This feeds the dashboard. Use `date -u +%Y-%m-%dT%H:%M:%SZ` to get the timestamp. Never truncate or clear the history array.
 
+<!-- THEORY_FIRST_START -->
 **`stage2b_theory_version`:** Set to the `theory_version` that Stage 2b last fully explored. Before advancing at Gate 4, the orchestrator must verify this equals the current `theory_version`; if it is stale, re-run Stage 2b on the new content (see `docs/stage_2.md` Stage 2b step 5).
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+**`stage2b_theory_version`:** Initialized to `null` and never updated under `--mode empirical-first`. Stage 2b does not run in mechanism mode (the mechanism document has no equilibrium objects to explore), so the Gate 4 staleness rule that consumes this field does not apply here. The analogous binding rule in empirical-first mode is `stage3a_theory_version == theory_version` — see `docs/stage_3a_empirical.md` "Gate 4 enforcement". The field remains in `pipeline_state.json` only because legacy reset paths (e.g., `puzzle-triager` RECONCILE / PIVOT) write to it; those resets are harmless no-ops in mechanism mode.
+<!-- EMPIRICAL_FIRST_END -->
 
 **`reject_cosmetic_round`:** Tracks consecutive cosmetic-deepening attempts when responding to a Stage 6 Reject verdict. Increments when branch-manager (gate-5-reject context) returns COSMETIC on a deepen attempt; resets to 0 on a SUBSTANTIVE deepen, on a Regeneration Round entry, or on falling back to standard Major Revision after the deepen path is exhausted. See `docs/stage_6.md` Reject row for the full state machine.
 
