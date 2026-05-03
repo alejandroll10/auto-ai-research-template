@@ -19,7 +19,7 @@ When deviation is required, make the **smallest change** that restores correctne
 - Scorer suggests a different framing/mechanism would score higher → do not adopt. Address only correctness/rigor comments (math gaps, unclear derivations, missing characterizations).
 - Referee says "the paper would be stronger if it were about X" → treat as `[RESPONSE]`, not `[FIX]`.
 - Referee says "the mechanism is wrong, try Y" → adopt Y only if required for mathematical correctness.
-- Referee Reject with "wrong topic" → revise and resubmit with the seed intact; stop only after 2 rejections citing fundamental flaws *in the seed's own claims* (not in topic choice).
+- Referee Reject with "wrong topic" or "should be a different paper" → revise and resubmit with the seed intact; stop only after 2 rejections citing fundamental flaws *in the seed's own claims* (not in topic choice).
 
 ### Entry: read and triage
 
