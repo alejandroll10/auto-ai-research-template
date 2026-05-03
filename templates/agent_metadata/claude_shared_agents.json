@@ -78,10 +78,10 @@
       "codex-math"
     ],
     "model": "opus",
-    "effort": "xhigh",
+    "effort": "high",
     "codex": {
       "model": "gpt-5.5",
-      "model_reasoning_effort": "xhigh"
+      "model_reasoning_effort": "high"
     },
     "gemini": {
       "model": "gemini-3-preview"
