@@ -47,7 +47,7 @@ Save to the path specified in your prompt:
 
 ## Attacks by severity
 
-Group attacks by **target** within each severity tier. A target is a specific model object the attack aims at — an assumption, a theorem, a mechanism, a scope condition, a calibration choice, a framing claim. If three attacks all target the same assumption from different angles, they belong in one group with a root attack and variants listed beneath. Severity of the group = max severity across variants. This prevents the triager and theory-generator from treating 4 different variants of the same attack as 4 separate issues.
+Group attacks by **target** within each severity tier. A target is a specific paper object the attack aims at — an assumption, a theorem, a {{MECHANISM_TERM}}, a scope condition, a calibration choice, a framing claim. If three attacks all target the same assumption from different angles, they belong in one group with a root attack and variants listed beneath. Severity of the group = max severity across variants. This prevents the triager and theory-generator from treating 4 different variants of the same attack as 4 separate issues.
 
 ### Severity 10 (paper-killing)
 [Any single one of these means the paper should not be written]
@@ -64,7 +64,7 @@ Group attacks by **target** within each severity tier. A target is a specific mo
 Within each tier, use this structure:
 
 ```
-**Target: [specific model object — e.g., "{{SELF_ATTACK_TARGET_EXAMPLE}}"]** — [FIX/LIMITS/RESPONSE/NOTE]
+**Target: [specific paper object — e.g., "{{SELF_ATTACK_TARGET_EXAMPLE}}"]** — [FIX/LIMITS/RESPONSE/NOTE]
 - Root attack: [the strongest or most general form of the attack]
 - Variant: [a different angle on the same target]
 - Variant: [another angle]

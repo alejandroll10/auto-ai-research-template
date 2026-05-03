@@ -77,6 +77,7 @@
   "SELF_ATTACK_RULE_EXAMPLE": "Assumption 2 (Calvo pricing) is doing all the work and the result vanishes with state-dependent pricing (see Golosov-Lucas 2007), so the paper's quantitative claims are fragile",
 
   "THEORY_GEN_ROLE": "macroeconomist",
+  "THEORY_GEN_DESCRIPTION": "Proposes new macroeconomics theory models. The orchestrator launches this agent at Stage 2 (Theory Development). Supports fresh, mutate, and crossover strategies based on attempt history.",
   "THEORY_ENV_DESC": "[Agents, timing, markets, stochastic structure — only what's needed]",
   "THEORY_AGENTS_SECTION": "### Agents' problems\n[What each agent type maximizes, subject to what constraints. Write out the Bellman equation or static optimization problem explicitly.]\n\n### Equilibrium concept\n[Competitive equilibrium, recursive competitive equilibrium, Markov perfect equilibrium, etc. State the definition precisely: market clearing conditions, consistency requirements, fixed points.]",
   "THEORY_ECON_DESC": "[WHY does the result hold? In economics, not algebra. A reader who skips the math should understand. What economic force drives agents' behavior and how does it aggregate?]",

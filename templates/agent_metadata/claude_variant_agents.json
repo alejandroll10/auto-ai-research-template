@@ -78,7 +78,7 @@
   },
   "theory-generator": {
     "name": "theory-generator",
-    "description": "Proposes new {{DOMAIN}} theory models. The orchestrator launches this agent at Stage 2 (Theory Development). Supports fresh, mutate, and crossover strategies based on attempt history.",
+    "description": "{{THEORY_GEN_DESCRIPTION}}",
     "tools": "Read, Write, Bash",
     "skills": [
       "sympy",

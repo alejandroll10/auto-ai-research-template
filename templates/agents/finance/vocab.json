@@ -77,6 +77,7 @@
   "SELF_ATTACK_RULE_EXAMPLE": "Assumption 2 (complete markets) rules out the most interesting case (liquidity crises) and the result trivially follows once you assume it",
 
   "THEORY_GEN_ROLE": "finance theorist",
+  "THEORY_GEN_DESCRIPTION": "Proposes new finance theory models. The orchestrator launches this agent at Stage 2 (Theory Development). Supports fresh, mutate, and crossover strategies based on attempt history.",
   "THEORY_ENV_DESC": "[Agents, timing, markets — only what's needed]",
   "THEORY_AGENTS_SECTION": "### Agents' problem\n[What each agent type maximizes, subject to what constraints]",
   "THEORY_ECON_DESC": "[WHY does the result hold? In economics, not algebra. A reader who skips the math should understand.]",
