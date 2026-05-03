@@ -215,6 +215,11 @@ while IFS= read -r f; do
         echo "  file: $f"
     else
         mkdir -p "$(dirname "$PROJECT/$f")"
+        # rm -f handles three cases that cp won't: regular symlinks (cp would
+        # follow and overwrite the target, corrupting wherever it points),
+        # dangling symlinks (cp errors with "not writing through dangling
+        # symlink"), and read-only files. Plain files are removed cleanly.
+        rm -f "$PROJECT/$f"
         cp "$FRESH/$f" "$PROJECT/$f"
         echo "  file ✓ $f"
     fi
@@ -242,7 +247,13 @@ while IFS= read -r env_file; do
         [ "$added" = "0" ] && echo "  (no new keys)"
     elif [ ! -f "$PROJECT/$env_file" ] && [ -f "$FRESH/$env_file" ]; then
         echo "  ! $env_file missing in target — copying fresh"
-        [ "$DRY_RUN" = "0" ] && cp "$FRESH/$env_file" "$PROJECT/$env_file"
+        # rm -f for the same dangling-symlink reason as files_replace: -f
+        # tests regular files, so a dangling symlink at this path would
+        # satisfy "! -f" and then trip cp.
+        if [ "$DRY_RUN" = "0" ]; then
+            rm -f "$PROJECT/$env_file"
+            cp "$FRESH/$env_file" "$PROJECT/$env_file"
+        fi
     fi
 done < <(jq -r '.infrastructure.files_env_merge[]?' "$NEW_MANIFEST")
 
