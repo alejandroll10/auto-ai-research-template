@@ -441,14 +441,7 @@ else
     CODEX_SESSION="$CLAUDE_SESSION"
     GEMINI_SESSION="$CLAUDE_SESSION"
 fi
-SCORING_FILE="$TEMPLATE_ROOT/templates/scoring/${AGENT_DIR}.md"
-SCORING_ARGS=()
-if [ "$MANUAL" = "0" ]; then
-    SCORING_ARGS=(--scoring "$SCORING_FILE")
-fi
-
 REQUIRED_FILES=("$CORE" "$CLAUDE_SESSION" "$CODEX_SESSION" "$GEMINI_SESSION")
-[ "$MANUAL" = "0" ] && REQUIRED_FILES+=("$SCORING_FILE")
 for f in "${REQUIRED_FILES[@]}"; do
     if [ ! -f "$f" ]; then
         echo "Error: $f not found"
@@ -529,7 +522,6 @@ fi
 python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --core "$CORE" \
     --session "$CLAUDE_SESSION" \
-    "${SCORING_ARGS[@]}" \
     --paper-type "$PAPER_TYPE" \
     --target-journals "$TARGET_JOURNALS" \
     --domain-areas "$DOMAIN_AREAS" \
@@ -551,7 +543,6 @@ fi
 python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --core "$CORE" \
     --session "$CODEX_SESSION" \
-    "${SCORING_ARGS[@]}" \
     --paper-type "$PAPER_TYPE" \
     --target-journals "$TARGET_JOURNALS" \
     --domain-areas "$DOMAIN_AREAS" \
@@ -574,7 +565,6 @@ fi
 python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --core "$CORE" \
     --session "$GEMINI_SESSION" \
-    "${SCORING_ARGS[@]}" \
     --paper-type "$PAPER_TYPE" \
     --target-journals "$TARGET_JOURNALS" \
     --domain-areas "$DOMAIN_AREAS" \
@@ -953,8 +943,17 @@ for ext in "${EXTENSIONS[@]}"; do
     case "$ext" in
         theory_llm)
             echo "Applying LLM experiment extension..."
+            if [ -n "$MODE" ]; then
+                echo "  Note: --mode $MODE does not currently propagate into the theory_llm extension agents."
+                echo "        See scripts/apply_extension_theory_llm.sh header comment for the forward-compat path."
+            fi
             LIGHT_MODEL=""
             if [ "$LIGHT" = "1" ]; then LIGHT_MODEL="sonnet"; fi
+            # NOTE: MODE_BODIES_OVERLAY / MODE_VOCAB_OVERLAY are intentionally NOT
+            # threaded here yet — see apply_extension_theory_llm.sh header comment.
+            # If a future mode wants mode-conditional theory_llm content, add the
+            # three positionals (mirroring apply_extension_empirical.sh) and
+            # remove the warning above.
             bash "$TEMPLATE_ROOT/scripts/apply_extension_theory_llm.sh" \
                 "$TEMPLATE_ROOT" \
                 "$P" \
