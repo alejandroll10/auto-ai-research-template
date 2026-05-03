@@ -2,6 +2,8 @@
 
 AFTER EVERY BIG CHANGE  SPAN A SONNET AGENT TO REVIEW YOUR CHANGES FOR ISSUES. IF ANY ISSUES ARE FOUND, ADD A NEW ROUND OF AUDITING AFTER FIXING THE CURRENT ROUND'S ISSUES (EVEN IF THERE ARE ONLY MINOR CHANGES). ITERATE UNTIL DONE.
 
+WHEN ADDING A NEW INFRASTRUCTURE PATH TO `setup.sh` (DIR OR FILE THAT GETS DEPLOYED), ALSO ADD IT TO THE `candidate_dirs` / `candidate_files` LIST IN THE MANIFEST EMISSION BLOCK (`setup.sh:1184`); OTHERWISE `update.sh` WILL SILENTLY SKIP IT WHEN REFRESHING EXISTING DEPLOYMENTS.
+
 ## What this is
 
 This is the **template repository** for the autonomous research paper pipeline. We are building and iterating on the pipeline infrastructure itself — agents, setup scripts, CLAUDE.md templates, dashboard, etc.
