@@ -310,6 +310,12 @@ else
     if [[ "$(uname)" == "Linux" ]]; then
         command -v bwrap >/dev/null 2>&1 || missing+=("bubblewrap (sudo apt-get install bubblewrap)")
     fi
+    # Git identity is required: setup.sh runs `git commit` on the new project, and
+    # `set -e` aborts the whole script (skipping the auto-publish step) if commit
+    # fails with "Author identity unknown". Check both global and local config.
+    if ! git config --get user.email >/dev/null 2>&1 || ! git config --get user.name >/dev/null 2>&1; then
+        missing+=("git identity (run: git config --global user.email \"you@example.com\" && git config --global user.name \"Your Name\")")
+    fi
     if [ ${#missing[@]} -gt 0 ]; then
         echo "Missing dependencies:"
         for dep in "${missing[@]}"; do echo "  - $dep"; done

@@ -64,6 +64,10 @@ npm install -g @openai/codex
 
 # Gemini CLI
 npm install -g @google/gemini-cli
+
+# Git identity (one-time, used by every setup.sh run)
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
 ```
 
 ## Quick start
