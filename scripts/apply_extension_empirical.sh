@@ -1,6 +1,18 @@
 #!/bin/bash
 set -e
 
+# NOTE on --mode interaction (forward-compat gap for phase 6+):
+# This script does NOT receive setup.sh's MODE_BODIES_OVERLAY or
+# MODE_VOCAB_OVERLAY. Extension agents (empiricist, empirics-auditor) are
+# loaded with `--bodies-dir extensions/empirical/agent_bodies/{shared,finance}`
+# and no `--shared-bodies-dir`, so the mode-overlay shadowing path does not
+# reach them. If a future --mode wants mode-conditional behavior in an
+# extension agent (phase 6 is expected to need this for empirics-auditor),
+# either thread MODE_BODIES_OVERLAY/MODE_VOCAB_OVERLAY through this script
+# as additional positionals and append them to the assemble_* calls below,
+# or factor mode-conditional content into the agent body via {{KEY}}
+# placeholders that resolve from a mode-aware vocab passed in here.
+
 TEMPLATE_ROOT="$1"
 PROJECT_ROOT="$2"
 AGENTS_OUT="$3"

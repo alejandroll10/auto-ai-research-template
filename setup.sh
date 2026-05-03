@@ -1,10 +1,18 @@
 #!/bin/bash
 # Auto AI Research Template — Setup & Launch
-# Usage: ./setup.sh [project-name] [--variant finance|macro] [--ext empirical|theory_llm] [--seed|--manual] [--light] [--local]
+# Usage: ./setup.sh [project-name] [--variant finance|macro] [--mode empirical-first]
+#                  [--ext empirical|theory_llm] [--seed|--manual] [--light] [--local]
 #
 # --local   Skip git clone, use templates from this repo directly.
 #           Outputs to test_output/{variant}/ for inspection.
 # --ext     Add an extension (can be repeated). Available: empirical, theory_llm
+# --mode    Pipeline-architecture mode (orthogonal to --variant). Available:
+#             empirical-first  — flips the pipeline so identification design and
+#                                empirical results lead and theory-generator runs
+#                                in mechanism mode (prose+DAG, no theorem/proof).
+#                                Auto-implies --ext empirical. Finance variant only
+#                                in v1; macro is gated on adding identification
+#                                tooling there.
 # --seed    Create a seeded-idea project. Creates output/seed/ with instructions.
 #           Drop your idea files there before launching. Pipeline starts at seed_triage.
 # --manual  Manual mode: assemble agents/skills as a research toolkit, no autonomous
@@ -19,9 +27,11 @@ set -e
 # ── Parse arguments ──
 PROJECT_NAME=""
 VARIANT="finance"
+MODE=""
 LOCAL=0
 NEXT_IS_VARIANT=0
 NEXT_IS_EXT=0
+NEXT_IS_MODE=0
 SEEDED=0
 MANUAL=0
 LIGHT=0
@@ -31,6 +41,7 @@ for arg in "$@"; do
     case "$arg" in
         --variant)     NEXT_IS_VARIANT=1 ;;
         --ext)         NEXT_IS_EXT=1 ;;
+        --mode)        NEXT_IS_MODE=1 ;;
         --seed)        SEEDED=1 ;;
         --manual)      MANUAL=1 ;;
         --light)       LIGHT=1 ;;
@@ -44,6 +55,9 @@ for arg in "$@"; do
             elif [ "$NEXT_IS_EXT" = "1" ]; then
                 EXTENSIONS+=("$arg")
                 NEXT_IS_EXT=0
+            elif [ "$NEXT_IS_MODE" = "1" ]; then
+                MODE="$arg"
+                NEXT_IS_MODE=0
             else
                 PROJECT_NAME="$arg"
             fi
@@ -59,6 +73,10 @@ if [ "$NEXT_IS_EXT" = "1" ]; then
     echo "Error: --ext requires a value (empirical, theory_llm)"
     exit 1
 fi
+if [ "$NEXT_IS_MODE" = "1" ]; then
+    echo "Error: --mode requires a value (empirical-first)"
+    exit 1
+fi
 
 if [ "$MANUAL" = "1" ] && [ "$SEEDED" = "1" ]; then
     echo "Error: --manual and --seed are mutually exclusive"
@@ -70,6 +88,34 @@ fi
 if [ "$VARIANT" = "finance_llm" ]; then
     VARIANT="finance"
     EXTENSIONS+=("theory_llm")
+fi
+
+# ── Mode validation and dependency expansion ──
+# Pipeline-architecture modes are orthogonal to variants (finance/macro) and to
+# extensions (empirical/theory_llm). A mode may auto-add an extension it depends
+# on rather than erroring when the extension is missing — flipping to
+# empirical-first without the empirical agents would be incoherent, so the
+# script implies the dependency rather than making the user type both flags.
+if [ -n "$MODE" ]; then
+    case "$MODE" in
+        empirical-first)
+            if [ "$VARIANT" != "finance" ]; then
+                echo "Error: --mode empirical-first is finance-only in v1."
+                echo "  Macro support requires identification tooling for macro (issue #18) before this mode can ship."
+                exit 1
+            fi
+            # Auto-imply --ext empirical (idempotent).
+            if [[ ! " ${EXTENSIONS[*]} " =~ " empirical " ]]; then
+                EXTENSIONS+=("empirical")
+                echo "Info: --mode empirical-first implies --ext empirical (auto-added)."
+            fi
+            ;;
+        *)
+            echo "Unknown mode: $MODE"
+            echo "Available modes: empirical-first"
+            exit 1
+            ;;
+    esac
 fi
 
 # ── Variant configuration ──
@@ -123,6 +169,38 @@ if [ "$LIGHT" = "1" ]; then
     MODEL_OVERRIDE_ARGS=(--model-override sonnet)
 fi
 
+# ── Mode-overlay paths ──
+# When --mode is set, the variant assemblers append a mode-specific shared
+# bodies dir (consulted before the base shared dir; first match wins, so a
+# mode override of `theory-generator-core.md` shadows the base body) and a
+# mode-specific vocab overlay (merged onto the base variant vocab; later
+# layer wins on duplicate keys, so mode-specific values override defaults).
+# Sourcing both via per-mode dirs lets future modes drop in their own
+# overrides without further setup.sh wiring.
+MODE_BODIES_OVERLAY=""
+MODE_VOCAB_OVERLAY=""
+if [ -n "$MODE" ]; then
+    mode_slug="${MODE//-/_}"  # 'empirical-first' → 'empirical_first'
+    candidate_bodies="$SCRIPT_DIR/templates/agent_bodies/shared_modes/${mode_slug}"
+    candidate_vocab="$SCRIPT_DIR/templates/agents/${AGENT_DIR}_modes/${mode_slug}/vocab.json"
+    if [ -d "$candidate_bodies" ]; then
+        MODE_BODIES_OVERLAY="$candidate_bodies"
+    fi
+    if [ -f "$candidate_vocab" ]; then
+        MODE_VOCAB_OVERLAY="$candidate_vocab"
+    fi
+    # Either layer may be empty if the mode has no overrides at that layer
+    # (e.g., a pure-vocab mode with no body overrides). But shipping a mode
+    # name with neither layer present is a configuration error.
+    if [ -z "$MODE_BODIES_OVERLAY" ] && [ -z "$MODE_VOCAB_OVERLAY" ]; then
+        echo "Error: --mode $MODE has no overlay assets for variant $VARIANT."
+        echo "  Expected at least one of:"
+        echo "    $candidate_bodies/"
+        echo "    $candidate_vocab"
+        exit 1
+    fi
+fi
+
 assemble_claude_shared_agents() {
     local template_root="$1"
     local dest_dir="$2"
@@ -141,11 +219,17 @@ assemble_claude_variant_agents() {
     local vocab_file="$template_root/templates/agents/${variant}/vocab.json"
     local vocab_args=()
     [ -f "$vocab_file" ] && vocab_args=(--vocab "$vocab_file")
+    [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
+    local shared_args=()
+    # Mode dir first so a per-agent override (e.g. theory-generator-core.md)
+    # shadows the base shared body for that one agent only.
+    [ -n "$MODE_BODIES_OVERLAY" ] && shared_args+=(--shared-bodies-dir "$MODE_BODIES_OVERLAY")
+    shared_args+=(--shared-bodies-dir "$template_root/templates/agent_bodies/shared")
 
     python3 "$template_root/scripts/assemble_claude_agents.py" \
         --metadata "$template_root/templates/agent_metadata/claude_variant_agents.json" \
         --bodies-dir "$template_root/templates/agents/${variant}" \
-        --shared-bodies-dir "$template_root/templates/agent_bodies/shared" \
+        "${shared_args[@]}" \
         "${vocab_args[@]}" \
         --output-dir "$dest_dir" \
         "${MODEL_OVERRIDE_ARGS[@]}"
@@ -194,11 +278,15 @@ assemble_codex_variant_agents() {
     local vocab_file="$template_root/templates/agents/${variant}/vocab.json"
     local vocab_args=()
     [ -f "$vocab_file" ] && vocab_args=(--vocab "$vocab_file")
+    [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
+    local shared_args=()
+    [ -n "$MODE_BODIES_OVERLAY" ] && shared_args+=(--shared-bodies-dir "$MODE_BODIES_OVERLAY")
+    shared_args+=(--shared-bodies-dir "$template_root/templates/agent_bodies/shared")
 
     python3 "$template_root/scripts/assemble_codex_subagents.py" \
         --metadata "$template_root/templates/agent_metadata/claude_variant_agents.json" \
         --bodies-dir "$template_root/templates/agents/${variant}" \
-        --shared-bodies-dir "$template_root/templates/agent_bodies/shared" \
+        "${shared_args[@]}" \
         "${vocab_args[@]}" \
         --output-dir "$dest_dir"
 }
@@ -234,11 +322,15 @@ assemble_gemini_variant_agents() {
     local vocab_file="$template_root/templates/agents/${variant}/vocab.json"
     local vocab_args=()
     [ -f "$vocab_file" ] && vocab_args=(--vocab "$vocab_file")
+    [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
+    local shared_args=()
+    [ -n "$MODE_BODIES_OVERLAY" ] && shared_args+=(--shared-bodies-dir "$MODE_BODIES_OVERLAY")
+    shared_args+=(--shared-bodies-dir "$template_root/templates/agent_bodies/shared")
 
     python3 "$template_root/scripts/assemble_gemini_agents.py" \
         --metadata "$template_root/templates/agent_metadata/claude_variant_agents.json" \
         --bodies-dir "$template_root/templates/agents/${variant}" \
-        --shared-bodies-dir "$template_root/templates/agent_bodies/shared" \
+        "${shared_args[@]}" \
         "${vocab_args[@]}" \
         --output-dir "$dest_dir" \
         "${MODEL_OVERRIDE_ARGS[@]}"
@@ -1230,6 +1322,7 @@ manifest = {
     "deploy_date": "$ARP_DATE",
     "deploy_fingerprint": "$ARP_UUID",
     "variant": "$VARIANT",
+    "mode": "$MODE",
     "extensions": extensions,
     "flags": {
         "seeded": $SEEDED_BOOL,

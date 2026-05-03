@@ -42,8 +42,11 @@ def main():
     parser.add_argument("--metadata", required=True)
     parser.add_argument("--bodies-dir", required=True)
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--shared-bodies-dir", default=None)
-    parser.add_argument("--vocab", default=None)
+    parser.add_argument("--shared-bodies-dir", action="append", default=[],
+                        help="Directory for shared core bodies ({id}-core.md). "
+                             "Repeatable; checked in order, first match wins.")
+    parser.add_argument("--vocab", action="append", default=[],
+                        help="Variant vocab JSON. Repeatable; later overlays override earlier.")
     args = parser.parse_args()
 
     metadata = json.loads(Path(args.metadata).read_text())

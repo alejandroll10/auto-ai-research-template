@@ -34,12 +34,15 @@ set -e
 PROJECT=""
 DRY_RUN=0
 OVERRIDE_VARIANT=""
+OVERRIDE_MODE=""
+OVERRIDE_MODE_SET=0   # distinguishes "no --mode flag" from "--no-mode (clear)"
 OVERRIDE_EXTS=()
 OVERRIDE_EXTS_SET=0   # distinguishes "no --ext flags" from "--ext '' (clear list)"
 OVERRIDE_SEEDED=""    # "", "true", or "false"
 OVERRIDE_MANUAL=""
 OVERRIDE_LIGHT=""
 NEXT_IS_VARIANT=0
+NEXT_IS_MODE=0
 NEXT_IS_EXT=0
 
 for arg in "$@"; do
@@ -47,6 +50,9 @@ for arg in "$@"; do
         --dry-run)        DRY_RUN=1 ;;
         --variant)        NEXT_IS_VARIANT=1 ;;
         --variant=*)      OVERRIDE_VARIANT="${arg#--variant=}" ;;
+        --mode)           NEXT_IS_MODE=1 ;;
+        --mode=*)         OVERRIDE_MODE="${arg#--mode=}";  OVERRIDE_MODE_SET=1 ;;
+        --no-mode)        OVERRIDE_MODE="";                OVERRIDE_MODE_SET=1 ;;
         --ext)            NEXT_IS_EXT=1 ;;
         --ext=*)          OVERRIDE_EXTS+=("${arg#--ext=}"); OVERRIDE_EXTS_SET=1 ;;
         --clear-ext)      OVERRIDE_EXTS=();                  OVERRIDE_EXTS_SET=1 ;;
@@ -60,6 +66,8 @@ for arg in "$@"; do
         *)
             if [ "$NEXT_IS_VARIANT" = "1" ]; then
                 OVERRIDE_VARIANT="$arg"; NEXT_IS_VARIANT=0
+            elif [ "$NEXT_IS_MODE" = "1" ]; then
+                OVERRIDE_MODE="$arg"; OVERRIDE_MODE_SET=1; NEXT_IS_MODE=0
             elif [ "$NEXT_IS_EXT" = "1" ]; then
                 OVERRIDE_EXTS+=("$arg"); OVERRIDE_EXTS_SET=1; NEXT_IS_EXT=0
             else
@@ -69,8 +77,22 @@ for arg in "$@"; do
     esac
 done
 
+# Catch dangling NEXT_IS_* sentinels — without these, `update.sh PROJECT
+# --mode --variant finance` silently drops the --mode flag because --variant
+# is an explicit case match (not a *) fallthrough), so NEXT_IS_MODE never
+# gets consumed and OVERRIDE_MODE_SET stays 0.
+if [ "$NEXT_IS_VARIANT" = "1" ]; then
+    echo "Error: --variant requires a value (finance, macro)"; exit 1
+fi
+if [ "$NEXT_IS_MODE" = "1" ]; then
+    echo "Error: --mode requires a value (empirical-first), or use --no-mode to clear"; exit 1
+fi
+if [ "$NEXT_IS_EXT" = "1" ]; then
+    echo "Error: --ext requires a value (empirical, theory_llm)"; exit 1
+fi
+
 if [ -z "$PROJECT" ]; then
-    echo "usage: update.sh <deployed-project-path> [--dry-run] [--variant X] [--ext Y ...]"
+    echo "usage: update.sh <deployed-project-path> [--dry-run] [--variant X] [--mode M] [--ext Y ...]"
     exit 1
 fi
 
@@ -82,14 +104,20 @@ command -v jq >/dev/null 2>&1 || { echo "update.sh requires jq (sudo apt-get ins
 command -v python3 >/dev/null 2>&1 || { echo "update.sh requires python3"; exit 1; }
 
 # ── Resolve original deployment parameters ──
+# Every setup.sh flag that affects what gets deployed must be read here AND
+# re-passed in the SETUP_FLAGS block below — drift between the two breaks the
+# round-trip on update. Currently tracked: variant, mode, extensions, seeded,
+# manual, light. When adding a new setup.sh flag, update both blocks.
 if [ -f "$MANIFEST" ]; then
     VARIANT=$(jq -r .variant "$MANIFEST")
+    MODE=$(jq -r '.mode // ""' "$MANIFEST")
     mapfile -t EXTENSIONS < <(jq -r '.extensions[]?' "$MANIFEST")
     SEEDED=$(jq -r .flags.seeded "$MANIFEST")
     MANUAL=$(jq -r .flags.manual "$MANIFEST")
     LIGHT=$(jq -r .flags.light "$MANIFEST")
     OLD_VERSION=$(jq -r .template_version "$MANIFEST")
-    echo "Found manifest: variant=$VARIANT, extensions=[${EXTENSIONS[*]}], template=$OLD_VERSION"
+    mode_str="${MODE:-(none)}"
+    echo "Found manifest: variant=$VARIANT, mode=$mode_str, extensions=[${EXTENSIONS[*]}], template=$OLD_VERSION"
 else
     echo "No .deploy_manifest.json — pre-manifest deploy. Sniffing..."
     # Sniff variant from CLAUDE.md
@@ -100,6 +128,12 @@ else
     else
         VARIANT=""
     fi
+    # Mode cannot be sniffed reliably — every empirical-first signature in a
+    # deployed project (mechanism body content, identification at Stage 1)
+    # could be retrofitted by hand or look the same across different
+    # decisions. Default to empty; user can pass --mode if their pre-manifest
+    # deploy was empirical-first.
+    MODE=""
     EXTENSIONS=()
     [ -f "$PROJECT/code/utils/wrds_client.py" ] && EXTENSIONS+=("empirical")
     [ -f "$PROJECT/code/llm_client.py" ] && EXTENSIONS+=("theory_llm")
@@ -120,6 +154,12 @@ APPLIED_OVERRIDES=()
 if [ -n "$OVERRIDE_VARIANT" ] && [ "$OVERRIDE_VARIANT" != "$VARIANT" ]; then
     APPLIED_OVERRIDES+=("variant: $VARIANT → $OVERRIDE_VARIANT")
     VARIANT="$OVERRIDE_VARIANT"
+fi
+if [ "$OVERRIDE_MODE_SET" = "1" ] && [ "$OVERRIDE_MODE" != "$MODE" ]; then
+    old_mode_str="${MODE:-(none)}"
+    new_mode_str="${OVERRIDE_MODE:-(none)}"
+    APPLIED_OVERRIDES+=("mode: $old_mode_str → $new_mode_str")
+    MODE="$OVERRIDE_MODE"
 fi
 if [ "$OVERRIDE_EXTS_SET" = "1" ]; then
     OLD_EXT_STR="${EXTENSIONS[*]}"
@@ -150,7 +190,10 @@ fi
 NEW_VERSION=$(cd "$TEMPLATE_ROOT" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
 # ── Build setup.sh flag list ──
+# When adding a new setup.sh flag, update both this block AND the manifest-
+# read block above so update→deploy round-trips preserve the deployment.
 SETUP_FLAGS=( --variant "$VARIANT" --local )
+[ -n "$MODE" ] && SETUP_FLAGS+=( --mode "$MODE" )
 for ext in "${EXTENSIONS[@]}"; do SETUP_FLAGS+=( --ext "$ext" ); done
 [ "$SEEDED" = "true" ] && SETUP_FLAGS+=( --seed )
 [ "$MANUAL" = "true" ] && SETUP_FLAGS+=( --manual )
@@ -260,9 +303,25 @@ done < <(jq -r '.infrastructure.files_env_merge[]?' "$NEW_MANIFEST")
 # ── Refresh manifest in target (preserve original deploy_date + fingerprint) ──
 if [ "$DRY_RUN" = "0" ]; then
     if [ -f "$MANIFEST" ]; then
-        # Update template_version + last_updated; keep deploy metadata.
+        # Update template_version + last_updated; sync deployment selectors
+        # (mode, extensions) from the fresh deploy so that an --override on
+        # this run is reflected in the persisted manifest. Anything not
+        # listed here passes through verbatim from the existing manifest
+        # (e.g. deploy_fingerprint, deploy_date — original deploy metadata).
+        # variant cannot be overridden mid-life on a deployed project, so
+        # it's not synced; if it ever can, add `.variant = (input | .variant)`.
+        # Bind NEW_MANIFEST once via `input as $new`; each bare `input` call
+        # consumes one file from the argv list, so reusing `(input | .X)` four
+        # times would try to read four files. The slurp pattern below reads
+        # NEW_MANIFEST once and lets us pull multiple fields from it.
         jq --arg v "$NEW_VERSION" --arg d "$(date -u +%Y-%m-%d)" \
-           '.template_version = $v | .last_updated = $d | .infrastructure = (input | .infrastructure)' \
+           'input as $new
+            | .template_version = $v
+            | .last_updated = $d
+            | .mode = $new.mode
+            | .extensions = $new.extensions
+            | .flags = $new.flags
+            | .infrastructure = $new.infrastructure' \
            "$MANIFEST" "$NEW_MANIFEST" > "$MANIFEST.tmp" && mv "$MANIFEST.tmp" "$MANIFEST"
     else
         # No prior manifest — adopt the fresh manifest but blank deploy_fingerprint

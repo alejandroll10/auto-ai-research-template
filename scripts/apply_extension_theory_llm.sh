@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+# NOTE on --mode interaction (forward-compat gap):
+# This script does NOT receive setup.sh's MODE_BODIES_OVERLAY or
+# MODE_VOCAB_OVERLAY. Extension agents (experiment-designer, experiment-reviewer)
+# are loaded with `--bodies-dir extensions/theory_llm/agent_bodies` and no
+# `--shared-bodies-dir`, so the mode-overlay shadowing path does not reach
+# them. If a future --mode wants mode-conditional behavior in a theory_llm
+# agent, thread MODE_BODIES_OVERLAY/MODE_VOCAB_OVERLAY through here as
+# additional positionals and append them to the assemble_* calls below.
+
 TEMPLATE_ROOT="$1"
 PROJECT_ROOT="$2"
 AGENTS_OUT="$3"

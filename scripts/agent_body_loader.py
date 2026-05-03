@@ -3,6 +3,11 @@
 Resolves an agent body from either a shared-bodies dir (as `{id}-core.md`)
 or the variant bodies dir (as `{id}.md`), and optionally applies variant
 vocabulary substitution for `{{KEY}}` placeholders.
+
+Both `shared_bodies_dirs` and the vocab argument accept either a single path
+(legacy) or a list. Lists are processed in order so a `--mode` overlay can
+shadow a base shared-bodies entry per-agent (first match wins) and a vocab
+overlay can override base vocab keys (later layers win on duplicates).
 """
 import json
 import re
@@ -11,24 +16,50 @@ from pathlib import Path
 VOCAB_KEY_PATTERN = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 
 
-def load_vocab(vocab_path):
-    if not vocab_path:
+def load_vocab(vocab_paths):
+    """Load and merge one or more vocab files.
+
+    `vocab_paths` may be None, a single path string (legacy), or a list of
+    paths. For lists, files are loaded in order and shallowly merged with
+    later layers overriding earlier ones — i.e. the last entry wins on
+    duplicate keys. Comment keys (e.g. `_comment_*`) flow through unchanged
+    because `_apply_vocab` only consumes keys that appear as `{{KEY}}` in a
+    body, so unused keys are silently ignored at substitution time.
+
+    Returns None when there are no paths to load.
+    """
+    if vocab_paths is None:
         return None
-    path = Path(vocab_path)
-    if not path.exists():
-        raise FileNotFoundError(
-            f"Vocab file not found: {vocab_path}. "
-            f"Either create it (variant vocab.json) or omit --vocab."
-        )
-    return json.loads(path.read_text())
+    if isinstance(vocab_paths, str):
+        vocab_paths = [vocab_paths]
+    if not vocab_paths:
+        return None
+
+    merged = {}
+    for path in vocab_paths:
+        p = Path(path)
+        if not p.exists():
+            raise FileNotFoundError(
+                f"Vocab file not found: {path}. "
+                f"Either create it (variant vocab.json) or omit --vocab."
+            )
+        merged.update(json.loads(p.read_text()))
+    return merged
 
 
-def load_body(agent_id, bodies_dir, shared_bodies_dir=None, vocab=None):
+def load_body(agent_id, bodies_dir, shared_bodies_dirs=None, vocab=None):
     """Return the body text for `agent_id` with optional vocab substitution.
 
-    Lookup order:
-      1. `{shared_bodies_dir}/{agent_id}-core.md` (if `shared_bodies_dir` given)
-      2. `{bodies_dir}/{agent_id}.md`
+    `shared_bodies_dirs` may be None, a single path string (legacy), or a list
+    of paths. Lookup order:
+      1. For each entry in `shared_bodies_dirs` (in order),
+         `{entry}/{agent_id}-core.md`. First match wins.
+      2. `{bodies_dir}/{agent_id}.md`.
+
+    The list form lets `setup.sh` pass a `--mode` overlay dir before the base
+    shared-bodies dir; an agent that has a mode-specific override (e.g.
+    `theory-generator-core.md` under `shared_modes/empirical_first/`) is taken
+    from the overlay, while every other agent falls through to the base.
 
     If `vocab` is provided, every `{{KEY}}` in the loaded body is replaced by
     `vocab[KEY]`. An unresolved key raises KeyError with a pointer to the
@@ -37,11 +68,17 @@ def load_body(agent_id, bodies_dir, shared_bodies_dir=None, vocab=None):
     agent.
     """
     bodies_dir = Path(bodies_dir)
+    if shared_bodies_dirs is None:
+        shared_bodies_dirs = []
+    elif isinstance(shared_bodies_dirs, str):
+        shared_bodies_dirs = [shared_bodies_dirs]
+
     source = None
-    if shared_bodies_dir is not None:
-        candidate = Path(shared_bodies_dir) / f"{agent_id}-core.md"
+    for sbd in shared_bodies_dirs:
+        candidate = Path(sbd) / f"{agent_id}-core.md"
         if candidate.exists():
             source = candidate
+            break
     if source is None:
         source = bodies_dir / f"{agent_id}.md"
     body = source.read_text()
