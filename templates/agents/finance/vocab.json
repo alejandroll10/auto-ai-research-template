@@ -7,6 +7,11 @@
 
   "H2_CHECK": "Could a reader write down the agents' optimization problem?",
   "H2_SHORT_LABEL": "Well-defined setup",
+  "H3_REQUIREMENT": "Key result is correct",
+  "H3_CHECK": "Both math audits passed (structured AND free-form)",
+  "H3_FAIL_ROUTING": "REVISE with specific fixes from math audit",
+  "H3_OUTPUT_LABEL": "Math correct",
+  "H3_OUTPUT_EVIDENCE": "[from math audit]",
   "H5_CHECK": "The \"mechanism\" section explains WHY in economics, not algebra",
 
   "IMPORTANCE_100": "changes a first-order decision that practitioners or policymakers make routinely (e.g., asset pricing model choice, core regulatory design, optimal contract form). Requires generality and immediate consequence.",

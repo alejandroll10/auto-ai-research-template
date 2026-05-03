@@ -20,13 +20,13 @@ You will be pointed to files containing:
 |---|------------|-------------|
 | H1 | **One clear idea** | Can you state the contribution in one sentence from the theory draft? **Multi-piece contributions pass H1 if the union is statable as a single thesis** (e.g., "an algebraic identity that yields both a within-asset characterization and a methodological observation"). H1 fails only when the paper is two unrelated papers stapled together. |
 | H2 | **Setup is well-defined** | {{H2_CHECK}} |
-| H3 | **Key result is correct** | Both math audits passed (structured AND free-form) |
+| H3 | **{{H3_REQUIREMENT}}** | {{H3_CHECK}} |
 | H4 | **The result is new** | Novelty check returned NOVEL → PASS. KNOWN → FAIL. INCREMENTAL → cross-check against the Gate 3 novelty report: if Gate 3 identified a distinguishing result (a new comparative static, a sign reversal, an additional assumption that changes the conclusion, or a new empirical implication), the theory passes H4 and is scored on its merits. If Gate 3 found no distinguishing result, INCREMENTAL is FAIL. |
 | H5 | **Economic {{MECHANISM_TERM}} is clear** | {{H5_CHECK}} |
 
 If ANY hard requirement fails → score is 0, decision is ABANDON or REVISE depending on what failed.
 
-- H3 fail (math wrong) → REVISE with specific fixes from math audit
+- H3 fail → {{H3_FAIL_ROUTING}}
 - H4 fail (not novel) → ABANDON this theory, start fresh
 - H1, H2, H5 fail → REVISE with specific feedback
 
@@ -119,7 +119,7 @@ Save to the path specified in your prompt:
 |-----|--------|----------|
 | H1 One clear idea | PASS/FAIL | [quote or reference] |
 | H2 {{H2_SHORT_LABEL}} | PASS/FAIL | [evidence] |
-| H3 Math correct | PASS/FAIL | [from math audit] |
+| H3 {{H3_OUTPUT_LABEL}} | PASS/FAIL | {{H3_OUTPUT_EVIDENCE}} |
 | H4 Novel | PASS/FAIL | [from novelty check] |
 | H5 Clear {{MECHANISM_TERM}} | PASS/FAIL | [evidence] |
 
