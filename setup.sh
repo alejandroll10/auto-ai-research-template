@@ -1539,7 +1539,9 @@ PUBLISH_VISIBILITY="${PUBLISH_VISIBILITY:-private}"
 # Always-suffixing eliminates name collisions between unrelated projects that
 # happen to share a project name (e.g., two charlie-2 folders on different hosts).
 PUBLISH_SUFFIX="${ARP_UUID:0:8}"
-PUBLISH_NAME="${PROJECT_NAME}-${PUBLISH_SUFFIX}"
+# PROJECT_NAME may be an absolute or relative path; GitHub repo names can't
+# contain slashes, so use just the basename for the repo name.
+PUBLISH_NAME="$(basename "$PROJECT_NAME")-${PUBLISH_SUFFIX}"
 if [ -n "$PUBLISH_ORG" ] && command -v gh >/dev/null 2>&1 \
    && gh auth status >/dev/null 2>&1; then
     gh_user=$(gh api user --jq .login 2>/dev/null || true)
