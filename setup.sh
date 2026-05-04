@@ -470,19 +470,29 @@ done
 
 # ── Manual mode: pre-generate agent and skill catalogs for runtime docs ──
 CATALOG_ARGS=()
+CODEX_CATALOG_ARGS=()
 if [ "$MANUAL" = "1" ]; then
     CATALOG_TMPDIR="$(mktemp -d)"
     trap 'rm -rf "$CATALOG_TMPDIR"' EXIT
     AGENT_CATALOG_FILE="$CATALOG_TMPDIR/agents.md"
     SKILL_CATALOG_FILE="$CATALOG_TMPDIR/skills.md"
+    CODEX_SKILL_CATALOG_FILE="$CATALOG_TMPDIR/skills_codex.md"
 
     AGENT_METADATA_ARGS=(
         --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_shared_agents.json"
         --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_variant_agents.json"
     )
+    # Skill metadata for the Claude/Gemini catalog. Codex's catalog is built
+    # separately below — codex-math is omitted there because the codex runtime
+    # IS the proof-verification backend the skill shells out to.
     SKILL_METADATA_ARGS=(
         --metadata "$TEMPLATE_ROOT/templates/skill_metadata/sympy_skills.json"
         --metadata "$TEMPLATE_ROOT/templates/skill_metadata/codex_math_skills.json"
+        --metadata "$TEMPLATE_ROOT/templates/skill_metadata/bib_verify_skills.json"
+        --metadata "$TEMPLATE_ROOT/templates/skill_metadata/openalex_skills.json"
+    )
+    CODEX_SKILL_METADATA_ARGS=(
+        --metadata "$TEMPLATE_ROOT/templates/skill_metadata/sympy_skills.json"
         --metadata "$TEMPLATE_ROOT/templates/skill_metadata/bib_verify_skills.json"
         --metadata "$TEMPLATE_ROOT/templates/skill_metadata/openalex_skills.json"
     )
@@ -496,12 +506,18 @@ if [ "$MANUAL" = "1" ]; then
                 SKILL_METADATA_ARGS+=(
                     --metadata "$TEMPLATE_ROOT/templates/skill_metadata/empirical_skills.json"
                 )
+                CODEX_SKILL_METADATA_ARGS+=(
+                    --metadata "$TEMPLATE_ROOT/templates/skill_metadata/empirical_skills.json"
+                )
                 ;;
             theory_llm)
                 AGENT_METADATA_ARGS+=(
                     --metadata "$TEMPLATE_ROOT/extensions/theory_llm/agent_metadata/agents.json"
                 )
                 SKILL_METADATA_ARGS+=(
+                    --metadata "$TEMPLATE_ROOT/templates/skill_metadata/theory_llm_skills.json"
+                )
+                CODEX_SKILL_METADATA_ARGS+=(
                     --metadata "$TEMPLATE_ROOT/templates/skill_metadata/theory_llm_skills.json"
                 )
                 ;;
@@ -525,8 +541,13 @@ if [ "$MANUAL" = "1" ]; then
         "${SKILL_METADATA_ARGS[@]}" \
         "${CATALOG_VOCAB_ARGS[@]}" \
         --output "$SKILL_CATALOG_FILE"
+    python3 "$TEMPLATE_ROOT/scripts/generate_catalog.py" \
+        "${CODEX_SKILL_METADATA_ARGS[@]}" \
+        "${CATALOG_VOCAB_ARGS[@]}" \
+        --output "$CODEX_SKILL_CATALOG_FILE"
 
     CATALOG_ARGS=(--agent-catalog "$AGENT_CATALOG_FILE" --skill-catalog "$SKILL_CATALOG_FILE")
+    CODEX_CATALOG_ARGS=(--agent-catalog "$AGENT_CATALOG_FILE" --skill-catalog "$CODEX_SKILL_CATALOG_FILE")
 fi
 
 if [ "$LOCAL" = "1" ]; then
@@ -584,7 +605,7 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --skill-dir "$CODEX_SKILLS_REL" \
     "${CODEX_DISCIPLINE_ARGS[@]}" \
     "${SEED_ARGS[@]}" \
-    "${CATALOG_ARGS[@]}" \
+    "${CODEX_CATALOG_ARGS[@]}" \
     --output "$AGENTS_MD_OUT"
 
 GEMINI_DISCIPLINE_ARGS=()
@@ -901,17 +922,13 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_codex_skills.py" \
     --bodies-dir "$TEMPLATE_ROOT/templates/skill_bodies/sympy" \
     --output-dir "$CODEX_SKILLS_OUT"
 
-# Codex math skill (available for all variants)
+# Codex math skill (Claude-only — would be circular under the codex runtime,
+# which is itself the proof-verification backend the skill shells out to)
 assemble_claude_skills \
     "$TEMPLATE_ROOT" \
     "$TEMPLATE_ROOT/templates/skill_metadata/codex_math_skills.json" \
     "$TEMPLATE_ROOT/templates/skill_bodies/codex_math" \
     "$SKILLS_OUT"
-
-python3 "$TEMPLATE_ROOT/scripts/assemble_codex_skills.py" \
-    --metadata "$TEMPLATE_ROOT/templates/skill_metadata/codex_math_skills.json" \
-    --bodies-dir "$TEMPLATE_ROOT/templates/skill_bodies/codex_math" \
-    --output-dir "$CODEX_SKILLS_OUT"
 
 # Copy codex-math utility scripts
 mkdir -p "$P/code/utils/codex_math"
