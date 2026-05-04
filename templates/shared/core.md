@@ -292,6 +292,7 @@ Read `docs/stage_10.md` and proceed accordingly.
 
 ## Post-pipeline math audit rule
 
+<!-- THEORY_FIRST_START -->
 After the pipeline is complete (`"status": "complete"`), any new or modified proposition, lemma, or corollary in `paper/sections/*.tex`, `paper/internet_appendix.tex`, or `paper/sections/internet_appendix/*.tex` must pass a math audit before being committed. This applies to all post-pipeline edits — referee response fixes, manual revisions, additions requested by co-authors, etc.
 
 **Procedure:**
@@ -303,6 +304,20 @@ After the pipeline is complete (`"status": "complete"`), any new or modified pro
 6. Commit format: `paper: post-pipeline edit — [description] (audited)`
 
 **Never commit unaudited mathematical content to paper sections after pipeline completion.** The pipeline's v1 runs showed 3/3 post-pipeline audits failed — this rule exists to prevent that.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+Empirical-first papers do not contain propositions, lemmas, or corollaries — `paper-writer` is instructed to use estimation tables and a posited reduced-form mechanism, not theorem/proof environments. The theory-mode post-pipeline math audit rule therefore does not apply. (The `math-auditor` agent is still assembled into the deployment — agent assembly is mode-invariant — but Gate 2 is skipped and `paper-writer` does not produce content for it to audit; it should not be invoked in this mode.)
+
+**Empirical-first analogue.** Any post-pipeline edit that adds or modifies an empirical claim (a new coefficient, a new robustness specification, a new heterogeneity test, or a re-stated identification assumption) must be backed by a re-runnable analysis script and a re-fired `empirics-auditor` PASS before being committed:
+
+1. The empiricist (or the operator, if working manually) updates `code/empirical.py` (or a new `code/empirical_post_v1.py`) and re-runs to produce the updated number.
+2. Launch `empirics-auditor` on the updated analysis with instruction "post-pipeline edit verification: confirm the updated coefficient / table reproduces from the code, and that the new claim does not violate the identification assumptions established in `output/stage3a/identification_audit.md`."
+3. Save the audit verdict to `output/post_pipeline/empirics_audit_post_N.md`.
+4. If FAIL: fix the analysis and re-audit. Do not commit the new number to the paper until PASS.
+5. If PASS: commit the number to the paper section / IA file. Commit format: `paper: post-pipeline edit — [description] (empirics audited)`.
+
+If the post-pipeline edit introduces a formal proposition or lemma despite the paper being empirical-first (e.g., a referee insists on formalizing a comparative-static claim), the operator should re-run setup with `--no-mode` to convert the deployment to theory-first before producing the formal content — the empirical-first deployment lacks the theorem-mode pipeline infrastructure (Gate 2, theory-generator chain, theorem/proof scaffolding) that formal claims require, and adding them ad-hoc post-pipeline produces unaudited mathematical content that the runtime was not configured to verify. (The `math-auditor` agent is assembled, but the surrounding pipeline stages are not.)
+<!-- EMPIRICAL_FIRST_END -->
 
 ---
 

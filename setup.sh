@@ -1295,11 +1295,17 @@ PYEOF
 # overlays in phase 4, not markers).
 EMPIRICAL_FIRST_ON=0
 [ "$MODE" = "empirical-first" ] && EMPIRICAL_FIRST_ON=1
-# Resolver runs over both stage docs and the three runtime docs (CLAUDE.md /
-# AGENTS.md / GEMINI.md, assembled from templates/shared/core.md). core.md
-# has mode-conditional content too (e.g., the stage2b_theory_version Gate 4
-# rule that doesn't apply under empirical-first).
-python3 - "$EMPIRICAL_FIRST_ON" "$P/docs/"*.md "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" <<'PYEOF'
+# Resolver runs over stage docs, the three runtime docs (CLAUDE.md /
+# AGENTS.md / GEMINI.md, assembled from templates/shared/core.md), AND the
+# three runtimes' assembled agent files. The agent-file coverage lets shared
+# agent bodies (e.g., paper-writer.md) carry inline EMPIRICAL_FIRST /
+# THEORY_FIRST markers — the alternative is a parallel body in
+# templates/agent_bodies/shared_modes/{mode}/, which is more duplication
+# when the body's mode-specific delta is small. Vocab substitution runs at
+# assembly time (before this resolver fires), so {{KEY}} placeholders are
+# already resolved when the resolver sees the agent files.
+python3 - "$EMPIRICAL_FIRST_ON" "$P/docs/"*.md "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" \
+    "$AGENTS_OUT"/*.md "$CODEX_AGENTS_OUT"/*.toml "$GEMINI_AGENTS_OUT"/*.md <<'PYEOF'
 import os, re, sys
 ef = sys.argv[1] == "1"
 if ef:

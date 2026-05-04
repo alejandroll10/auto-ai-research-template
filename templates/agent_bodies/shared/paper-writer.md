@@ -34,6 +34,7 @@ Write each section to a separate file in `paper/sections/`:
 - Position against literature (use literature map — cite real papers only)
 - Roadmap last paragraph
 
+<!-- THEORY_FIRST_START -->
 ### `model.tex`
 - Setup: environment, agents, timing
 - Agents' problem: objectives and constraints
@@ -44,6 +45,37 @@ Write each section to a separate file in `paper/sections/`:
 - Main proposition(s) with proofs
 - Comparative statics
 - Economic intuition after each result (not before — let the math speak first)
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+### `data.tex`
+- Sample construction: data sources, filters, period coverage, observation count. Cross-reference `output/stage3a/empirical_analysis.md` for the actual realized sample.
+- Variable definitions: precise computation rules for the dependent variable, the treatment, and key controls. Define every variable a regression specification will reference.
+- Descriptive statistics: a `\begin{table}` with means, medians, SDs by treatment status (or relevant grouping). Booktabs formatting; one row per variable; clear caption.
+- Sample-construction filters that affect identification (panel pre-period coverage, unit-of-observation choice, restriction to compliers, etc.) get their own paragraph — these decisions interact with the design and should not be buried.
+
+### `identification.tex`
+- The design class and the variation it exploits. Quote the Stage 1 design verbatim where useful (`output/stage1/identification_design.md`).
+- The named identifying assumptions, each followed by the diagnostic that defends it (Goodman-Bacon decomposition for staggered DiD, Olea-Pflueger F for IV, manipulation tests for RD, etc.). One assumption per paragraph; the diagnostic appears in the same paragraph and is reported numerically with a `\begin{table}` or in-text.
+- The estimand the design recovers (LATE on compliers / ATT(g,t) / units near the cutoff / etc.), in the language of the empirical question.
+- Top-2 alternative designs with one paragraph each on why they were not selected.
+
+### `results.tex`
+- One headline regression table presenting the main estimate. Booktabs formatting; primary specification in column 1; robustness columns 2-N (clustering variants, period splits, alternative outcome definitions); standard errors in parentheses; significance stars; clear caption naming the design + sample.
+- One paragraph per coefficient interpreting it economically (sign, magnitude, what it means for the channel). State the economic significance, not just the statistical significance.
+- Heterogeneity table(s) testing the channel's predicted heterogeneity (e.g., effect should be larger in high-leverage firms). Each heterogeneity test gets a paragraph linking the result back to the channel's prediction.
+- Auxiliary tests / falsification tests if the channel makes specific predictions on populations where the effect should NOT hold. If a falsification fails (the effect appears in a population where it shouldn't), say so plainly — the paper is then weaker, but the alternative is misleading.
+
+### `mechanism.tex`
+- The prose mechanism from `output/stage2/theory_draft_vN.md` (mechanism mode), tightened for the paper's audience. Keep it focused: one channel, agent-level reasoning, and how the channel aggregates to the documented relationship.
+- The DAG (rendered via tikz, an external image, or a clearly-formatted ASCII block in a `verbatim` environment if the rendering toolchain is unreliable). Caption names the channel.
+- The reduced-form posit(s) — at most two equations, each captioned to indicate it is **posited, not derived**. Do not import structural derivations; if the mechanism document contains one, leave it in `output/stage2/` and do not lift it into the paper.
+- The competing channels considered and why the design or the heterogeneity tests rule them out (or weaken them). One paragraph per competing channel.
+
+### `robustness.tex` (only when robustness checks exceed what fits in `results.tex`)
+- Alternative specifications, sample restrictions, time-period splits, alternative variable definitions, alternative cluster levels — each with one table or table-row and one paragraph of interpretation.
+- Sensitivity to identifying-assumption violations (Rambachan-Roth `HonestDiD` for parallel trends, Cinelli-Hazlett `sensemakr` for unobservables, weak-IV-robust CIs for IV) — present the smallest violation that overturns the headline result.
+- If an extension or interaction is "we also show…" rather than load-bearing, prefer cutting it. Robustness sections must be earning their keep.
+<!-- EMPIRICAL_FIRST_END -->
 
 ### `discussion.tex`
 - Implications and testable predictions
@@ -54,16 +86,27 @@ Write each section to a separate file in `paper/sections/`:
 ### `conclusion.tex`
 - One paragraph. Restate the contribution. Stop.
 
+<!-- THEORY_FIRST_START -->
 ### `appendix.tex` (if needed)
 - Proof details that interrupt the flow
 - Extensions or robustness
 - Only if necessary — prefer proofs in the main text
 - If you populate the internet appendix substantively (see below), this in-paper appendix may shrink to nothing. Do not pad it for symmetry — empty is fine.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+### `appendix.tex` (if needed)
+- Variable construction details that interrupt the main-text flow
+- Additional robustness tables and figures
+- Sample-construction sensitivity (different filters, different periods)
+- Only if necessary — prefer keeping the headline robustness in `results.tex` or `robustness.tex`. The in-paper appendix is for material a careful reader needs but the main-text reader can skip.
+- If you populate the internet appendix substantively (see below), this in-paper appendix may shrink to nothing. Do not pad it for symmetry — empty is fine.
+<!-- EMPIRICAL_FIRST_END -->
 
 ### `paper/internet_appendix.tex` (only when triggered)
 
 A separate LaTeX document (own `\documentclass`, own compile, shared `bib.bib`) for material that is too long to fit in the main paper or its in-paper appendix. The skeleton ships with the deploy and uses `xr-hyper` to cross-reference the main paper's labels — write `\ref{prop:main_result}` (or whatever label `main.tex` defines) and `\externaldocument{main}` resolves the number from `main.aux`.
 
+<!-- THEORY_FIRST_START -->
 **Only populate the internet appendix when one of these triggers fires:**
 
 - A single proof exceeds ~3 pages, OR
@@ -72,6 +115,18 @@ A separate LaTeX document (own `\documentclass`, own compile, shared `bib.bib`) 
 Evaluate the trigger *within this same invocation*, after you have drafted the main text and in-paper appendix and before you finalize your output files — the 30% comparison is a post-draft judgment, not a pre-draft gate. The `~` qualifiers signal these are judgment thresholds, not precise cutoffs. If neither trigger fires once the draft is written, leave `paper/internet_appendix.tex` as the placeholder skeleton and put proofs in the main text or in `paper/sections/appendix.tex`. If a trigger does fire, move the qualifying proof(s) into the IA before you finish the invocation — the orchestrator does not re-launch you to do the relocation, so the trigger evaluation and the move both happen inside this single Stage-5 write pass. The internet appendix is **not** a default home for "anything that didn't fit"; the right answer for borderline material is usually to compress, not to relocate.
 
 When you do populate it, structure as: brief `\tableofcontents`, `\appendix`, then a sequence of `\section{...}` blocks, each with a clear topical title (e.g., "Proof of Proposition 4", "Continuous-time extension"). Cite the main paper's results explicitly (e.g., "Proposition~\ref{prop:main} of the main paper"). Long sections may be factored into `paper/sections/internet_appendix/<topic>.tex` files and `\input` from `internet_appendix.tex`.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+**Only populate the internet appendix when one of these triggers fires:**
+
+- The robustness analysis spans more than ~10 distinct specifications / tables, OR
+- The in-paper `appendix.tex` would otherwise exceed ~30% of main-text length, OR
+- Heterogeneity analysis covers more than ~5 sub-population dimensions and the main-text presentation forces a choice between completeness and readability.
+
+Evaluate the trigger *within this same invocation*, after you have drafted the main text and in-paper appendix and before you finalize your output files. The `~` qualifiers signal these are judgment thresholds, not precise cutoffs. If neither trigger fires, leave `paper/internet_appendix.tex` as the placeholder skeleton and keep robustness in `paper/sections/robustness.tex` or `paper/sections/appendix.tex`. If a trigger does fire, move the qualifying tables into the IA before you finish the invocation.
+
+When you do populate it, structure as: brief `\tableofcontents`, `\appendix`, then a sequence of `\section{...}` blocks with clear topical titles (e.g., "Robustness to alternative cluster levels", "Heterogeneity by industry", "Sensitivity to parallel-trends violations via HonestDiD"). Cite the main paper's results explicitly (e.g., "Table~\ref{tab:main} of the main paper"). Long sections may be factored into `paper/sections/internet_appendix/<topic>.tex` files and `\input` from `internet_appendix.tex`.
+<!-- EMPIRICAL_FIRST_END -->
 
 ## Also update
 
@@ -96,10 +151,21 @@ The `style` agent enforces these (and more) at Stage 7 and the polish agents cat
 
 - **No hallucinated citations.** Only cite papers from the literature map or that you can find in `references/references.md`. If a citation is needed but doesn't exist, write `[CITATION NEEDED: description]`.
 - **No fabricated results.** Every claim must trace back to the theory draft. If the theory doesn't prove it, the paper doesn't claim it.
+<!-- THEORY_FIRST_START -->
 - **No numerical claims outside Stage 2b / 3a / 3b files.** Every numerical value, "N/N grid points," calibration number, or figure description must come from `output/stage2b/` (theory exploration), `output/stage3a/` (empirical analysis, if `--ext empirical`), or `output/stage3b/` (LLM experiments, if `--ext theory_llm`). If a claim is needed but no such file exists, write `[NEEDS THEORY-EXPLORER: description]` — do not draft the number, do not write or run scripts yourself. Theory-explorer / empiricist / experiment-designer own all new numerical scripts.
 - **Keep it short.** Theory papers should be 20-30 pages including proofs. If the model is simple (as it should be), the paper should be short.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+- **No numerical claims outside Stage 3a / 3b files.** Every coefficient, standard error, sample-size figure, calibration number, or descriptive statistic must come from `output/stage3a/` (empirical analysis) or `output/stage3b/` (LLM experiments, if `--ext theory_llm`). If a claim is needed but no such file exists, write `[NEEDS EMPIRICIST: description]` — do not draft the number, do not write or run scripts yourself. Empiricist owns all new numerical scripts. (Stage 2b theory exploration does not run under empirical-first; do not cite `output/stage2b/`.)
+- **Length:** empirical finance papers in top-3 journals run 35-50 pages including tables, figures, and main-text appendix; allocate the budget between identification.tex / results.tex / mechanism.tex / robustness.tex with the bulk of the budget on results + robustness. Internet appendix can hold additional tables.
+<!-- EMPIRICAL_FIRST_END -->
 - **Math notation must be consistent.** Define every symbol on first use. Don't reuse symbols for different objects.
+<!-- THEORY_FIRST_START -->
 - **LaTeX quality.** Proper environments (theorem, proposition, proof, lemma). Numbered equations for referenced ones only. Clean formatting.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+- **LaTeX quality.** Booktabs (`\toprule`, `\midrule`, `\bottomrule`) for all tables. Estimation tables follow finance-empirical conventions: dependent variable named in the caption or top row, columns are specifications, parentheses around standard errors, significance stars (`*` p<0.10, `**` p<0.05, `***` p<0.01), R² and N at the bottom. Numbered equations for referenced ones only. Do NOT use theorem/proposition/proof/lemma environments — the paper has no theorems. If the mechanism section needs a posited equation, render it as a plain `\begin{equation}` (numbered if referenced) with a sentence stating it is posited, not derived.
+<!-- EMPIRICAL_FIRST_END -->
 
 ## When re-invoked at Stage 9 (polish round)
 

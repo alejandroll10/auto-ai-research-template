@@ -6,13 +6,32 @@
 2. **Review the outline.** Check: does it address the self-attack points? Is the positioning against the literature accurate? Is the structure appropriate for the target journal? If not, provide feedback and re-launch.
 3. **Write.** Launch paper-writer with the approved outline + all inputs. Paper-writer creates files in `paper/sections/`:
    - `introduction.tex`
+<!-- THEORY_FIRST_START -->
    - `model.tex`
    - `results.tex`
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+   - `data.tex` (sample construction, variable definitions, descriptive statistics)
+   - `identification.tex` (design class, identifying assumptions, diagnostics, estimand)
+   - `results.tex` (estimation tables, heterogeneity, falsifications)
+   - `mechanism.tex` (channel + DAG + reduced-form posit, competing channels)
+   - `robustness.tex` (alternative specifications, sensitivity to identifying-assumption violations) — only when robustness checks exceed what fits in `results.tex`
+<!-- EMPIRICAL_FIRST_END -->
    - `discussion.tex`
    - `conclusion.tex`
    - `appendix.tex` (if needed)
+<!-- THEORY_FIRST_START -->
    Paper-writer may *also* populate the internet appendix (`paper/internet_appendix.tex`, a separate compile that ships with the deploy) when a single proof exceeds ~3 pages or the in-paper appendix would otherwise exceed ~30% of main-text length. If the trigger does not fire, the IA file stays as the placeholder skeleton and is ignored downstream.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+   Paper-writer may *also* populate the internet appendix (`paper/internet_appendix.tex`, a separate compile that ships with the deploy) when robustness analysis exceeds ~10 specifications, the in-paper appendix would otherwise exceed ~30% of main-text length, or heterogeneity covers more than ~5 sub-population dimensions. If no trigger fires, the IA file stays as the placeholder skeleton.
+<!-- EMPIRICAL_FIRST_END -->
 4. Paper-writer **updates** `paper/main.tex` (a skeleton with a `% PIPELINE-MANAGED` block already exists from setup.sh) — adds `\input` commands for each section file, fills `\title{...}`, `\author{...}`, and the abstract, and adjusts the bibliography commands. **Do not overwrite from scratch and do not delete or modify the `% PIPELINE-MANAGED` block** (the `\usepackage{arpipeline}` line and surrounding markers); these are the deployment fingerprint that downstream tooling depends on. The same `% PIPELINE-MANAGED` discipline applies to `paper/internet_appendix.tex`'s preamble if the IA is populated.
+<!-- THEORY_FIRST_START -->
 5. **Scan for `[NEEDS THEORY-EXPLORER: ...]` markers.** Paper-writer flags any numerical claim it cannot source from `output/stage2b/` or `output/stage3a/`. For each marker: re-invoke theory-explorer on that specific claim, directing output to `output/stage2b/exploration_for_<claim_id>.md` (do not overwrite the primary `exploration.md`). Wait for the output file, then re-launch paper-writer to fill the gap. Never let a draft ship with `[NEEDS THEORY-EXPLORER]` placeholders or with numerical prose paper-writer authored on its own.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+5. **Scan for `[NEEDS EMPIRICIST: ...]` markers.** Paper-writer flags any empirical claim (coefficient, standard error, sample-size figure, descriptive statistic) it cannot source from `output/stage3a/`. For each marker: re-invoke empiricist on that specific claim per the Stage 3a re-fire procedure (`docs/stage_3a_empirical.md` "Re-fire on theory revision"), directing output to a versioned `output/stage3a/empirical_analysis_v<claim_id>.md`. Wait for the output file and an empirics-auditor PASS, then re-launch paper-writer to fill the gap. Never let a draft ship with `[NEEDS EMPIRICIST]` placeholders or with numerical prose paper-writer authored on its own. Theory-explorer and `output/stage2b/` do not exist under empirical-first.
+<!-- EMPIRICAL_FIRST_END -->
 6. **Early bib-verify.** Launch `bib-verifier` on the draft. Same procedure as Stage 8 (OpenAlex + WebSearch fallback). If fabrications or fix-needed cites are found, re-launch paper-writer to drop or correct them before referees see the draft. Stage 8 still runs near the end as the final cite-key check; Stage 9 (polish) then audits the prose-level claims about each cite.
 7. Commit: `pipeline: stage 5 — paper draft written`
