@@ -149,6 +149,25 @@ case "$VARIANT" in
         ;;
 esac
 
+# ── Mode-conditional overrides for variant descriptors ──
+# Mode flags can re-frame what kind of paper the deploy produces. PAPER_TYPE
+# and DOMAIN_AREAS feed CLAUDE.md's opening prose, the agent metadata
+# descriptions, and the literature-scout's variant context — they need to
+# accurately describe an empirical-first deploy as such, not as a theory
+# paper. TARGET_JOURNALS does not change (top-3 finance journals publish
+# both theory and empirical work). JOURNAL_LIST also unchanged.
+if [ "$MODE" = "empirical-first" ]; then
+    case "$VARIANT" in
+        finance)
+            # Article-safe: starts with consonant ("c") so the "a {{PAPER_TYPE}}"
+            # template in core.md reads correctly. (Switching to "an" would
+            # break the default-mode "a finance theory paper" wording.)
+            PAPER_TYPE="causal-identification empirical finance paper"
+            DOMAIN_AREAS="empirical finance — asset pricing, corporate finance, information economics, market design, financial intermediation, or behavioral finance — with the contribution resting on a credibly-identified causal estimand plus a prose+DAG mechanism"
+            ;;
+    esac
+fi
+
 # ── Resolve paths ──
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE_DIR_REL=".claude"
