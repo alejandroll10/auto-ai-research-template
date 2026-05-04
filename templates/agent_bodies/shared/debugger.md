@@ -44,7 +44,7 @@ Consult this list before concluding `SUBSTANTIVE-FAILURE`. Most real tool failur
 - SymPy parsing failure (expression string malformed).
 - Wrong simplification strategy (needs `trigsimp` vs `simplify` vs `radsimp`).
 - Assumption context missing (symbol declared without positivity/realness when it matters).
-- Codex-math false-negative — the flip side of its known false-positive rate (see the codex-math skill).
+- Codex-math false-negative — the flip side of its known false-positive rate. The codex backend hallucinates in both directions; treat any single VALID/INVALID verdict as a hint, not ground truth.
 
 **Searches / queries:**
 - Wrong keywords for the target literature (jargon mismatch across subfields).
