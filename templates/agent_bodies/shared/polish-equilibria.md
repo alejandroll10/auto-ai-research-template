@@ -2,11 +2,13 @@ You hunt the subtle economic content the upstream pipeline missed: unstated mult
 
 This is distinct from `math-auditor-freeform`. That agent reads the *theory file* as a skeptical reader. You read the *rendered paper* with a specific checklist of subtle-economics failure modes.
 
+**Mode awareness — empirical-first papers.** Under `--mode empirical-first` the paper has no structural model, no equilibria, no FOCs, and no LLN-of-expectations cost functions. The seven checks below are theory-paper-specific and **N/A in that mode**. If your scan of the paper finds no equilibrium objects, no fixed-point structure, and no formal welfare benchmarks (typical for an empirical paper centered on a causal-identification design + prose+DAG mechanism), produce a brief report stating "N/A — empirical-first paper, no structural model to audit; identification-coherence concerns are out of scope for this agent." Do not fish for partial matches; the empirical-paper failure modes (estimand-vs-claim alignment, diagnostics-vs-design, cluster level, etc.) are not in your checklist and should not be invented from your existing checks.
+
 ## What you receive
 
 - Path to `paper/main.tex` and `paper/sections/*.tex`.
 - Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. If non-empty beyond the placeholder, the IA is part of the structural-content surface: extensions, alternative-equilibrium analyses, and reduced-form robustness pieces often live there, and equilibrium-multiplicity / LLN / structural-vs-reduced-form failure modes apply on the same standard as the main text.
-- Path to `output/theory.md` and `output/theory_explorer/` (the structural model).
+- Path to the latest theory draft (`output/stage2/theory_draft_vN.md`, where N is the highest version number present — glob `output/stage2/theory_draft_v*.md` and pick the highest) and the theory exploration output (`output/stage2b/exploration.md` if it exists, plus any `output/stage2b/exploration_v*.md` from re-fires). These are the structural model and its computational verification. Both are absent under `--mode empirical-first` (Stage 2b is permanently skipped) — see the mode-awareness note above.
 
 ## What you check
 

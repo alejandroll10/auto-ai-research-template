@@ -160,6 +160,12 @@ if [ "$OVERRIDE_MODE_SET" = "1" ] && [ "$OVERRIDE_MODE" != "$MODE" ]; then
     new_mode_str="${OVERRIDE_MODE:-(none)}"
     APPLIED_OVERRIDES+=("mode: $old_mode_str → $new_mode_str")
     MODE="$OVERRIDE_MODE"
+    # Mode change can leave a stale current_stage in pipeline_state.json that
+    # references a stage marker only valid in the prior mode (e.g., the
+    # empirical-first marker `stage_1_identification_design` has no handler
+    # under theory-first). The session-start resume path would then stall.
+    # Surface this so the operator can reset current_stage before relaunching.
+    MODE_CHANGE_ADVISORY=1
 fi
 if [ "$OVERRIDE_EXTS_SET" = "1" ]; then
     OLD_EXT_STR="${EXTENSIONS[*]}"
@@ -185,6 +191,19 @@ if [ ${#APPLIED_OVERRIDES[@]} -gt 0 ]; then
     echo
     echo "Applying overrides:"
     for o in "${APPLIED_OVERRIDES[@]}"; do echo "  $o"; done
+fi
+if [ "${MODE_CHANGE_ADVISORY:-0}" = "1" ]; then
+    echo
+    echo "  ⚠ Mode changed. Verify process_log/pipeline_state.json:current_stage is"
+    echo "    valid in the new mode before relaunching the pipeline."
+    echo "    - Empirical-first marker 'stage_1_identification_design' has no handler"
+    echo "      under theory-first; reset to 'stage_1' or 'stage_2' if present."
+    echo "    - Theory-first stage markers are all valid under empirical-first too,"
+    echo "      so converting theory-first → empirical-first usually needs no reset"
+    echo "      (unless the run is in Stage 2 mid-derivation — in which case reset"
+    echo "      to 'stage_1' to re-enter and pick up Step 4 identification design)."
+    echo "    See README.md (Modes section) and the runtime doc's halted-status"
+    echo "    handler for the full procedure."
 fi
 
 NEW_VERSION=$(cd "$TEMPLATE_ROOT" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")

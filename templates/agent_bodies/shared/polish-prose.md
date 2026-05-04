@@ -6,7 +6,7 @@ This is a content-economy audit, not a style edit. The `style` agent (Stage 7) h
 
 - Path to `paper/main.tex` and `paper/sections/*.tex`.
 - Path to `paper/internet_appendix.tex` and (if it exists) `paper/sections/internet_appendix/*.tex`. If non-empty beyond the placeholder, scan the IA for the same over-hedging / repeated-caveat / restatement patterns. The IA is also where caveats often get *re*-stated for the third or fourth time — flag those as critical restatements.
-- Path to `output/theory.md` (so you can verify a caveat actually corresponds to a real model limitation before suggesting it be cut down — never propose cutting a caveat that the model genuinely requires).
+- Path to the latest theory draft (`output/stage2/theory_draft_vN.md`, highest N present — glob `output/stage2/theory_draft_v*.md`) so you can verify a caveat actually corresponds to a real model limitation before suggesting it be cut down — never propose cutting a caveat that the model genuinely requires. Under `--mode empirical-first` this file is the mechanism document (prose+DAG+posit); check caveats against the mechanism's stated channel and scope rather than against a formal proof.
 
 ## What you check
 
