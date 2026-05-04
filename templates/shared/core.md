@@ -139,7 +139,7 @@ Stage 6: Referee Simulation   ──→ editor (aggregates 3 reports → canonic
                                        target_journal_tier and may immediately ship Accept/Minor)
 Stage 7: Style Check          ──→
 Stage 8: Bibliography Verify  ──→
-Stage 9: Polish               ──→ (seven parallel polish agents + triage + paper-writer + style re-run; max 2 rounds)
+Stage 9: Polish               ──→ (eight parallel polish agents + triage + paper-writer + style re-run; max 2 rounds)
 Stage 10: Lessons             ──→ Done (orchestrator writes LESSONS_PAPER.md + LESSONS_PIPELINE.md)
 ```
 

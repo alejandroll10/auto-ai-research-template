@@ -304,7 +304,7 @@
   },
   "polish-consistency": {
     "name": "polish-consistency",
-    "description": "Reads the rendered paper end-to-end and flags places it contradicts itself: prose claims that don't match propositions, headings that contradict their text, intro framings that get qualified away later, label-vs-object mismatches (e.g., 'LP welfare' that computes gross fund return), corner-solution propositions whose comparative statics are then invoked downstream. Stage 9 polish agent; runs in parallel with the other five. Writes output/polish_consistency_r{N}.md where N is the current polish_round.",
+    "description": "Reads the rendered paper end-to-end and flags places it contradicts itself: prose claims that don't match propositions, headings that contradict their text, intro framings that get qualified away later, label-vs-object mismatches (e.g., 'LP welfare' that computes gross fund return), corner-solution propositions whose comparative statics are then invoked downstream. Stage 9 polish agent; runs in parallel with the other seven. Writes output/polish_consistency_r{N}.md where N is the current polish_round.",
     "tools": "Read, Write, Bash, Glob, Grep",
     "skills": [
       "sympy"
@@ -388,6 +388,20 @@
       "model": "gemini-3-preview"
     }
   },
+  "polish-identification": {
+    "name": "polish-identification",
+    "description": "Hunts identification-coherence failures in the rendered paper: estimand-vs-claim mismatches (paper says ATE but design recovers LATE on compliers), diagnostics-vs-design coverage (design promised Goodman-Bacon decomposition but paper omits it), cluster level vs. design level (state-year design clustered at firm), identification.tex faithfulness to the Stage 1 design, heterogeneity-vs-treated-population coherence, and out-of-scope structural claims on a reduced-form coefficient. Symmetric counterpart to polish-equilibria for empirical papers. Carries 2026-standard diagnostic knowledge (Goodman-Bacon, Olea-Pflueger, BHJ shift-share, Roth/Rambachan-Roth HonestDiD, Cattaneo-Jansson-Ma, Calonico-Cattaneo-Titiunik, Feng-Giglio-Xiu, Stambaugh/Boudoukh) inherited from identification-designer / identification-auditor. Distinct from identification-auditor (which audited the empiricist's plan at Stage 3a step 3). Stage 9 polish agent. Writes output/polish_identification_r{N}.md where N is the current polish_round. Produces an N/A report on theory-only papers without an empirical identification design.",
+    "tools": "Read, Write, Glob, Grep",
+    "model": "opus",
+    "effort": "high",
+    "codex": {
+      "model": "gpt-5.5",
+      "model_reasoning_effort": "high"
+    },
+    "gemini": {
+      "model": "gemini-3-preview"
+    }
+  },
   "polish-bibliography": {
     "name": "polish-bibliography",
     "description": "Audits the paper's *use* of its bibliography. For every in-text citation, looks up the cited paper on OpenAlex and verifies the prose claim about it. Scores each citation use FAITHFUL / APPROXIMATE / MISCHARACTERIZED / DECORATIVE. Complements bib-verifier (which checks cite-key validity) and polish-institutions (which catches the egregious cases as part of a broader pass). Stage 9 polish agent. Writes output/polish_bibliography_r{N}.md where N is the current polish_round.",
@@ -407,7 +421,7 @@
   },
   "polish-prose": {
     "name": "polish-prose",
-    "description": "Audits the paper's prose economy: caveats restated more times than necessary, hedge stacking that hides a confident claim, abstracts that read like a referee response, defensive contribution framing, buried thesis sentences, section openers that re-summarize what just ended. Catches the 'over-armored' failure mode where a correct paper reads as defensive and the contribution gets buried. Distinct from style (mechanical rules) and polish-consistency (contradictions). Stage 9 polish agent; runs in parallel with the other six. Writes output/polish_prose_r{N}.md where N is the current polish_round.",
+    "description": "Audits the paper's prose economy: caveats restated more times than necessary, hedge stacking that hides a confident claim, abstracts that read like a referee response, defensive contribution framing, buried thesis sentences, section openers that re-summarize what just ended. Catches the 'over-armored' failure mode where a correct paper reads as defensive and the contribution gets buried. Distinct from style (mechanical rules) and polish-consistency (contradictions). Stage 9 polish agent; runs in parallel with the other seven. Writes output/polish_prose_r{N}.md where N is the current polish_round.",
     "tools": "Read, Write, Bash, Glob, Grep",
     "model": "opus",
     "effort": "high",
