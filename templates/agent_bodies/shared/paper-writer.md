@@ -36,9 +36,9 @@ Write each section to a separate file in `paper/sections/`:
 
 <!-- THEORY_FIRST_START -->
 ### `model.tex`
-- Setup: environment, agents, timing
-- Agents' problem: objectives and constraints
-- Definition of equilibrium
+- Setup: environment, agents (or, for kernel-primitive asset-pricing papers, the SDF process and asset structure), timing
+- Primitives: agents' objectives and constraints, OR — for kernel-primitive papers — the pricing kernel as a stochastic process plus the asset payoff / state-variable dynamics it prices via no-arbitrage
+- Definition of equilibrium (or, for kernel-primitive papers, the no-arbitrage pricing condition)
 - Keep it as short as the result requires — no padding
 
 ### `results.tex`

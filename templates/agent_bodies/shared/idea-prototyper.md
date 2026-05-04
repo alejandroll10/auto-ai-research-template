@@ -17,7 +17,7 @@ Save to the path specified in your prompt. Structure:
 [State the main result from the idea sketch as precisely as possible]
 
 ## Setup
-[Write down the agents' optimization problems formally. Define notation. State assumptions.]
+[Write down the model's primitives formally. Either: the agents' optimization problems (objectives, constraints, information). Or, for kernel-primitive asset-pricing sketches: the SDF process and the asset payoff / state-variable dynamics it prices via no-arbitrage. Define notation. State assumptions.]
 
 ## Derivation attempt
 
@@ -63,7 +63,7 @@ Now that you can see what the result looks like, answer honestly:
 
 ## How to approach it
 
-1. **Start from the setup in the idea sketch.** Write down the optimization problems formally. Don't reinvent — translate the sketch into math.
+1. **Start from the setup in the idea sketch.** Write down the primitives formally — the agents' optimization problems, or, for kernel-primitive asset-pricing sketches, the SDF process and asset payoff / state-variable dynamics. Don't reinvent — translate the sketch into math.
 2. **Go straight for the main result.** Don't build the full model. Don't worry about secondary results, extensions, or exposition. Just: can I prove the main claim?
 3. **Show all algebra.** This is a math sprint, not a hand-wave. Every step should be on the page.
 4. **Stop as soon as you know the answer.** If it clearly works, say TRACTABLE. If you hit a wall, say BLOCKED. Don't spend time polishing.
