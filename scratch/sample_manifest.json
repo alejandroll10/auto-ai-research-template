@@ -1,0 +1,55 @@
+{
+  "manifest_version": 1,
+  "template_version": "d156580",
+  "deploy_date": "2026-05-03",
+  "deploy_fingerprint": "5f4db07d-bb0b-40dd-8cc8-34ebf968adb2",
+  "variant": "finance",
+  "extensions": [
+    "empirical"
+  ],
+  "flags": {
+    "seeded": false,
+    "manual": false,
+    "light": false
+  },
+  "infrastructure": {
+    "dirs_replace": [
+      ".claude/agents",
+      ".claude/skills",
+      ".codex/agents",
+      ".agents/skills",
+      ".gemini/agents",
+      "docs",
+      "code/utils/codex_math",
+      "code/utils/bib_verify",
+      "code/utils/openalex"
+    ],
+    "files_replace": [
+      "CLAUDE.md",
+      "AGENTS.md",
+      "GEMINI.md",
+      ".claude/settings.json",
+      ".gemini/settings.json",
+      ".gitignore",
+      "dashboard.html",
+      "code/utils/__init__.py",
+      "code/utils/chen_zimmerman_utils.py",
+      "code/utils/download_crsp_daily.py",
+      "code/utils/download_crsp_monthly.py",
+      "code/utils/edgar_utils.py",
+      "code/utils/form_5500_utils.py",
+      "code/utils/fred_utils.py",
+      "code/utils/ken_french_utils.py",
+      "code/utils/mutual_fund_utils.py",
+      "code/utils/process_crsp_daily.py",
+      "code/utils/process_crsp_monthly.py",
+      "code/utils/start_services.sh",
+      "code/utils/wrds_client.py",
+      "code/utils/wrds_server.py",
+      "code/utils/wrds_utils.py"
+    ],
+    "files_env_merge": [
+      ".env"
+    ]
+  }
+}
