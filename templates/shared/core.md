@@ -90,11 +90,21 @@ Stage 1: Idea Generation     ──→ Gate 1: Idea Review (iterates with genera
                                      → winner copied to canonical files
                                    ├── all K eliminated → new Round of Stage 1
                                    └── ≥1 survives → proceed to Stage 2
+<!-- THEORY_FIRST_START -->
 Stage 2: Theory Development  ──→ Gate 2: Math Audit (structured then free-form)
                                    Gate 3: Novelty Check on full theory
                                    Stage 2b: Theory Exploration (compute, verify, plot)
                                       ├── FAILS → back to Stage 2
                                       └── HOLDS/FRAGILE → proceed
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+Stage 2: Mechanism Document  ──→ theory-generator runs in mechanism mode
+                                   (prose + DAG + ≤2 reduced-form posits)
+                                   Gate 2 (math audit) and Stage 2b (theory
+                                   exploration) are SKIPPED — mechanism mode
+                                   has no derivations or equilibria to audit
+                                   Gate 3: Novelty Check on the mechanism
+<!-- EMPIRICAL_FIRST_END -->
 Gate 3a-feasibility: Empirical Feasibility   (only if --ext empirical)
                                    ├── FALSIFIED → back to Stage 1
                                    └── OK → proceed
@@ -105,10 +115,10 @@ Stage 3b: Experiments         (only if --ext theory_llm, design + review)
 Puzzle Triage                ──→ fires if empirics/experiments contradict, OR Stage 3 PUZZLE-CANDIDATE
                                    ├── NORMAL-PROCEED → Stage 4
                                    ├── FIX-EMPIRICS → re-run empirics
-                                   ├── RECONCILE → add scope condition, Gate 2
+                                   ├── RECONCILE → add scope condition, Gate 2 (skipped under empirical-first)
                                    ├── BACK-TO-IDEA → Stage 1
                                    ├── PIVOT → rebuild theory around contradiction
-                                   │            (re-run Gate 2, Gate 3, Stage 2b, Stage 3, empirics; max 2 pivots)
+                                   │            (re-run Gate 2, Gate 3, Stage 2b, Stage 3, empirics — Gate 2/2b skipped under empirical-first; max 2 pivots)
                                    └── HONEST-NULL → Stage 5 with limits, or Stage 0
 Stage 4: Self-Attack          ──→ Gate 4: Scorer Decision (trajectory-based)
                                    ├── ADVANCE (≥ tier threshold — see docs/stage_4.md) → Stage 5
@@ -309,7 +319,13 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 **Extension types:** continuous time (HJB/SDEs), incomplete markets/heterogeneity (Bewley/HANK), learning/incomplete information, general preferences (CRRA/EZ/habits), higher dimensions (N assets, continuum of agents), perturbation/approximation (formal error bounds), dynamic/stochastic, moral hazard/agency, adverse selection, mechanism design, network/contagion.
 {{EMPIRICAL_PLAYBOOK_ADDENDUM}}
 
-**How to apply:** Identify the specific economic weakness from scorer/self-attack feedback. Pick 1-2 extensions that test whether the channel survives under realistic features. Prove the result or prove it breaks (a counterexample is as valuable as a positive result). Re-run Gate 2 + Gate 4 on extensions.
+**How to apply:** Identify the specific economic weakness from scorer/self-attack feedback. Pick 1-2 extensions that test whether the channel survives under realistic features. Prove the result or prove it breaks (a counterexample is as valuable as a positive result).
+<!-- THEORY_FIRST_START -->
+Re-run Gate 2 + Gate 4 on extensions.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+Re-run Stage 3a (empirical re-fire on the extension's new prediction) + Gate 4 on extensions. Gate 2 is skipped under empirical-first; Gate 3 (novelty) re-fires only if the extension introduces a structurally new channel.
+<!-- EMPIRICAL_FIRST_END -->
 
 **When to extend vs. start over:** Score in the REVISE band or above for the current target tier with correct core → extend. Score in the ABANDON band or core wrong → start over. Novelty KNOWN → start over.
 
@@ -323,7 +339,13 @@ When the core result is correct but thin, extend it with mathematically hard, ec
 | Idea review rejects all | 1 rejection | Return to Stage 0 for a different problem |
 | Gates 1b/1c parallel screening eliminates all candidates | All top-K KNOWN at 1b OR BLOCKED at 1c | New Round of Stage 1 (counts toward 5-round limit) |
 | Gate 3 novelty INCREMENTAL | 3 rework attempts at Stage 2 | Abandon this idea, return to Stage 1 for a new one |
+<!-- THEORY_FIRST_START -->
 | Math audit fails | 3 attempts | Abandon this theory version |
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+| Identification audit fails | 3 plan-revision rounds (cap from `stage_3a_empirical.md`) | Treat as FAIL — empiricist selects a different design from the menu, or escalate per `stage_3a_empirical.md` step 3 routing |
+| Empirics audit fails | 5 audit-fix attempts (cap from `stage_3a_empirical.md`) | Treat as theory-version failure — re-fire theory-generator (mechanism mode) with the audit notes as input |
+<!-- EMPIRICAL_FIRST_END -->
 | Scorer: delta ≥ 3 with substantive content change | — | Allow one more iteration in current band |
 | Scorer: delta ≥ 3 from reframing only | — | Treat as plateau — escalate. Reframing is not progress (see `stage_4.md`). |
 | Scorer: delta < 3 (plateau/decline) | — | Escalate one level (REVISE → MAJOR REWORK → ABANDON) |
@@ -349,8 +371,14 @@ output/                   # Pipeline outputs by stage
 ├── seed/                 # (--seed mode only) user idea files + pipeline reports
 ├── stage0/               # literature_map_broad.md, gap_selection.md, literature_map.md, problem_statement.md
 ├── stage1/               # idea sketches, reviews, selected_idea.md, novelty + prototype
+<!-- THEORY_FIRST_START -->
 ├── stage2/               # theory drafts, math audits, novelty checks (versioned _v1, _v2…)
 ├── stage2b/              # theory exploration report + figures/
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+├── stage2/               # mechanism documents, novelty checks (versioned _v1, _v2…). No math audit files in this mode.
+                          # (stage2b/ is not created — theory exploration is skipped)
+<!-- EMPIRICAL_FIRST_END -->
 ├── stage3/               # implications.md
 ├── stage3a/              # empirical feasibility + full analysis (if --ext empirical)
 ├── stage3b/  # LLM experiments (if --ext theory_llm)

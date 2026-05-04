@@ -8,7 +8,15 @@ entries with the same key (so extensions can shadow shared definitions if needed
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
+
+# Reuse the same vocab loader the assemblers use, so {{KEY}} placeholders in
+# metadata `description` fields (e.g. {{THEORY_GEN_DESCRIPTION}} added in
+# phase 4c) resolve identically here. Without this the manual catalog would
+# ship literal {{KEY}} tokens to the user.
+sys.path.insert(0, str(Path(__file__).parent))
+from agent_body_loader import load_vocab  # noqa: E402
 
 ORCHESTRATOR_REPLACEMENTS = [
     ("The orchestrator launches this agent at ", "Used at "),
@@ -19,8 +27,20 @@ ORCHESTRATOR_REPLACEMENTS = [
     ("Launched at ", "Used at "),
 ]
 
+VOCAB_KEY_PATTERN = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 
-def clean_description(desc: str) -> str:
+
+def apply_vocab(desc: str, vocab) -> str:
+    if not vocab:
+        return desc
+    def replace(m):
+        key = m.group(1)
+        return vocab.get(key, m.group(0))
+    return VOCAB_KEY_PATTERN.sub(replace, desc)
+
+
+def clean_description(desc: str, vocab=None) -> str:
+    desc = apply_vocab(desc, vocab)
     for old, new in ORCHESTRATOR_REPLACEMENTS:
         desc = desc.replace(old, new)
     desc = desc.replace("{{DOMAIN}}", "")
@@ -44,16 +64,21 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--metadata", action="append", required=True,
                         help="Path to a metadata JSON file (repeatable)")
+    parser.add_argument("--vocab", action="append", default=[],
+                        help="Vocab JSON for {{KEY}} substitution in description fields. "
+                             "Repeatable; merged in order (later overrides earlier on "
+                             "duplicate keys), matching the assembler convention.")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
+    vocab = load_vocab(args.vocab) or {}
     items = load_items(args.metadata)
     lines = []
     for name in sorted(items.keys()):
         meta = items[name]
         if meta.get("pipeline_only"):
             continue
-        desc = clean_description(meta.get("description", ""))
+        desc = clean_description(meta.get("description", ""), vocab)
         lines.append(f"- `{name}` — {desc}")
 
     Path(args.output).write_text("\n".join(lines) + "\n")

@@ -14,16 +14,28 @@
 
 1. Launch both scorers in parallel with the same inputs:
    - Theory draft: `output/stage2/theory_draft_vN.md`
+<!-- THEORY_FIRST_START -->
    - Math audit (structured): `output/stage2/math_audit_vN.md`
    - Math audit (free-form): `output/stage2/freeform_audit_vN.md`
    - Theory exploration: `output/stage2b/exploration.md` (if available — computational verification and diagnostic plots)
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+   - Identification audit: `output/stage3a/identification_audit.md` (Stage 1 design + Stage 3a plan; the H3 hard requirement gates on this)
+   - Empirics audit: `output/stage3a/empirics_audit.md` (the H3 hard requirement also gates on this)
+   - (Math audit and theory exploration files do not exist under empirical-first; do NOT attempt to read `output/stage2/math_audit_*.md` or `output/stage2b/exploration.md`.)
+<!-- EMPIRICAL_FIRST_END -->
    - Novelty check (idea): `output/stage1/novelty_check_idea.md`
    - Novelty check (theory): `output/stage2/novelty_check_vN.md`
    - **Implications with lit-check tags:** `output/stage3/implications.md` (for the SUPPORTED-cap / PUZZLE-CANDIDATE-floor rules on Surprise)
    - **Puzzle-triage report(s):** any `output/puzzle_triage/triage_pN.md` files that exist (needed for the Surprise-floor rule's measurement-quality gate on PUZZLE-CANDIDATE)
    - **Pipeline state:** pass `pivot_round` and `pivot_resolved` so the scorer knows whether a pivot fired and whether it resolved
    - Self-attack: `output/stage4/self_attack_vN.md`
+<!-- THEORY_FIRST_START -->
    - **Structured scorer only, on revisions (N ≥ 2):** also pass the prior theory draft (`output/stage2/theory_draft_v{N-1}.md`) and the `## Unverified claims` section of the prior math audit (`output/stage2/math_audit_v{N-1}.md`). Do NOT pass any prior scorer output or prior score to either agent — the structured scorer scores independently; the freeform scorer is history-blind.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+   - **Structured scorer only, on revisions (N ≥ 2):** also pass the prior theory draft (`output/stage2/theory_draft_v{N-1}.md`) and the prior identification + empirics audit reports if they were re-fired alongside the theory revision. (Empirical-first has no math audit's `## Unverified claims` section to read; the analogous "what was unresolved last round" content lives in the prior `output/stage3a/identification_audit.md` REVISE notes and the prior `output/stage3a/empirics_audit.md` issue list.) Do NOT pass any prior scorer output or prior score to either agent.
+<!-- EMPIRICAL_FIRST_END -->
 2. Save results to `output/stage4/scorer_decision_vN.md` and `output/stage4/scorer_freeform_vN.md`
 3. Commit: `artifact: scorer decisions v{N} (structured + freeform)`
 
@@ -37,7 +49,12 @@
    - Stage 1 candidate selection: `output/stage1/candidate_selection.md` (which top-K candidates were screened and why the current idea won — so branch-manager does not recommend returning to already-eliminated sketches)
    - Pipeline state: `process_log/pipeline_state.json`
    - Self-attack + triage: `output/stage4/self_attack_vN.md`, `output/stage4/triage_vN.md`
+<!-- THEORY_FIRST_START -->
    - Free-form audit: `output/stage2/freeform_audit_vN.md`
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+   - Identification audit: `output/stage3a/identification_audit.md`; empirics audit: `output/stage3a/empirics_audit.md` (the freeform-audit equivalent under empirical-first; no `output/stage2/freeform_audit_*.md` exists)
+<!-- EMPIRICAL_FIRST_END -->
    - Literature map: `output/stage0/literature_map.md`
 5. Save result to `output/stage4/branch_manager_vN.md`
 6. Commit: `artifact: branch-manager report v{N}`

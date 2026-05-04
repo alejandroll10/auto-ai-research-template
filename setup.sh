@@ -508,11 +508,22 @@ if [ "$MANUAL" = "1" ]; then
         esac
     done
 
+    # Vocab args mirror the assembler convention: base variant vocab first,
+    # then mode overlay (last-write-wins on duplicate keys). Without this the
+    # catalog leaks {{KEY}} tokens like {{THEORY_GEN_DESCRIPTION}} for any
+    # description that's vocab-driven.
+    CATALOG_VOCAB_ARGS=()
+    [ -f "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}/vocab.json" ] && \
+        CATALOG_VOCAB_ARGS+=(--vocab "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}/vocab.json")
+    [ -n "$MODE_VOCAB_OVERLAY" ] && CATALOG_VOCAB_ARGS+=(--vocab "$MODE_VOCAB_OVERLAY")
+
     python3 "$TEMPLATE_ROOT/scripts/generate_catalog.py" \
         "${AGENT_METADATA_ARGS[@]}" \
+        "${CATALOG_VOCAB_ARGS[@]}" \
         --output "$AGENT_CATALOG_FILE"
     python3 "$TEMPLATE_ROOT/scripts/generate_catalog.py" \
         "${SKILL_METADATA_ARGS[@]}" \
+        "${CATALOG_VOCAB_ARGS[@]}" \
         --output "$SKILL_CATALOG_FILE"
 
     CATALOG_ARGS=(--agent-catalog "$AGENT_CATALOG_FILE" --skill-catalog "$SKILL_CATALOG_FILE")
@@ -711,7 +722,11 @@ fi
 if [ "$MANUAL" = "1" ]; then
     mkdir -p "$P/output"
 else
-    mkdir -p "$P/output/stage0" "$P/output/stage1" "$P/output/stage2" "$P/output/stage2b/figures" "$P/output/stage3" "$P/output/stage4" "$P/output/puzzle_triage" "$P/output/post_pipeline"
+    # Stage 2b (theory exploration) is permanently skipped under
+    # --mode empirical-first; don't create the empty dir there.
+    STAGE2B_DIRS=()
+    [ "$MODE" != "empirical-first" ] && STAGE2B_DIRS=("$P/output/stage2b/figures")
+    mkdir -p "$P/output/stage0" "$P/output/stage1" "$P/output/stage2" "${STAGE2B_DIRS[@]}" "$P/output/stage3" "$P/output/stage4" "$P/output/puzzle_triage" "$P/output/post_pipeline"
     mkdir -p "$P/process_log/sessions" "$P/process_log/decisions" "$P/process_log/discussions" "$P/process_log/patterns"
 fi
 

@@ -6,7 +6,13 @@
 2. Choose strategy:
    - Attempt 1: develop the selected idea into a full theory, building on the prototype's derivation
    - Attempt 2+: mutate (if previous attempt had good elements) or fresh with different approach
-3. Launch theory-generator with the selected idea, problem statement, literature map, **`output/stage1/negative_results.md` if it exists** (BLOCKED prototypes from prior Stage-1 rounds — orchestrator must pass this in explicitly so a regenerated or re-attempted theory cannot silently re-propose a known-blocked sketch), and strategy. Pass the same file to `math-auditor` and `self-attacker` on their launches in step 4 below and at Stage 4. On mutate / crossover / pivot relaunches, also point theory-generator at the prior `output/stage2/math_audit_v*.md` and `output/stage2/freeform_audit_v*.md` files for this attempt — the agent reads them to avoid repeating error classes flagged in earlier versions.
+3. Launch theory-generator with the selected idea, problem statement, literature map, **`output/stage1/negative_results.md` if it exists** (BLOCKED prototypes from prior Stage-1 rounds — orchestrator must pass this in explicitly so a regenerated or re-attempted theory cannot silently re-propose a known-blocked sketch), and strategy.
+<!-- THEORY_FIRST_START -->
+   Pass the same file to `math-auditor` and `self-attacker` on their launches in step 4 below and at Stage 4. On mutate / crossover / pivot relaunches, also point theory-generator at the prior `output/stage2/math_audit_v*.md` and `output/stage2/freeform_audit_v*.md` files for this attempt — the agent reads them to avoid repeating error classes flagged in earlier versions.
+<!-- THEORY_FIRST_END -->
+<!-- EMPIRICAL_FIRST_START -->
+   Pass the negative-results file to `self-attacker` at Stage 4 too. (`math-auditor` is not launched in empirical-first mode — Gate 2 below is permanently skipped — so prior `math_audit_v*.md` / `freeform_audit_v*.md` files do not exist; theory-generator on a mutate/pivot relaunch should instead consult the most recent `referee-mechanism` report at Stage 6 and any `self_attack_v*.md` for prior content failures.)
+<!-- EMPIRICAL_FIRST_END -->
 4. Save result to `output/stage2/theory_draft_vN.md` where **N = `theory_version`** from `pipeline_state.json`. On a fresh `theory_attempt`, reset `theory_version` to 1. On each mutation (including re-launches after Gate 2 FAIL within the same attempt), increment `theory_version` and save to the new version file. N is a within-attempt counter — it does not reset across attempts within the same pipeline run, but it can collide across attempts; this is fine because attempts overwrite prior files and only the latest version matters downstream.
 5. Commit: `artifact: theory draft v{N}`
 
