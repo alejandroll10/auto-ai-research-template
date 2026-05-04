@@ -66,3 +66,4 @@ Save the report to: `paper/referee_reports/YYYY-MM-DD_vN.md` where N is the next
 - Reference specific equations, propositions, sections, and page numbers.
 - Do not fabricate claims about what the paper says. Quote or paraphrase accurately.
 - A good referee report helps the author improve the paper, not just lists complaints.
+- **Substance-over-form leeway.** Per the core principle, when a result is genuinely exceptional but violates a journal-standard expectation *by necessity of its content* (irrelevance / impossibility / calibration / pure characterization papers, where "mechanism," "comparative static," or "decision change" may not apply as usually written), recommend on the content's merits and name the convention you set aside. The bar is exceptional content the rubric wasn't built to score — not "I think this is good." Use sparingly. Never invoke leeway to recommend a paper whose result has been shown KNOWN by novelty-checker.

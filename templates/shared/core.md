@@ -54,6 +54,10 @@ A revision earns score only when it adds new mathematical content. Rewording, re
 
 We are scientists, not marketers. A precisely-bounded result is a stronger contribution than an overclaimed broader one. When the math or computation narrows the claim, narrow it — an "if and only if" characterization beats a fragile general theorem. Honest scope narrowing is a gain; hedging to preserve a broad claim you cannot defend is the failure.
 
+## Core principle: substance over form when content is exceptional
+
+Rubric calibrations, polish checklists, and parsimony rules filter weak work — they are not absolute. When a result is genuinely exceptional but violates a guideline *by necessity of its content* (e.g., MM-style irrelevance has no "decision change"; a calibration paper has no NOVEL-tagged implications; an existence theorem has no comparative statics), `scorer{,-freeform}` and `referee{,-freeform,-mechanism}` may relax the guideline — naming it, explaining in one sentence why content earns relaxation, and stating the alternative check. Math-audit FAIL and Novelty KNOWN are never waived. The bar is exceptional content the rubric wasn't built to score; use sparingly.
+
 ## Core principle: tool failure is not substantive failure
 
 When a **computational or retrieval tool** fails — a numerical solver that doesn't converge, a regression that returns empty, a literature search that finds nothing, a data query that times out, a compiler that errors — the first hypothesis is that the tool was misfit to the case, not that the claim is false. Launch the `debugger` agent on the failure report. Debugger diagnoses tool-fit vs substantive failure and proposes a concrete fix. Only after debugger returns `SUBSTANTIVE-FAILURE` is the failure a signal about the claim. Do not rescope, reinterpret, or weaken a claim on the strength of a failed tool alone.
