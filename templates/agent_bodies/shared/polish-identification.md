@@ -38,11 +38,11 @@ For each main coefficient or table cell discussed in the prose: identify the est
 The Stage 1 design (or Stage 3a menu) committed to specific diagnostics. The rendered paper must actually present them. Failure modes by design class:
 
 - **Staggered DiD without Goodman-Bacon decomposition**: the paper presents only the headline two-way fixed-effects estimate without the `bacondecomp` table that exposes how much weight is on already-treated comparison observations. 2026-standard requires this for any staggered design even when the headline estimator is one of the robust alternatives.
-- **Staggered DiD without HonestDiD breakdown**: parallel-trends violations bound the inference. Roth-Rambachan-Roth HonestDiD (`HonestDiD` package) produces the smallest violation that overturns the headline result. A paper claiming a robust DiD effect that does not present this breakdown invites referee `dishonest-id-failure-mode-not-bounded`.
+- **Staggered DiD without HonestDiD breakdown**: parallel-trends violations bound the inference. Roth-Rambachan-Roth HonestDiD (`HonestDiD` package) produces the smallest violation that overturns the headline result. A paper claiming a robust DiD effect that does not present this breakdown invites the auditor's `no-honestdid-sensitivity` failure-mode flag.
 - **Staggered DiD without Roth (2022) pre-trends power**: testing pre-trends with low statistical power is consistent with both flat-trend and important-trend worlds. Reporting an F-test without the `pretrends` package's power calculation is incomplete.
 - **IV without Olea-Pflueger F**: Stock-Yogo F > 10 is insufficient under heteroskedasticity / clustering. Olea-Pflueger effective F (≈23 threshold for one IV) is the 2026 standard.
 - **IV without Lee-McCrary-Moreira-Porter tF correction**: for a single IV, the tF correction or Anderson-Rubin CIs are required.
-- **Shift-share IV without BHJ shock-balance OR GPSS Rotemberg-weight table**: the 2026 alternatives. Verbal-only exclusion is a referee `BHJ-no-shock-balance` immediate-flag.
+- **Shift-share IV without BHJ shock-balance OR GPSS Rotemberg-weight table**: the 2026 alternatives. Verbal-only exclusion is the auditor's `bhj-no-shock-balance` immediate-flag.
 - **RD without Cattaneo-Jansson-Ma manipulation test**: McCrary alone is stale; CJM `rddensity` is the 2026 standard. RD without it invites `rd-no-manipulation-test`.
 - **RD without Calonico-Cattaneo-Titiunik bandwidth + bias correction**: `rdrobust` with MSE-optimal bandwidth and robust bias-corrected confidence intervals is the standard reference.
 - **Asset-pricing factor without Feng-Giglio-Xiu LASSO zoo test**: any paper proposing a new factor must demonstrate it survives the zoo, not just the literature's existing factors.

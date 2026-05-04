@@ -227,9 +227,10 @@ Stage 5: Paper Writing
 Stage 6: Referee Simulation   → Gate 5: Referee Decision
 Stage 7: Style Check
 Stage 8: Bibliography Verify
-Stage 9: Polish               → Done (six parallel polish agents — consistency,
+Stage 9: Polish               → Done (eight parallel polish agents — consistency,
                                  formula, numerics, institutions, equilibria,
-                                 bibliography — triaged + applied; max 2 rounds)
+                                 identification, bibliography, prose — triaged
+                                 + applied; max 2 rounds)
 ```
 
 Each gate is adversarial. Failed theories get revised, reworked, or abandoned. The system loops until it produces a paper that passes simulated referee review.
@@ -256,8 +257,10 @@ Each gate is adversarial. Failed theories get revised, reworked, or abandoned. T
 | `polish-formula` | Re-derives every numbered equation in the rendered paper (codex-math + sympy) |
 | `polish-numerics` | Recomputes every numerical claim from stated parameters |
 | `polish-institutions` | Verifies real-world claims and faithful characterization of cited papers |
-| `polish-equilibria` | Catches multiple equilibria, missing LLN/continuum assumptions, reduced-form/structural bridges |
+| `polish-equilibria` | Catches multiple equilibria, missing LLN/continuum assumptions, reduced-form/structural bridges (theory papers) |
+| `polish-identification` | Audits identification-coherence in the rendered paper: estimand-vs-claim, diagnostics-vs-design, cluster level, identification.tex faithfulness, heterogeneity-population coherence (empirical papers) |
 | `polish-bibliography` | Per-citation prose-claim verification via OpenAlex |
+| `polish-prose` | Prose economy: repeated caveats, hedge stacking, abstract bloat, defensive contribution framing |
 | `bib-verifier` | Verifies cite-key validity against OpenAlex |
 | `scribe` | Background documentation of the process |
 | `empiricist` | Empirical analysis (if `--ext empirical`) |
