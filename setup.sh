@@ -439,6 +439,8 @@ else
     git clone https://github.com/alejandroll10/zeropaper.git "$PROJECT_NAME"
     cd "$PROJECT_NAME"
     git remote remove origin
+    rm -rf .git
+    git init -q -b main
 
     TEMPLATE_ROOT="."
     OUT_DIR="."
