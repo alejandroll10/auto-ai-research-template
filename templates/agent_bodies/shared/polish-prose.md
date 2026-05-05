@@ -46,7 +46,7 @@ Write `output/polish_prose_r{N}.md` where `{N}` is the current value of the `pol
 
 ### 1. <One-line title — e.g., "Caveat 'A4 is parameterization, not derivation' restated 5 times">
 **Severity:** critical
-**Pattern type:** [repeated caveat | hedge stacking | abstract bloat | undefined acronym | defensive contribution | buried thesis | section-opener resummary]
+**Pattern type:** [repeated caveat | hedge stacking | abstract bloat | undefined acronym | defensive framing | buried thesis | section-opener resummary]
 **Canonical home:** §1 intro contribution paragraph
 **Restatement anchors (each instance to drop or compress):**
 > Abstract, sentence 3: "A4 imposes ΔΠ = ρ·B·(1−µ) — a parameterization, not a primitive derivation"
