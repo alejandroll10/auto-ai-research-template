@@ -16,9 +16,11 @@ If the ping returns False, attempt one restart with `bash code/utils/start_servi
 
 Quick falsification check: can this theory be calibrated at all? Do the key empirical moments exist? A theory that predicts the wrong sign on a well-measured moment is dead regardless of how elegant the implications are. Check this BEFORE investing in implications.
 
+**Empirical-first caution.** A wrong-sign feasibility result only kills the idea when the moment is well measured by a proxy/design that actually matches the Stage 1 empirical question. If the mismatch is plausibly due to a proxy, sample, merge-key, aggregation-key, coding, or identification-design artifact, do **not** mark the theory FALSIFIED. Route it as a feasibility-fix: document the artifact in `output/stage3a/empirical_feasibility.md`, repair the proxy/design if possible, and rerun feasibility. If the corrected feasible design no longer identifies the selected idea, use the no-design escalation in `docs/stage_1.md` Step 4 rather than puzzle triage.
+
 1. Launch `empiricist` with a focused instruction: "Quick feasibility check only — download the 2-3 key moments this theory needs to match. Report whether the theory's predictions are in the right ballpark. Do NOT run a full analysis."
 2. Save to `output/stage3a/empirical_feasibility.md`
-3. If the key moments contradict the theory (wrong sign, off by an order of magnitude): flag as **FALSIFIED** — increment `theory_attempt` and reset `theory_version` to 1, then return to Stage 1 for a new idea (the theory is dead; counter must advance so the "5 theories on same problem → Stage 0" escalation rule in core.md fires correctly). Don't waste time on implications for a theory the data already rejects.
+3. If the key moments contradict the theory (wrong sign, off by an order of magnitude) **and** the proxy/design passed the caution above: flag as **FALSIFIED** — increment `theory_attempt` and reset `theory_version` to 1, then return to Stage 1 for a new idea (the theory is dead; counter must advance so the "5 theories on same problem → Stage 0" escalation rule in core.md fires correctly). Don't waste time on implications for a theory the data already rejects.
 
 {{SEED_OVERRIDE_STAGE_3A_FALSIFIED}}
 4. If moments are roughly consistent or unavailable: proceed to Stage 3.

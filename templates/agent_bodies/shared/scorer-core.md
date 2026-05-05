@@ -24,6 +24,10 @@ You will be pointed to files containing:
 | H4 | **The result is new** | Novelty check returned NOVEL → PASS. KNOWN → FAIL. INCREMENTAL → cross-check against the Gate 3 novelty report: if Gate 3 identified a distinguishing result (a new comparative static, a sign reversal, an additional assumption that changes the conclusion, or a new empirical implication), the theory passes H4 and is scored on its merits. If Gate 3 found no distinguishing result, INCREMENTAL is FAIL. |
 | H5 | **Economic {{MECHANISM_TERM}} is clear** | {{H5_CHECK}} |
 
+<!-- EMPIRICAL_FIRST_START -->
+**Empirical-first causal-design guard.** This deployment is for causal-identification empirical papers. If the theory draft's main contribution is primarily a measurement note, data-construction warning, standard-error correction, descriptive fact, or methods checklist rather than the causal estimand committed to in `output/stage1/identification_design.md`, treat H1/H5 as FAIL unless one of two exceptions is explicitly documented: (a) the operator asked for methods-note outputs, or (b) Stage 3a contains an external replication showing the methods issue changes a published conclusion. A useful debugging insight is not, by itself, the paper's contribution in empirical-first mode.
+
+<!-- EMPIRICAL_FIRST_END -->
 If ANY hard requirement fails → score is 0, decision is ABANDON or REVISE depending on what failed.
 
 - H3 fail → {{H3_FAIL_ROUTING}}
