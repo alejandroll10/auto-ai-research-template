@@ -5,6 +5,8 @@
 **Fires when:** (a) an empirical analysis (`output/stage3a/empirical_analysis.md`) or experimental result (`output/stage3b/`) **contradicts** at least one prediction in `output/stage3/implications.md`, OR (b) Stage 3 tagged at least one implication **PUZZLE-CANDIDATE** — gap-scout reports the literature shows a sign reversal or order-of-magnitude discrepancy vs. the prediction (the lit-check report is the contradiction evidence; fire before any formal empirics). If results confirm the theory or are silent on its predictions, **skip this stage** — proceed directly to Stage 4.
 
 This stage operationalizes the principle that surprises are discoveries: when a well-grounded theory predicts X and well-measured data shows not-X, the contradiction itself is often the most valuable contribution. The triager decides whether to pivot the paper around that puzzle, fix the empirics, restrict the theory's scope, abandon the idea, or ship an honest null.
+
+**Artifact guard.** A contradiction is not a puzzle-pivot opportunity if the best explanation is a data-construction, proxy, sample, merge-key, aggregation-key, standard-error, coding, or identification-design artifact. That is an empirical/debugging failure even when the artifact is interesting. Route to `FIX-EMPIRICS` if the artifact can be corrected and the original prediction retested; route to `BACK-TO-IDEA` before Stage 5 if the corrected design removes the paper's identifying variation; route to `HONEST-NULL` after Stage 5. Do not promote a methodological warning to the main paper unless the operator explicitly asked for methods-note outputs or an external replication shows the artifact changes published conclusions.
 <!-- EMPIRICAL_FIRST_START -->
 
 **Empirical-first mode note.** Several instructions below reference Gate 2 (math audit), Stage 2b (theory exploration), and `output/stage2/math_audit_v*.md` / `output/stage2/freeform_audit_v*.md` files. **All of these are no-ops under empirical-first mode** — Gate 2 and Stage 2b are permanently skipped (see `docs/stage_2.md`), and the math-audit files do not exist. When a RECONCILE or PIVOT verdict says "re-run Gate 2 + Stage 2b," skip those re-runs in empirical-first mode and re-fire only Gate 3 (novelty), Stage 3 (implications), and Stage 3a (empirical analysis re-fire per `docs/stage_3a_empirical.md` "Re-fire on theory revision"). The `stage2b_theory_version` resets remain harmless no-ops (the field stays `null`). When the triager's input list mentions "math audit results," substitute the most recent `referee-mechanism` report (Stage 6, if it exists) and the prior `output/stage4/self_attack_v*.md` — these are the analogous content-quality records under empirical-first.
@@ -20,8 +22,9 @@ Before launching the triager, verify the contradiction is real:
    - `output/stage3b/experiment_results.md` (if `--ext theory_llm`)
    Both may exist when both extensions are enabled — use all of them.
 3. For each tested implication: did the data contradict it (sign reversal, magnitude mismatch outside predicted range)?
-4. If no contradiction across any result source: **skip this stage**, proceed to Stage 4.
-5. If at least one tested implication was contradicted by at least one result source: launch the puzzle-triager.
+4. Check whether the contradiction is attributable to a data/proxy/sample/merge-key/aggregation-key/SE/coding/identification artifact. If yes, pass that diagnosis prominently to the triager and apply the artifact guard above; the default path is `FIX-EMPIRICS`, not `PIVOT`.
+5. If no contradiction across any result source: **skip this stage**, proceed to Stage 4.
+6. If at least one tested implication was contradicted by at least one result source: launch the puzzle-triager.
 
 ## Procedure
 
