@@ -14,15 +14,15 @@ This is a content-economy audit, not a style edit. The `style` agent (Stage 7) h
 
 2. **Hedge stacking.** Sentences that combine two or more hedges ("approximately roughly the order of...", "broadly consistent with what could be a..."). The hedge density compounds and the substantive claim disappears. Flag sentences with 2+ hedge tokens (approximately, roughly, largely, mostly, broadly, plausibly, arguably, perhaps, possibly, on the order of, in the neighborhood of, consistent with) and propose the strongest single-hedge rewrite.
 
-3. **Abstract bloat.** Flag the abstract if it (a) exceeds 100 words (hard cap; count words in the rendered abstract body, excluding `\begin{abstract}`/`\end{abstract}` tags), (b) contains linearization-error decimals or other referee-response numerics that belong in §3 not the abstract, (c) contains more than one caveat sentence, or (d) leads with a methodological qualifier ("we acknowledge...", "this is a parameterization choice...") rather than the contribution. An abstract over 100 words is automatically a `critical` finding regardless of other criteria. Do not prescribe a sentence-by-sentence structure — different papers carry their weight in different orders.
+3. **Abstract bloat.** Flag the abstract if it (a) exceeds 100 words, (b) contains linearization-error decimals or other referee-response numerics that belong in §3 not the abstract, (c) contains more than one caveat sentence, or (d) leads with a methodological qualifier ("we acknowledge...", "this is a parameterization choice...") rather than the contribution. Do not prescribe a sentence-by-sentence structure — different papers carry their weight in different orders. Word-counting rule: count whitespace-delimited tokens in the rendered abstract body, excluding `\begin{abstract}`/`\end{abstract}` tags; LaTeX commands (`\emph{...}`, `\citet{...}`, `\textit{...}`, etc.) count as one word each; inline math `$...$` counts as one word regardless of internal content; comments and labels are ignored. Severity for criterion (a) is `critical` regardless of how many other criteria fire (a >100-word abstract is the dispositive signal; it must come down). The other criteria (b/c/d) follow the standard rubric below.
 
-3a. **Undefined acronyms.** Scan the rendered paper for acronyms (tokens of 2+ uppercase letters, optionally with internal digits, e.g., `CRSP`, `CAPM`, `LLM`, `PE`, `DiD`, `IV`, `GMM`). For each acronym, locate its first occurrence and check that the immediately preceding text spells it out — either `full name (ACRONYM)` or `ACRONYM (full name)` — at first use in the abstract *and* again at first use in the main text. Flag every acronym that appears before being defined, listing the file, anchor, and the offending sentence verbatim. Standard math/stat tokens that are universally understood without expansion in the target journals (`OLS`, `i.i.d.`, `CDF`, `PDF`, `R^2`) are exempt; when in doubt, flag it. Each undefined acronym is a `major` finding; an undefined acronym in the title or abstract is `critical`.
+4. **Undefined acronyms.** Scan the rendered paper for acronyms (tokens of 2+ uppercase letters, optionally with internal digits, e.g., `CRSP`, `CAPM`, `SDF`, `VAR`, `LLM`, `PE`, `DiD`, `IV`, `GMM`). For each acronym, locate its first occurrence and check that the immediately preceding text spells it out — either `full name (ACRONYM)` or `ACRONYM (full name)` — at first use in the abstract *and* again at first use in the main text. Flag every acronym that appears before being defined, listing the file, anchor, and the offending sentence verbatim. Standard math/stat tokens that are universally understood without expansion in the target journals (`OLS`, `i.i.d.`, `CDF`, `PDF`, `R^2`) are exempt; causal-inference estimands (`LATE`, `ATE`, `ATT`, `ITT`) are *not* exempt — define them. When in doubt, flag it. Each undefined acronym is a `major` finding; an undefined acronym in the title or abstract is `critical`.
 
-4. **Section openers that re-summarize.** A section that begins by restating the previous section's conclusion (rather than stating its own claim) wastes the strongest position in the section. Flag openers whose first sentence paraphrases the previous section's last sentence.
+5. **Section openers that re-summarize.** A section that begins by restating the previous section's conclusion (rather than stating its own claim) wastes the strongest position in the section. Flag openers whose first sentence paraphrases the previous section's last sentence.
 
-5. **Defensive framing of the contribution.** The contribution paragraph in the introduction states what the paper *is*. If the contribution paragraph leads with what the paper *does not* claim, what it *acknowledges*, what it *grants*, or how it *differs from* a referee's anticipated objection, that's defensive framing.
+6. **Defensive framing of the contribution.** The contribution paragraph in the introduction states what the paper *is*. If the contribution paragraph leads with what the paper *does not* claim, what it *acknowledges*, what it *grants*, or how it *differs from* a referee's anticipated objection, that's defensive framing.
 
-6. **Buried thesis sentences.** A sentence of the form "this paper shows X" or "the result is Y" or "we provide a closed-form characterization of Y" that is more than two paragraphs into the introduction. The thesis should land on or near page 1.
+7. **Buried thesis sentences.** A sentence of the form "this paper shows X" or "the result is Y" or "we provide a closed-form characterization of Y" that is more than two paragraphs into the introduction. The thesis should land on or near page 1.
 
 ## What you do NOT do
 
@@ -46,7 +46,7 @@ Write `output/polish_prose_r{N}.md` where `{N}` is the current value of the `pol
 
 ### 1. <One-line title — e.g., "Caveat 'A4 is parameterization, not derivation' restated 5 times">
 **Severity:** critical
-**Pattern type:** [repeated caveat | hedge stacking | abstract bloat | defensive contribution | buried thesis]
+**Pattern type:** [repeated caveat | hedge stacking | abstract bloat | undefined acronym | defensive contribution | buried thesis | section-opener resummary]
 **Canonical home:** §1 intro contribution paragraph
 **Restatement anchors (each instance to drop or compress):**
 > Abstract, sentence 3: "A4 imposes ΔΠ = ρ·B·(1−µ) — a parameterization, not a primitive derivation"
@@ -73,8 +73,8 @@ Write `output/polish_prose_r{N}.md` where `{N}` is the current value of the `pol
 
 Severity rubric:
 
-- **critical** — a caveat restated 4+ times; an abstract that fails 2+ of the abstract-bloat criteria; a contribution paragraph led by defensive framing; a thesis sentence that does not appear by the end of page 2. These are visible to the first-pass reader and hurt the paper's perceived confidence.
-- **major** — a caveat restated 2–3 times beyond the canonical home; hedge stacking on a load-bearing claim; a section opener whose first sentence paraphrases the previous section's last sentence; an abstract that fails 1 bloat criterion.
+- **critical** — a caveat restated 4+ times; an abstract over 100 words (criterion a; alone suffices); an abstract that fails 2+ of criteria b/c/d; a contribution paragraph led by defensive framing; a thesis sentence that does not appear by the end of page 2; an undefined acronym in the title or abstract. These are visible to the first-pass reader and hurt the paper's perceived confidence.
+- **major** — a caveat restated 2–3 times beyond the canonical home; hedge stacking on a load-bearing claim; a section opener whose first sentence paraphrases the previous section's last sentence; an abstract that fails 1 of criteria b/c/d (word-count breach is `critical`, not `major`); an undefined acronym in the main text.
 - **minor** — single hedge stack in a non-load-bearing sentence; mild section-opener overlap; a single restatement of a caveat that is already in its canonical home.
 
 ## Triage discipline

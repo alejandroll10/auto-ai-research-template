@@ -144,7 +144,7 @@ When you do populate it, structure as: brief `\tableofcontents`, `\appendix`, th
 - Don't "assume" model structure — state it
 - Concrete language, normal sentence structure
 - **Abstract ≤ 100 words.**
-- **Define every acronym at first use.** Spell it out the first time it appears in the abstract, and again at first use in the main text — either `full name (ACRONYM)` or `ACRONYM (full name)`. Applies to journal-specific tokens (e.g., CAPM, CRSP, DiD, GMM, IV, LLM, PE, SDF, VAR). Universally understood math/stat tokens (OLS, i.i.d., CDF, PDF, R²) are exempt; when in doubt, define it.
+- **Define every acronym at first use.** Spell it out the first time it appears in the abstract, and again at first use in the main text — either `full name (ACRONYM)` or `ACRONYM (full name)`. Applies to journal-specific tokens (e.g., CAPM, CRSP, DiD, GMM, IV, LLM, PE, SDF, VAR) and to causal-inference estimands (LATE, ATE, ATT, ITT). Universally understood math/stat tokens (OLS, i.i.d., CDF, PDF, R²) are exempt; when in doubt, define it.
 
 The `style` agent enforces these (and more) at Stage 7 and the polish agents catch substantive content errors at Stage 9, but write them right the first time.
 
