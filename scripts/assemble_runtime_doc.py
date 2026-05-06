@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 from pathlib import Path
 
 
@@ -27,6 +28,10 @@ def main():
                         help="Path to pre-generated agent catalog markdown (manual mode)")
     parser.add_argument("--skill-catalog", default=None,
                         help="Path to pre-generated skill catalog markdown (manual mode)")
+    parser.add_argument("--session-out", default=None,
+                        help="If set, write the substituted session guidance to this path "
+                             "and replace {{RUNTIME_SESSION_GUIDANCE}} with a one-line pointer "
+                             "(reduces runtime doc size).")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
@@ -63,7 +68,22 @@ def main():
     content = content.replace("{{AGENT_CATALOG}}", agent_catalog)
     content = content.replace("{{SKILL_CATALOG}}", skill_catalog)
     runtime_session = runtime_session.replace("{{SKILL_DIR}}", args.skill_dir)
-    content = content.replace("{{RUNTIME_SESSION_GUIDANCE}}", runtime_session)
+    if args.session_out:
+        session_path = Path(args.session_out)
+        session_path.parent.mkdir(parents=True, exist_ok=True)
+        session_path.write_text(runtime_session + "\n")
+        # Relative path from the runtime doc to the session file (handles both
+        # in-project deploys and --local mode where output sits under OUT_DIR).
+        rel_path = os.path.relpath(session_path.resolve(),
+                                   Path(args.output).resolve().parent)
+        pointer = (
+            "## How to start a session\n\n"
+            f"Read `{rel_path}` and follow it. That file is the session-start "
+            "playbook for this runtime — data inventory, stall-guard loop, and resume rules."
+        )
+        content = content.replace("{{RUNTIME_SESSION_GUIDANCE}}", pointer)
+    else:
+        content = content.replace("{{RUNTIME_SESSION_GUIDANCE}}", runtime_session)
 
     Path(args.output).write_text(content)
 

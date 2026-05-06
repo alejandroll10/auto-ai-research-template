@@ -556,10 +556,14 @@ if [ "$LOCAL" = "1" ]; then
     CLAUDE_MD_OUT="$OUT_DIR/CLAUDE.md"
     AGENTS_MD_OUT="$OUT_DIR/AGENTS.md"
     GEMINI_MD_OUT="$OUT_DIR/GEMINI.md"
+    SESSION_OUT_DIR="$OUT_DIR/docs"
+    SESSION_OUT_REL_PREFIX="$OUT_DIR/docs"
 else
     CLAUDE_MD_OUT="CLAUDE.md"
     AGENTS_MD_OUT="AGENTS.md"
     GEMINI_MD_OUT="GEMINI.md"
+    SESSION_OUT_DIR="docs"
+    SESSION_OUT_REL_PREFIX="docs"
 fi
 
 SEED_ARGS=()
@@ -584,6 +588,7 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --doc-name "CLAUDE.md" \
     --agent-dir "$CLAUDE_AGENTS_REL" \
     --skill-dir "$CLAUDE_SKILLS_REL" \
+    --session-out "$SESSION_OUT_DIR/start_session_claude.md" \
     "${SEED_ARGS[@]}" \
     "${CATALOG_ARGS[@]}" \
     --output "$CLAUDE_MD_OUT"
@@ -605,6 +610,7 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --doc-name "AGENTS.md" \
     --agent-dir "$CODEX_AGENTS_REL" \
     --skill-dir "$CODEX_SKILLS_REL" \
+    --session-out "$SESSION_OUT_DIR/start_session_codex.md" \
     "${CODEX_DISCIPLINE_ARGS[@]}" \
     "${SEED_ARGS[@]}" \
     "${CODEX_CATALOG_ARGS[@]}" \
@@ -627,6 +633,7 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --doc-name "GEMINI.md" \
     --agent-dir "$GEMINI_AGENTS_REL" \
     --skill-dir "$GEMINI_DIR_REL/skills" \
+    --session-out "$SESSION_OUT_DIR/start_session_gemini.md" \
     "${GEMINI_DISCIPLINE_ARGS[@]}" \
     "${SEED_ARGS[@]}" \
     "${CATALOG_ARGS[@]}" \
@@ -1387,6 +1394,9 @@ candidate_files = [
     "CLAUDE.md",
     "AGENTS.md",
     "GEMINI.md",
+    "docs/start_session_claude.md",
+    "docs/start_session_codex.md",
+    "docs/start_session_gemini.md",
     ".claude/settings.json",
     ".gemini/settings.json",
     ".gitignore",
