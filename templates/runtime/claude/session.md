@@ -29,10 +29,10 @@ Subagents can hang indefinitely. Launch web-dependent agents (`literature-scout`
 
 ### Hourly self-check (stall guard + pace reminder)
 
-Right after the data inventory completes and before Stage 0 launches, set up an hourly self-loop using the Claude Code `/loop` skill. The loop is local; do not ask for confirmation.
+Right after the data inventory completes and before Stage 0 launches, set up an ~hourly self-loop using the Claude Code `/loop` skill. The loop is local; do not ask for confirmation. Use **`59m` exactly** — the `/loop` skill triggers a cloud-vs-local cloud-offer prompt at intervals ≥60m, and 59m sidesteps it. If the skill offers to round to 60m, decline; the slight cron unevenness is intentional.
 
 Invoke once at session start or if not set on a resume session:
 
 ```
-/loop 1h Stall check: has the latest history timestamp advanced since the previous check? Are any subagent output files empty or not growing? If a subagent is hung, kill it and re-launch with the same prompt, or escalate the relevant attempt counter per the stage doc. Pace reminder: this paper would normally take months of human work, and the quality of the final manuscript is what matters — not throughput. Honest scope, careful derivations, and slow iteration produce better papers than fast brittle drafts. Do not advance a gate to save time; advance only when the gate's criteria are met.
+/loop 59m Stall check: has the latest history timestamp advanced since the previous check? Are any subagent output files empty or not growing? If a subagent is hung, kill it and re-launch with the same prompt, or escalate the relevant attempt counter per the stage doc. Pace reminder: this paper would normally take months of human work, and the quality of the final manuscript is what matters — not throughput. Honest scope, careful derivations, and slow iteration produce better papers than fast brittle drafts. Do not advance a gate to save time; advance only when the gate's criteria are met.
 ```
