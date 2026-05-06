@@ -78,8 +78,7 @@ def main():
                                    Path(args.output).resolve().parent)
         pointer = (
             "## How to start a session\n\n"
-            f"Read `{rel_path}` and follow it. That file is the session-start "
-            "playbook for this runtime — data inventory, stall-guard loop, and resume rules."
+            f"Read `{rel_path}` and follow it."
         )
         content = content.replace("{{RUNTIME_SESSION_GUIDANCE}}", pointer)
     else:
