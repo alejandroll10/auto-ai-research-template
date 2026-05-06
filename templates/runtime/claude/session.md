@@ -29,7 +29,7 @@ Subagents can hang indefinitely. Launch web-dependent agents (`literature-scout`
 
 ### Hourly self-check (stall guard + pace reminder)
 
-Right after the data inventory completes and before Stage 0 launches, set up an hourly self-loop using the Claude Code `/loop` skill. 
+Right after the data inventory completes and before Stage 0 launches, set up an hourly self-loop using the Claude Code `/loop` skill. The loop is local; do not ask for confirmation.
 
 Invoke once at session start or if not set on a resume session:
 
