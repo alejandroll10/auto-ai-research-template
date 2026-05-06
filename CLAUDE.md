@@ -55,6 +55,12 @@ If a user asks to create/set up/start a new research project, run `setup.sh` for
 # Seeded idea + empirical
 ./setup.sh <project-name> --variant finance --seed --ext empirical
 
+# Faithful mode (stricter --seed: implement the seed as a contract)
+./setup.sh <project-name> --variant finance --faithful
+
+# Faithful + empirical
+./setup.sh <project-name> --variant finance --faithful --ext empirical
+
 # Manual mode (research toolkit — agents and skills only, no autonomous pipeline)
 ./setup.sh <project-name> --variant finance --manual
 
@@ -62,7 +68,9 @@ If a user asks to create/set up/start a new research project, run `setup.sh` for
 ./setup.sh <project-name> --variant finance --manual --ext empirical
 ```
 
-`--manual` is mutually exclusive with `--seed`. It assembles `core_manual.md` instead of `core.md`, auto-generates an agent/skill catalog from the metadata files, swaps in per-runtime `session_manual.md` files, and skips creating `process_log/pipeline_state.json`, the `output/stage*` subdirs, and `dashboard.html`. Pipeline-only agents (`scribe`, `triager`, `puzzle-triager`, `branch-manager`) are still assembled into `.claude/agents/` etc. but flagged `pipeline_only: true` in metadata so `scripts/generate_catalog.py` hides them from the user-facing catalog.
+`--manual` is mutually exclusive with `--seed` and `--faithful`. It assembles `core_manual.md` instead of `core.md`, auto-generates an agent/skill catalog from the metadata files, swaps in per-runtime `session_manual.md` files, and skips creating `process_log/pipeline_state.json`, the `output/stage*` subdirs, and `dashboard.html`. Pipeline-only agents (`scribe`, `triager`, `puzzle-triager`, `branch-manager`) are still assembled into `.claude/agents/` etc. but flagged `pipeline_only: true` in metadata so `scripts/generate_catalog.py` hides them from the user-facing catalog.
+
+`--faithful` is a stricter variant of `--seed` (the two are mutually exclusive; `--faithful` implies `--seed`'s folder structure). It treats the seed as a contract: at seed_triage the orchestrator extracts `output/seed/mechanism_contract.md` (the seed's named mechanism, structural invariants, theorem-statement constraints, identification strategy, stated contribution); developing agents must respect every invariant. Substitution / pivot / headline-replacement are forbidden; additions on top (extra theorems, comparative statics, robustness checks) are encouraged. Genuine impossibilities get documented in `output/seed/limitations.md` and the paper ships documenting them honestly. Evaluators (scorer, referees, math-auditor, novelty-checker, self-attacker, branch-manager, idea-prototyper, idea-reviewer, empirics-auditor, identification-auditor) stay impartial — corrupting the evaluation signal corrupts the paper. The faithful constraint enters at the orchestrator's routing of evaluator verdicts (per `templates/shared/faithful.md`) and via a static "read `mechanism_contract.md` first" pointer appended to each developing agent body. A `process_log/pivot_log.md` is seeded for auditing every potentially-mechanism-affecting routing decision.
 
 This creates a standalone project folder with assembled CLAUDE.md, AGENTS.md, GEMINI.md, agents for all runtimes, and skills. After setup, tell the user to:
 
@@ -98,7 +106,11 @@ templates/
 ├── shared/
 │   ├── core.md              # Runtime-agnostic pipeline orchestrator template
 │   ├── core_manual.md       # Slim manual-mode runtime doc (no pipeline, just catalogs)
-│   └── seed.md              # Seeded-idea override block (injected when --seed is used)
+│   ├── seed.md              # Seeded-idea override block (injected when --seed is used)
+│   ├── faithful.md          # Stricter seeded-mode block (injected when --faithful is used)
+│   ├── faithful_inject.md   # Short pointer appended to developing-agent bodies under --faithful
+│   ├── seed_overrides/      # Per-stage overrides for --seed (gate doc placeholders)
+│   └── faithful_overrides/  # Per-stage overrides for --faithful (supersedes seed_overrides)
 ├── runtime/
 │   ├── claude/
 │   │   ├── session.md           # Claude-specific session guidance (autonomous mode)
@@ -185,14 +197,17 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
    - Injects runtime-specific session guidance from `templates/runtime/{runtime}/session.md`
    - Substitutes per-variant scorer calibrations from `templates/agents/{variant}/vocab.json` into the scorer agent body
    - If `--seed`: injects `templates/shared/seed.md` as `{{SEED_OVERRIDE}}`
+   - If `--faithful`: injects `templates/shared/faithful.md` instead (supersedes seed.md at the same placeholder)
    - Replaces `{{PAPER_TYPE}}`, `{{TARGET_JOURNALS}}`, `{{DOMAIN_AREAS}}`, `{{RUNTIME_DOC_NAME}}`, `{{AGENT_DIR}}`, `{{SKILL_DIR}}`
 4. Assembles agents from metadata + prompt bodies:
    - Shared: `agent_metadata/claude_shared_agents.json` + `agent_bodies/shared/*.md`
    - Variant: `agent_metadata/claude_{variant}_agents.json` + `agents/{variant}/*.md`
    - Claude agents → `.claude/agents/*.md`, Codex → `.codex/agents/*.toml`, Gemini → `.gemini/agents/*.md`
 5. Injects variant context (paper type, journal list, domain) into key agents
+   - If `--faithful`: also appends `templates/shared/faithful_inject.md` (a short "read `output/seed/mechanism_contract.md` first" pointer) to *developing* agent bodies only — theory-generator, idea-generator, paper-writer, polish-* (all 7), bib-verifier, plus extension developers (empiricist, identification-designer under `--ext empirical`; experiment-designer under `--ext theory_llm`). Evaluators (scorer, referees, math-auditor, novelty-checker, self-attacker, branch-manager, idea-prototyper, idea-reviewer, empirics-auditor, identification-auditor, experiment-reviewer) explicitly do **not** receive the pointer — corrupting the evaluation signal corrupts the paper.
 6. Creates project structure (output/, paper/, code/, etc.) and initial pipeline state
-   - If `--seed`: creates `output/seed/` with a README, sets `pipeline_state.json` to start at `seed_triage` with `"seeded": true`
+   - If `--seed`: creates `output/seed/` with a README, sets `pipeline_state.json` to start at `seed_triage` with `"seeded": true, "faithful": false`
+   - If `--faithful`: creates `output/seed/` with a faithful-mode README, sets `pipeline_state.json` to start at `seed_triage` with `"seeded": true, "faithful": true`, and seeds `process_log/pivot_log.md` with a header + table skeleton for auditing routing decisions
 7. Installs core Python deps (sympy, matplotlib) via `uv pip install`
 8. Assembles core skills:
    - Claude skills into `.claude/skills/`

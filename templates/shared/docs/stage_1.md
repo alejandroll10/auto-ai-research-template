@@ -111,6 +111,9 @@ Purpose: late-bind the final idea selection. Instead of committing to idea-revie
    Keep the per-round indexed files under `round_{N}/` as well (do not delete them) — they are the audit trail for this Round's screening.
 5. **INCREMENTAL forwarding:** if the winner's novelty verdict is INCREMENTAL, extract the "escape the obvious version" instruction — *"This idea was flagged INCREMENTAL — the obvious version of this model already exists in the literature. Your job is to find a result within this framework that the existing papers do not imply: a sign reversal, an unexpected threshold, a case where the standard intuition breaks. Do not formalize the obvious version."* — and include it verbatim in the Stage 2 theory-generator prompt. Gate 3 will hard-fail INCREMENTAL on the full theory, so the theory must escape incrementality during development.
 6. **OBVIOUS forwarding:** if the winner's prototype verdict is TRACTABLE + OBVIOUS, instruct the theory-generator to find a non-obvious result within the model (unexpected comparative static, interaction effect, parameter regime where the sign flips). If the full theory also scores low on surprise at Gate 4, the idea will not advance.
+
+{{SEED_OVERRIDE_STAGE_1_OBVIOUS_FORWARD}}
+
 7. Update `pipeline_state.json`.
 <!-- THEORY_FIRST_START -->
 8. Commit: `pipeline: stage 1 complete — winner selected from {K} candidates`.

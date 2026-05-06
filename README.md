@@ -105,6 +105,9 @@ cd zeropaper
 # Seeded idea (creates output/seed/ — drop your files there before launching)
 ./setup.sh my-paper --seed
 
+# Faithful mode (stricter --seed: implement the seed as a contract)
+./setup.sh my-paper --faithful
+
 # Manual mode (research toolkit — no autonomous pipeline, you drive the agents)
 ./setup.sh my-toolkit --manual
 
@@ -202,11 +205,12 @@ If `identification-designer` returns `N/A — no causal claim` at Stage 1 (the q
 
 | Flag | What it does |
 |------|-------------|
-| `--seed` | Create a seeded-idea project. Creates `output/seed/` — drop your idea files there (markdown, PDFs, drafts, etc.) before launching. Pipeline triages seed maturity and enters at the appropriate stage. Never silently abandons the seeded idea. |
-| `--manual` | Set up the same agents and skills as a research toolkit — no autonomous pipeline. The runtime doc lists every agent and skill with a one-line description; you invoke them yourself. Useful when you want the math-auditor, novelty-checker, theory-explorer, paper-writer, polish-* agents, etc. as standalone helpers without committing to the end-to-end loop. Mutually exclusive with `--seed`. **Paths are fixed**: agents read from `paper/main.tex`, `paper/sections/*.tex`, `output/`, `references/`. **Bringing your own paper:** (1) existing paper as its own git repo → drop the whole repo into `paper/` and add a bare `paper/` line to `.gitignore` so the outer git ignores the nested repo entirely (the existing `paper/*.aux`/`paper/*.pdf`/etc. lines become harmless once `paper/` is excluded); (2) flat `.tex` files → drop them into `paper/sections/` + `paper/main.tex`, the default `.gitignore` handles them; (3) no paper yet → launch `paper-writer` to create one from scratch. |
+| `--seed` | Create a seeded-idea project. Creates `output/seed/` — drop your idea files there (markdown, PDFs, drafts, etc.) before launching. Pipeline triages seed maturity and enters at the appropriate stage. Never silently abandons the seeded idea, but **may** pivot under puzzle-triage / refine framing under scorer recommendations. |
+| `--faithful` | Stricter variant of `--seed`. Treats the seed as a **contract**. At seed_triage the orchestrator extracts `output/seed/mechanism_contract.md` (the seed's named mechanism, structural invariants, theorem-statement constraints, identification strategy, stated contribution); developing agents must respect every invariant. Substitution / pivot / headline-replacement are forbidden — additions on top of the contract (extra theorems, comparative statics, robustness checks) are allowed and encouraged. Genuine impossibilities (proof unrepairable, identification infeasible, prediction contradicted by data) get documented in `output/seed/limitations.md` and the paper ships documenting them honestly. Evaluators (scorers, referees, auditors) stay impartial — the constraint enters only at the orchestrator's routing of their verdicts. Use when you want the seed implemented as written. Mutually exclusive with `--manual`. |
+| `--manual` | Set up the same agents and skills as a research toolkit — no autonomous pipeline. The runtime doc lists every agent and skill with a one-line description; you invoke them yourself. Useful when you want the math-auditor, novelty-checker, theory-explorer, paper-writer, polish-* agents, etc. as standalone helpers without committing to the end-to-end loop. Mutually exclusive with `--seed` and `--faithful`. **Paths are fixed**: agents read from `paper/main.tex`, `paper/sections/*.tex`, `output/`, `references/`. **Bringing your own paper:** (1) existing paper as its own git repo → drop the whole repo into `paper/` and add a bare `paper/` line to `.gitignore` so the outer git ignores the nested repo entirely (the existing `paper/*.aux`/`paper/*.pdf`/etc. lines become harmless once `paper/` is excluded); (2) flat `.tex` files → drop them into `paper/sections/` + `paper/main.tex`, the default `.gitignore` handles them; (3) no paper yet → launch `paper-writer` to create one from scratch. |
 | `--light` | Use sonnet for all subagents (cheaper/faster). The orchestrator model is unchanged. Good for drafts or iteration. |
 
-These flags combine freely with `--variant` and `--ext` (except `--manual` and `--seed`).
+These flags combine freely with `--variant` and `--ext` (except `--manual` and `--seed`/`--faithful`, which are mutually exclusive).
 
 ## Pipeline stages
 

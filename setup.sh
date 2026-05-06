@@ -1,7 +1,7 @@
 #!/bin/bash
 # Auto AI Research Template — Setup & Launch
 # Usage: ./setup.sh [project-name] [--variant finance|macro] [--mode empirical-first]
-#                  [--ext empirical|theory_llm] [--seed|--manual] [--light] [--local]
+#                  [--ext empirical|theory_llm] [--seed|--faithful|--manual] [--light] [--local]
 #
 # --local   Skip git clone, use templates from this repo directly.
 #           Outputs to test_output/{variant}/ for inspection.
@@ -15,9 +15,17 @@
 #                                tooling there.
 # --seed    Create a seeded-idea project. Creates output/seed/ with instructions.
 #           Drop your idea files there before launching. Pipeline starts at seed_triage.
+#           Soft semantics: the pipeline preserves the seed's mechanism but may
+#           pivot under puzzle-triage / refine framing under scorer recommendations.
+# --faithful  Stricter variant of --seed. The seed is treated as a contract; the
+#           pipeline implements the seed's named mechanism faithfully and
+#           documents impossibilities rather than substituting alternatives. Use
+#           when you want the seed executed as written, with additions on top
+#           allowed but no replacement of the seed's mechanism / headline /
+#           identification strategy. Mutually exclusive with --seed and --manual.
 # --manual  Manual mode: assemble agents/skills as a research toolkit, no autonomous
 #           pipeline. The runtime doc lists what's available and lets you drive.
-#           Mutually exclusive with --seed.
+#           Mutually exclusive with --seed and --faithful.
 # --light   Use sonnet for all subagents (cheaper/faster). Orchestrator model unchanged.
 #
 # Legacy: --variant finance_llm is shorthand for --variant finance --ext theory_llm
@@ -33,6 +41,7 @@ NEXT_IS_VARIANT=0
 NEXT_IS_EXT=0
 NEXT_IS_MODE=0
 SEEDED=0
+FAITHFUL=0
 MANUAL=0
 LIGHT=0
 EXTENSIONS=()
@@ -43,6 +52,7 @@ for arg in "$@"; do
         --ext)         NEXT_IS_EXT=1 ;;
         --mode)        NEXT_IS_MODE=1 ;;
         --seed)        SEEDED=1 ;;
+        --faithful)    FAITHFUL=1; SEEDED=1 ;;  # faithful implies seeded folder structure
         --manual)      MANUAL=1 ;;
         --light)       LIGHT=1 ;;
         --local)       LOCAL=1 ;;
@@ -79,10 +89,16 @@ if [ "$NEXT_IS_MODE" = "1" ]; then
 fi
 
 if [ "$MANUAL" = "1" ] && [ "$SEEDED" = "1" ]; then
-    echo "Error: --manual and --seed are mutually exclusive"
-    echo "  --manual disables the autonomous pipeline; --seed configures the pipeline to consume a user-supplied idea."
+    echo "Error: --manual is mutually exclusive with --seed and --faithful"
+    echo "  --manual disables the autonomous pipeline; --seed/--faithful configure the pipeline to consume a user-supplied idea."
     exit 1
 fi
+
+# --faithful set both FAITHFUL and SEEDED above. If the user explicitly passed
+# --seed in the same invocation, the modes have collapsed to faithful (which
+# subsumes --seed's folder structure) — that is fine. The error case is one
+# we cannot detect after the case statement: passing both flags is silently
+# treated as --faithful. Document that in --help if the script grows one.
 
 # ── Expand legacy finance_llm variant ──
 if [ "$VARIANT" = "finance_llm" ]; then
@@ -565,7 +581,14 @@ else
 fi
 
 SEED_ARGS=()
-if [ "$SEEDED" = "1" ]; then
+if [ "$FAITHFUL" = "1" ]; then
+    SEED_TEMPLATE="$TEMPLATE_ROOT/templates/shared/faithful.md"
+    if [ ! -f "$SEED_TEMPLATE" ]; then
+        echo "Error: faithful template not found: $SEED_TEMPLATE"
+        exit 1
+    fi
+    SEED_ARGS=(--seed-block "$SEED_TEMPLATE")
+elif [ "$SEEDED" = "1" ]; then
     SEED_TEMPLATE="$TEMPLATE_ROOT/templates/shared/seed.md"
     if [ ! -f "$SEED_TEMPLATE" ]; then
         echo "Error: seed template not found: $SEED_TEMPLATE"
@@ -699,6 +722,62 @@ for agent in literature-scout gap-scout novelty-checker theory-explorer referee 
 done
 echo "  ✓ Variant context injected into agents"
 
+# ── Faithful-mode contract pointer for developing agents (--faithful only) ──
+# Faithful mode adds a short pointer to *developing* agents — those that
+# produce paper content — directing them to read `output/seed/mechanism_contract.md`
+# before producing output. *Evaluators* (scorer, referees, auditors, novelty-checker,
+# self-attacker, idea-{prototyper,reviewer}, branch-manager) stay impartial: quoting
+# the contract into them would corrupt the evaluation signal. The faithful constraint
+# enters at the orchestrator's routing of evaluator verdicts (see faithful.md),
+# not at the evaluators themselves.
+#
+# `inject_faithful_into_agents` is called once after core agent assembly and once
+# inside each extension block (after the extension finishes assembling its own
+# agents) so extension developing agents (empiricist, identification-designer,
+# experiment-designer, etc.) also get the pointer. A no-op when FAITHFUL=0.
+inject_faithful_into_agents() {
+    [ "$FAITHFUL" = "1" ] || return 0
+    local _inject_file="$TEMPLATE_ROOT/templates/shared/faithful_inject.md"
+    if [ ! -f "$_inject_file" ]; then
+        echo "Error: faithful inject template not found: $_inject_file" >&2
+        exit 1
+    fi
+    local _block
+    _block=$(cat "$_inject_file")
+    local _agent
+    for _agent in "$@"; do
+        if [ -f "$AGENTS_OUT/$_agent.md" ]; then
+            printf '\n%s\n' "$_block" >> "$AGENTS_OUT/$_agent.md"
+        fi
+        if [ -f "$CODEX_AGENTS_OUT/$_agent.toml" ]; then
+            awk -v block="$_block" '
+            { lines[NR] = $0 }
+            /^'\'''\'''\''$/ { last = NR }
+            END {
+                for (i = 1; i <= NR; i++) {
+                    if (i == last) print block
+                    print lines[i]
+                }
+            }' "$CODEX_AGENTS_OUT/$_agent.toml" > "$CODEX_AGENTS_OUT/$_agent.toml.tmp" \
+            && mv "$CODEX_AGENTS_OUT/$_agent.toml.tmp" "$CODEX_AGENTS_OUT/$_agent.toml"
+        fi
+        if [ -f "$GEMINI_AGENTS_OUT/$_agent.md" ]; then
+            printf '\n%s\n' "$_block" >> "$GEMINI_AGENTS_OUT/$_agent.md"
+        fi
+    done
+}
+
+# Core developing agents (added directly by templates/agent_metadata/claude_shared_agents.json
+# and templates/agent_metadata/claude_{variant}_agents.json):
+inject_faithful_into_agents \
+    theory-generator idea-generator paper-writer \
+    polish-prose polish-consistency polish-equilibria polish-formula \
+    polish-numerics polish-institutions polish-bibliography polish-identification \
+    bib-verifier
+if [ "$FAITHFUL" = "1" ]; then
+    echo "  ✓ Faithful pointer injected into core developing agents"
+fi
+
 # ── Create project directories and initial files ──
 echo "Creating project structure..."
 
@@ -775,31 +854,76 @@ fi
 # Function to substitute {{SEED_OVERRIDE_*}} placeholders in all docs in $P/docs/.
 # Called after shared docs copy AND after each extension copies its own docs, so
 # extension-specific stage docs (e.g., stage_3a_empirical.md) also get substituted.
+#
+# Resolution order for each placeholder:
+#   1. Collect placeholder keys: union of seed_overrides/*.md and (if FAITHFUL=1)
+#      faithful_overrides/*.md basenames.
+#   2. For each key, pick the override body:
+#      - FAITHFUL=1: prefer faithful_overrides/<key>.md, fall back to
+#        seed_overrides/<key>.md if no faithful version exists. This lets us
+#        write only the *strict-delta* faithful overrides — for placeholders
+#        where seeded behavior is already strict enough, faithful mode reuses
+#        the seeded text.
+#      - SEEDED=1 (and not FAITHFUL): use seed_overrides/<key>.md only.
+#      - Neither: strip the placeholder.
 apply_seed_overrides() {
-    local override_dir="$TEMPLATE_ROOT/templates/shared/seed_overrides"
-    [ -d "$override_dir" ] || return 0
-    for _override in "$override_dir"/*.md; do
-        [ -f "$_override" ] || continue
-        local _key
-        _key=$(basename "$_override" .md)
+    local seed_override_dir="$TEMPLATE_ROOT/templates/shared/seed_overrides"
+    local faithful_override_dir="$TEMPLATE_ROOT/templates/shared/faithful_overrides"
+
+    # Build the union of placeholder keys across both dirs.
+    local _keys=()
+    if [ -d "$seed_override_dir" ]; then
+        for _f in "$seed_override_dir"/*.md; do
+            [ -f "$_f" ] && _keys+=("$(basename "$_f" .md)")
+        done
+    fi
+    # Always include faithful_overrides keys in the union — even when FAITHFUL=0.
+    # This ensures placeholders that exist only in the faithful set (e.g., the
+    # new Stage 1 OBVIOUS-forwarding override) get stripped cleanly in regular
+    # and soft-seed modes rather than leaking into the deployed docs as raw
+    # `{{SEED_OVERRIDE_*}}` text. The body-resolution step below still picks
+    # the faithful body only when FAITHFUL=1.
+    if [ -d "$faithful_override_dir" ]; then
+        for _f in "$faithful_override_dir"/*.md; do
+            [ -f "$_f" ] || continue
+            local _k="$(basename "$_f" .md)"
+            # Only add if not already in _keys (dedupe).
+            local _found=0
+            for _existing in "${_keys[@]:-}"; do
+                [ "$_existing" = "$_k" ] && { _found=1; break; }
+            done
+            [ "$_found" = "0" ] && _keys+=("$_k")
+        done
+    fi
+
+    [ "${#_keys[@]}" -eq 0 ] && return 0
+
+    for _key in "${_keys[@]}"; do
+        # Pick the override body for this key per the resolution order above.
+        local _override=""
+        if [ "$FAITHFUL" = "1" ] && [ -f "$faithful_override_dir/$_key.md" ]; then
+            _override="$faithful_override_dir/$_key.md"
+        elif [ "$SEEDED" = "1" ] && [ -f "$seed_override_dir/$_key.md" ]; then
+            _override="$seed_override_dir/$_key.md"
+        fi
+
         for _docfile in "$P/docs/"*.md; do
-            if grep -q "{{$_key}}" "$_docfile"; then
-                if [ "$SEEDED" = "1" ]; then
-                    python3 -c "
+            grep -q "{{$_key}}" "$_docfile" || continue
+            if [ -n "$_override" ]; then
+                python3 -c "
 import sys, pathlib
 doc = pathlib.Path(sys.argv[1])
 override = pathlib.Path(sys.argv[2]).read_text().rstrip()
 doc.write_text(doc.read_text().replace('{{' + sys.argv[3] + '}}', override))
 " "$_docfile" "$_override" "$_key"
-                else
-                    # Strip placeholder and any immediately surrounding blank lines
-                    python3 -c "
+            else
+                # Strip placeholder and any immediately surrounding blank lines.
+                python3 -c "
 import sys, re, pathlib
 p = pathlib.Path(sys.argv[1])
 key = sys.argv[2]
 p.write_text(re.sub(r'\n*\{\{' + re.escape(key) + r'\}\}\n*', '\n\n', p.read_text()))
 " "$_docfile" "$_key"
-                fi
             fi
         done
     done
@@ -810,6 +934,43 @@ apply_seed_overrides
 # Create seed folder with instructions if --seed
 if [ "$SEEDED" = "1" ]; then
     mkdir -p "$P/output/seed"
+    if [ "$FAITHFUL" = "1" ]; then
+    cat > "$P/output/seed/README.md" <<'SEEDREADME'
+# Seed folder (faithful mode)
+
+Drop your idea files here before launching the pipeline. The pipeline will read
+everything in this folder as the seeded idea.
+
+You can put anything here: markdown notes, PDFs, paper drafts, evaluation
+reports, emails, code snippets — whatever describes the idea you want the
+pipeline to develop.
+
+This is a **faithful** run: the seed is treated as a contract. Before any other
+agent fires, the orchestrator extracts `output/seed/mechanism_contract.md` from
+your files — its named mechanism, structural invariants, theorem-statement
+constraints, identification strategy, and stated contribution. That contract is
+then quoted into every developing agent's launch prompt as a non-negotiable.
+
+What the pipeline will do:
+- Implement your seed faithfully — its named mechanism, headline result, and
+  identification strategy stay intact.
+- Add to / refine / extend the implementation where it can — extra theorems,
+  comparative statics, robustness checks.
+- Document any genuine impossibility (proof unrepairable, identification
+  infeasible, prediction contradicted by data) in `output/seed/limitations.md`
+  and ship the paper documenting the impossibility honestly.
+
+What the pipeline will **not** do:
+- Substitute a different mechanism, model class, or research design.
+- Pivot to a more publishable framing.
+- Promote a "buried" result over your stated headline.
+
+If you wanted softer behavior — pipeline preserves the seed but may pivot under
+puzzle-triage / refine framing under scorer recommendations — re-run setup with
+`--seed` instead of `--faithful`.
+SEEDREADME
+        echo "  ✓ Seed folder created at output/seed/ (faithful mode) — drop your idea files there before launching"
+    else
     cat > "$P/output/seed/README.md" <<'SEEDREADME'
 # Seed folder
 
@@ -824,14 +985,15 @@ The pipeline reads your files, builds a literature map, assesses maturity, and
 enters at the appropriate stage. It will never silently abandon your seeded idea.
 If a gate fails, it reports the issue rather than pivoting.
 SEEDREADME
-    echo "  ✓ Seed folder created at output/seed/ — drop your idea files there before launching"
+        echo "  ✓ Seed folder created at output/seed/ — drop your idea files there before launching"
+    fi
 fi
 
 # Initial pipeline state (skipped in manual mode — no autonomous pipeline)
 if [ "$MANUAL" = "1" ]; then
     : # no pipeline state
 elif [ "$SEEDED" = "1" ]; then
-cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
+cat > "$P/process_log/pipeline_state.json" <<JSONEOF
 {
   "current_stage": "seed_triage",
   "problem_attempt": 1,
@@ -851,6 +1013,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "target_journal_tier": "__INITIAL_TIER__",
   "status": "not_started",
   "seeded": true,
+  "faithful": $([ "$FAITHFUL" = "1" ] && echo true || echo false),
   "scores": {},
   "stage2b_theory_version": null,
   "stage1_candidates": [],
@@ -878,6 +1041,7 @@ cat > "$P/process_log/pipeline_state.json" <<'JSONEOF'
   "triaged_lit_implications": [],
   "target_journal_tier": "__INITIAL_TIER__",
   "seeded": false,
+  "faithful": false,
   "status": "not_started",
   "scores": {},
   "stage2b_theory_version": null,
@@ -890,6 +1054,23 @@ fi
 
 if [ "$MANUAL" = "0" ]; then
     touch "$P/process_log/history.md"
+fi
+
+# Faithful mode: seed pivot_log.md with a header + table skeleton so the
+# orchestrator has a target to append to. Each routing decision that could
+# affect the mechanism contract appends a row per faithful.md's instructions.
+if [ "$FAITHFUL" = "1" ]; then
+    cat > "$P/process_log/pivot_log.md" <<'PIVOTLOG'
+# Pivot log (faithful mode)
+
+Every potentially-mechanism-affecting routing decision is logged here. See
+`CLAUDE.md` (the assembled `faithful.md` block) for the routing rules. Each row
+records what an evaluator agent reported, how the orchestrator classified it
+under the faithful contract, and why.
+
+| timestamp | stage | agent | verdict | classification | rationale |
+|-----------|-------|-------|---------|----------------|-----------|
+PIVOTLOG
 fi
 
 echo "  ✓ Project structure created"
@@ -1103,6 +1284,10 @@ if os.path.exists(state_path):
             f.write("\n")
 PYEOF
 
+            # Theory_LLM extension developing agents.
+            # experiment-designer produces designs; experiment-reviewer evaluates.
+            inject_faithful_into_agents experiment-designer
+
             echo "  ✓ LLM experiment extension applied"
             ;;
         empirical)
@@ -1231,6 +1416,11 @@ if os.path.exists(state_path):
         json.dump(data, f, indent=2)
         f.write("\n")
 PYEOF
+
+            # Empirical extension developing agents.
+            # empiricist runs analyses; identification-designer designs the strategy.
+            # empirics-auditor and identification-auditor are evaluators — excluded.
+            inject_faithful_into_agents empiricist identification-designer
 
             echo "  ✓ Empirical extension applied (skills + agents)"
             ;;
@@ -1603,7 +1793,11 @@ echo "Extensions: ${EXTENSIONS[*]:-none}"
 if [ "$LIGHT" = "1" ]; then
     echo "Mode: light (all subagents use sonnet)"
 fi
-if [ "$SEEDED" = "1" ]; then
+if [ "$FAITHFUL" = "1" ]; then
+    echo "Mode: faithful (the seed is a contract; the pipeline implements it as written)"
+    echo "Drop your idea files in output/seed/ before launching"
+    echo "Pipeline will extract a mechanism contract first, then triage entry-stage"
+elif [ "$SEEDED" = "1" ]; then
     echo "Seeded: drop your idea files in output/seed/ before launching"
     echo "Pipeline will triage seed maturity and enter at the appropriate stage"
 fi
