@@ -2,6 +2,7 @@
   "empiricist": {
     "name": "empiricist",
     "description": "Confronts theory with data. The orchestrator launches this agent at Stage 3a after implications are developed. Reads the theory, decides what empirical work is needed (calibration, tests, descriptive stats, portfolio sorts), fetches real data via skills, and executes it.",
+    "category": "developing",
     "tools": "Bash, Read, Write",
     "skills": "fred, ken-french, chen-zimmerman, wrds, edgar, flex-mining, mutual-funds",
     "model": "opus",
@@ -16,7 +17,8 @@
   },
   "identification-designer": {
     "name": "identification-designer",
-    "description": "Proposes a ranked menu of identification strategies for an empirical finance plan. Launched at Stage 3a before the empiricist writes the plan (or after, as a revision input). Reads the theory, implications, and data inventory; produces output/stage3a/identification_menu.md with ≥3 ranked strategies (when feasible), each with assumptions, diagnostics, estimand, theory-match, anticipated auditor concerns, and software references. Looks up published precedent design papers via OpenAlex / web search. Does not run code or estimate anything. Returns OUT-OF-SCOPE for macro-style designs (SVAR, sign restrictions, narrative shocks, calibrated DSGE-as-identification — see issue #18) and N/A for plans with no causal claim.",
+    "description": "Proposes a ranked menu of identification strategies for an empirical finance plan. Launched at Stage 3a before the empiricist writes the plan (or after, as a revision input). Reads the theory, implications, and data inventory; produces output/stage3a/identification_menu.md with \u22653 ranked strategies (when feasible), each with assumptions, diagnostics, estimand, theory-match, anticipated auditor concerns, and software references. Looks up published precedent design papers via OpenAlex / web search. Does not run code or estimate anything. Returns OUT-OF-SCOPE for macro-style designs (SVAR, sign restrictions, narrative shocks, calibrated DSGE-as-identification \u2014 see issue #18) and N/A for plans with no causal claim.",
+    "category": "developing",
     "tools": "Read, Write, WebSearch, WebFetch",
     "skills": [
       "openalex"
@@ -34,6 +36,7 @@
   "identification-auditor": {
     "name": "identification-auditor",
     "description": "Adversarial audit of the identification strategy in an empirical finance plan. Launched at Stage 3a after the empiricist writes empirical_plan.md and before execution. Returns PASS / REVISE / FAIL with severity-ranked named failure modes (e.g., TWFE-staggered-no-robust-estimator, weak-iv-stockyogo-misuse, no-rd-manipulation-test). Does not audit code or data construction (empirics-auditor handles that). Checks estimand-vs-theory match. Returns OUT-OF-SCOPE for macro-style designs.",
+    "category": "evaluator",
     "tools": "Read, Write",
     "model": "opus",
     "effort": "high",

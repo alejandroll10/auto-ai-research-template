@@ -2,6 +2,7 @@
   "empirics-auditor": {
     "name": "empirics-auditor",
     "description": "Adversarial empirical verification agent. The orchestrator launches this agent after the empiricist completes Stage 3a. Reviews empirical analysis and code for correctness. Must pass before advancing.",
+    "category": "evaluator",
     "tools": "Bash, Read, Write, Glob, Grep",
     "model": "opus",
     "codex": {

@@ -1,7 +1,8 @@
 {
   "idea-generator": {
     "name": "idea-generator",
-    "description": "Brainstorms candidate mechanisms and model ideas for a given problem. The orchestrator launches this agent at Stage 1 of the pipeline. Produces developed sketches — not full theories, but enough to evaluate.",
+    "description": "Brainstorms candidate mechanisms and model ideas for a given problem. The orchestrator launches this agent at Stage 1 of the pipeline. Produces developed sketches \u2014 not full theories, but enough to evaluate.",
+    "category": "developing",
     "tools": "Read, Write",
     "model": "sonnet",
     "effort": "high",
@@ -16,6 +17,7 @@
   "idea-reviewer": {
     "name": "idea-reviewer",
     "description": "Evaluates and ranks candidate idea sketches. The orchestrator launches this agent at Stage 1 to iterate with the idea-generator. Decides when an idea is ready for full theory development.",
+    "category": "evaluator",
     "tools": "Read, Write, WebSearch, WebFetch",
     "model": "opus",
     "effort": "high",
@@ -30,6 +32,7 @@
   "referee": {
     "name": "referee",
     "description": "Simulated top-journal referee. The orchestrator launches this agent at Stage 6 of the pipeline. Always runs fresh with no knowledge of previous reports or changes.",
+    "category": "evaluator",
     "tools": "Read, Glob, Grep, Write, Bash",
     "skills": [
       "sympy"
@@ -47,6 +50,7 @@
   "scorer": {
     "name": "scorer",
     "description": "Adversarial theory scorer. The orchestrator launches this agent at Gate 4. Aggregates all evaluation outputs and makes the advance/revise/abandon decision.",
+    "category": "evaluator",
     "tools": "Read, Write",
     "model": "opus",
     "effort": "high",
@@ -61,6 +65,7 @@
   "self-attacker": {
     "name": "self-attacker",
     "description": "Adversarial weakness finder. The orchestrator launches this agent at Stage 4 after novelty check passes. Finds every possible weakness before the referee does.",
+    "category": "evaluator",
     "tools": "Read, Write, Bash",
     "skills": [
       "sympy",
@@ -79,6 +84,7 @@
   "theory-generator": {
     "name": "theory-generator",
     "description": "{{THEORY_GEN_DESCRIPTION}}",
+    "category": "developing",
     "tools": "Read, Write, Bash",
     "skills": [
       "sympy",
