@@ -29,9 +29,17 @@ ORCHESTRATOR_REPLACEMENTS = [
 
 VOCAB_KEY_PATTERN = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 
-# Split on period+space-before-capital. Avoids splitting on "e.g.", "i.e.",
-# "vs.", abbreviations followed by lowercase, etc.
-SENTENCE_SPLIT = re.compile(r"(?<=[a-z\)])\. (?=[A-Z])")
+# Split on period+space-before-capital. Negative lookbehinds block common
+# abbreviations that would otherwise mid-sentence-truncate. Each lookbehind
+# is fixed-width (Python re constraint).
+SENTENCE_SPLIT = re.compile(
+    r"(?<![Vv]s)"      # vs.
+    r"(?<![Cc]f)"      # cf.
+    r"(?<!etc)"        # etc.
+    r"(?<![ei]\.g)"    # e.g.
+    r"(?<![ei]\.e)"    # i.e.
+    r"(?<=[a-z\)])\. (?=[A-Z])"
+)
 DESC_CHAR_CAP = 120
 
 
