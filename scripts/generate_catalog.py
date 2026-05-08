@@ -29,6 +29,11 @@ ORCHESTRATOR_REPLACEMENTS = [
 
 VOCAB_KEY_PATTERN = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 
+# Split on period+space-before-capital. Avoids splitting on "e.g.", "i.e.",
+# "vs.", abbreviations followed by lowercase, etc.
+SENTENCE_SPLIT = re.compile(r"(?<=[a-z\)])\. (?=[A-Z])")
+DESC_CHAR_CAP = 120
+
 
 def apply_vocab(desc: str, vocab) -> str:
     if not vocab:
@@ -39,13 +44,23 @@ def apply_vocab(desc: str, vocab) -> str:
     return VOCAB_KEY_PATTERN.sub(replace, desc)
 
 
+def shorten(desc: str) -> str:
+    """First sentence, soft-capped. Ellipsis when truncated so users know to
+    read the agent file in {{AGENT_DIR}}/<name>.md for the full firing rules."""
+    first = SENTENCE_SPLIT.split(desc, maxsplit=1)[0].rstrip(". ")
+    if len(first) > DESC_CHAR_CAP:
+        cut = first[:DESC_CHAR_CAP].rsplit(" ", 1)[0]
+        return cut + "…"
+    return first + "."
+
+
 def clean_description(desc: str, vocab=None) -> str:
     desc = apply_vocab(desc, vocab)
     for old, new in ORCHESTRATOR_REPLACEMENTS:
         desc = desc.replace(old, new)
     desc = desc.replace("{{DOMAIN}}", "")
     desc = re.sub(r"\s+", " ", desc).strip()
-    return desc
+    return shorten(desc)
 
 
 def load_items(metadata_paths):

@@ -16,7 +16,7 @@ These shape the variant-specific agents (`idea-generator`, `theory-generator`, `
 
 ## Agents
 
-Subagents live in `{{AGENT_DIR}}/`. Invoke by name — see your runtime's docs for the exact mechanism.
+Subagents live in `{{AGENT_DIR}}/`. Invoke by name — see your runtime's docs for the exact mechanism. The summaries below are one-liners; read the agent file in `{{AGENT_DIR}}/<name>.md` for full firing rules and rationale.
 
 {{AGENT_CATALOG}}
 
