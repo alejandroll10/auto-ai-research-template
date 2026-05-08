@@ -767,13 +767,13 @@ inject_faithful_into_agents() {
     done
 }
 
-# Core developing agents (added directly by templates/agent_metadata/claude_shared_agents.json
-# and templates/agent_metadata/claude_{variant}_agents.json):
-inject_faithful_into_agents \
-    theory-generator idea-generator paper-writer \
-    polish-prose polish-consistency polish-equilibria polish-formula \
-    polish-numerics polish-institutions polish-bibliography polish-identification \
-    bib-verifier
+# Core developing agents — list comes from metadata `category: "developing"`,
+# the single source of truth (see scripts/list_agents_by_category.py).
+mapfile -t _core_developing_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
+    --category developing \
+    --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_shared_agents.json" \
+    --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_variant_agents.json")
+inject_faithful_into_agents "${_core_developing_agents[@]}"
 if [ "$FAITHFUL" = "1" ]; then
     echo "  ✓ Faithful pointer injected into core developing agents"
 fi
@@ -1284,9 +1284,11 @@ if os.path.exists(state_path):
             f.write("\n")
 PYEOF
 
-            # Theory_LLM extension developing agents.
-            # experiment-designer produces designs; experiment-reviewer evaluates.
-            inject_faithful_into_agents experiment-designer
+            # Theory_LLM extension developing agents — from metadata.
+            mapfile -t _tllm_developing_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
+                --category developing \
+                --metadata "$TEMPLATE_ROOT/extensions/theory_llm/agent_metadata/agents.json")
+            inject_faithful_into_agents "${_tllm_developing_agents[@]}"
 
             echo "  ✓ LLM experiment extension applied"
             ;;
@@ -1417,10 +1419,14 @@ if os.path.exists(state_path):
         f.write("\n")
 PYEOF
 
-            # Empirical extension developing agents.
-            # empiricist runs analyses; identification-designer designs the strategy.
-            # empirics-auditor and identification-auditor are evaluators — excluded.
-            inject_faithful_into_agents empiricist identification-designer
+            # Empirical extension developing agents — from metadata.
+            # Variant-aware via $AGENT_DIR (finance metadata adds identification-designer;
+            # macro currently has empiricist only). The metadata is the source of truth.
+            mapfile -t _empirical_developing_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
+                --category developing \
+                --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/shared_agents.json" \
+                --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/${AGENT_DIR}_agents.json")
+            inject_faithful_into_agents "${_empirical_developing_agents[@]}"
 
             echo "  ✓ Empirical extension applied (skills + agents)"
             ;;
