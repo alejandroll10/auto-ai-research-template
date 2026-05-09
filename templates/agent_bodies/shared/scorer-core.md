@@ -24,8 +24,13 @@ You will be pointed to files containing:
 | H4 | **The result is new** | Novelty check returned NOVEL → PASS. KNOWN → FAIL. INCREMENTAL → cross-check against the Gate 3 novelty report: if Gate 3 identified a distinguishing result (a new comparative static, a sign reversal, an additional assumption that changes the conclusion, or a new empirical implication), the theory passes H4 and is scored on its merits. If Gate 3 found no distinguishing result, INCREMENTAL is FAIL. |
 | H5 | **Economic {{MECHANISM_TERM}} is clear** | {{H5_CHECK}} |
 
+<!-- EXT_EMPIRICAL_START -->
+**Own-design-critique guard.** If the paper's main contribution is primarily a methodological warning, measurement caveat, standard-error correction, methods checklist about *this paper's own analysis or data pipeline*, or a dataset/pipeline release where the release itself is the claimed contribution, treat H1/H5 as FAIL unless one of three exceptions is explicitly documented: (a) the operator asked for methods-note outputs, (b) Stage 3a contains an external replication showing the methods issue changes a published conclusion, or (c) the contribution is a formal methodological result — a stated theorem with proof, applicable beyond this paper's specific analysis or dataset (e.g., a new estimator's consistency, an identification theorem, a diagnostic's stated size/power) — not a simulation rejection rate, placebo battery, or debugging insight even framed as a general claim.
+
+<!-- EXT_EMPIRICAL_END -->
+
 <!-- EMPIRICAL_FIRST_START -->
-**Empirical-first causal-design guard.** This deployment is for causal-identification empirical papers. If the theory draft's main contribution is primarily a measurement note, data-construction warning, standard-error correction, descriptive fact, or methods checklist rather than the causal estimand committed to in `output/stage1/identification_design.md`, treat H1/H5 as FAIL unless one of two exceptions is explicitly documented: (a) the operator asked for methods-note outputs, or (b) Stage 3a contains an external replication showing the methods issue changes a published conclusion. A useful debugging insight is not, by itself, the paper's contribution in empirical-first mode.
+**Causal-estimand fidelity (empirical-first only).** Empirical-first commits the paper to the causal estimand in `output/stage1/identification_design.md`. Drift to a non-causal contribution class (descriptive fact, calibration, predictive horserace, dataset release) is itself an H1/H5 FAIL — empirical-first chose causal identification as the contract; exceptions (a) and (b) above do not apply here. Exception (c) applies identically in both blocks: a paper that satisfies (c) above is exempt here too — a stated theorem with proof, applicable beyond this paper's data, is a legitimate contribution even under empirical-first.
 
 <!-- EMPIRICAL_FIRST_END -->
 If ANY hard requirement fails → score is 0, decision is ABANDON or REVISE depending on what failed.

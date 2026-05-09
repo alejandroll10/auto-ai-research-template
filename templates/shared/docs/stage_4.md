@@ -52,9 +52,9 @@
 <!-- THEORY_FIRST_START -->
    - Free-form audit: `output/stage2/freeform_audit_vN.md`
 <!-- THEORY_FIRST_END -->
-<!-- EMPIRICAL_FIRST_START -->
-   - Identification audit: `output/stage3a/identification_audit.md`; empirics audit: `output/stage3a/empirics_audit.md` (the freeform-audit equivalent under empirical-first; no `output/stage2/freeform_audit_*.md` exists)
-<!-- EMPIRICAL_FIRST_END -->
+<!-- EXT_EMPIRICAL_START -->
+   - Identification audit: `output/stage3a/identification_audit.md`; empirics audit: `output/stage3a/empirics_audit.md`
+<!-- EXT_EMPIRICAL_END -->
    - Literature map: `output/stage0/literature_map.md`
 5. Save result to `output/stage4/branch_manager_vN.md`
 6. Commit: `artifact: branch-manager report v{N}`

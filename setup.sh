@@ -1515,31 +1515,47 @@ PYEOF
 # overlays in phase 4, not markers).
 EMPIRICAL_FIRST_ON=0
 [ "$MODE" = "empirical-first" ] && EMPIRICAL_FIRST_ON=1
+# EXT_EMPIRICAL_ON gates content that should activate whenever the empirical
+# extension is present, regardless of mode. Note: --mode empirical-first
+# auto-adds --ext empirical (line ~124), so EMPIRICAL_FIRST_ON=1 implies
+# EXT_EMPIRICAL_ON=1; the converse is not true (theory-first --ext empirical).
+EXT_EMPIRICAL_ON=0
+[[ " ${EXTENSIONS[*]} " =~ " empirical " ]] && EXT_EMPIRICAL_ON=1
 # Resolver runs over stage docs, the three runtime docs (CLAUDE.md /
 # AGENTS.md / GEMINI.md, assembled from templates/shared/core.md), AND the
 # three runtimes' assembled agent files. The agent-file coverage lets shared
 # agent bodies (e.g., paper-writer.md) carry inline EMPIRICAL_FIRST /
-# THEORY_FIRST markers — the alternative is a parallel body in
-# templates/agent_bodies/shared_modes/{mode}/, which is more duplication
+# THEORY_FIRST / EXT_EMPIRICAL markers — the alternative is a parallel body
+# in templates/agent_bodies/shared_modes/{mode}/, which is more duplication
 # when the body's mode-specific delta is small. Vocab substitution runs at
 # assembly time (before this resolver fires), so {{KEY}} placeholders are
 # already resolved when the resolver sees the agent files.
-python3 - "$EMPIRICAL_FIRST_ON" "$P/docs/"*.md "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" \
+python3 - "$EMPIRICAL_FIRST_ON" "$EXT_EMPIRICAL_ON" "$P/docs/"*.md "$CLAUDE_MD_OUT" "$AGENTS_MD_OUT" "$GEMINI_MD_OUT" \
     "$AGENTS_OUT"/*.md "$CODEX_AGENTS_OUT"/*.toml "$GEMINI_AGENTS_OUT"/*.md <<'PYEOF'
 import os, re, sys
 ef = sys.argv[1] == "1"
+xe = sys.argv[2] == "1"
+patterns = []  # list of (regex, replacement) applied in order
+# Trailing \n after END markers is optional so a marker at EOF (no final
+# newline) still matches; otherwise the literal HTML comment leaks into the
+# deployed file.
 if ef:
-    keep_marker = re.compile(r"<!-- EMPIRICAL_FIRST_(?:START|END) -->\n")
-    strip_block = re.compile(r"<!-- THEORY_FIRST_START -->\n.*?<!-- THEORY_FIRST_END -->\n\n?", re.DOTALL)
+    patterns.append((re.compile(r"<!-- THEORY_FIRST_START -->\n.*?<!-- THEORY_FIRST_END -->\n{0,2}", re.DOTALL), ""))
+    patterns.append((re.compile(r"<!-- EMPIRICAL_FIRST_(?:START|END) -->\n?"), ""))
 else:
-    keep_marker = re.compile(r"<!-- THEORY_FIRST_(?:START|END) -->\n")
-    strip_block = re.compile(r"<!-- EMPIRICAL_FIRST_START -->\n.*?<!-- EMPIRICAL_FIRST_END -->\n\n?", re.DOTALL)
-for p in sys.argv[2:]:
+    patterns.append((re.compile(r"<!-- EMPIRICAL_FIRST_START -->\n.*?<!-- EMPIRICAL_FIRST_END -->\n{0,2}", re.DOTALL), ""))
+    patterns.append((re.compile(r"<!-- THEORY_FIRST_(?:START|END) -->\n?"), ""))
+if xe:
+    patterns.append((re.compile(r"<!-- EXT_EMPIRICAL_(?:START|END) -->\n?"), ""))
+else:
+    patterns.append((re.compile(r"<!-- EXT_EMPIRICAL_START -->\n.*?<!-- EXT_EMPIRICAL_END -->\n{0,2}", re.DOTALL), ""))
+for p in sys.argv[3:]:
     if not os.path.exists(p):
         continue
     with open(p) as f: t = f.read()
-    new = strip_block.sub("", t)
-    new = keep_marker.sub("", new)
+    new = t
+    for rx, repl in patterns:
+        new = rx.sub(repl, new)
     if new != t:
         with open(p, "w") as f: f.write(new)
 PYEOF
