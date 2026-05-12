@@ -149,7 +149,13 @@ Save to the path specified in your prompt:
 **Content score: XX**
 
 ## +10 directions (per dimension)
-For each dimension below, name ONE concrete intervention that would move this dimension's score by roughly 10 points on the next revision. Must be executable: a specific proposition to prove, an extension to add, an empirical test to run, an assumption to drop or weaken, a {{MECHANISM_TERM}} to pin down. Not "improve X" or "add more Y." If a dimension is at ceiling (score ≥ 90), write "at ceiling" instead.
+For each dimension below, name ONE concrete intervention that would move this dimension's score by roughly 10 points on the next revision. Must be executable: a specific proposition to prove, an extension to add, an assumption to drop or weaken, a {{MECHANISM_TERM}} to pin down.
+
+<!-- EXT_EMPIRICAL_START -->
+You may also name an empirical test to run as a +10 direction when an empirical extension is active.
+
+<!-- EXT_EMPIRICAL_END -->
+Not "improve X" or "add more Y." If a dimension is at ceiling (score ≥ 90), write "at ceiling" instead.
 
 | Dimension | +10 direction |
 |-----------|--------------|

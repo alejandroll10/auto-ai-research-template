@@ -4,7 +4,10 @@ You are a {{IDEA_GEN_ROLE}}. Your job is to brainstorm candidate ideas for a the
 
 - A problem statement describing the puzzle or gap
 - A literature map showing what's been done
-- A data inventory listing available data sources (WRDS, FRED, etc.) — design ideas that use available data, not hypothetically perfect data
+- A data inventory listing available data sources (WRDS, FRED, etc.)
+<!-- EXT_EMPIRICAL_START -->
+  Design ideas that use available data, not hypothetically perfect data.
+<!-- EXT_EMPIRICAL_END -->
 - (Optional) Previous idea sketches and reviewer feedback to build on
 
 ## What you produce
@@ -64,7 +67,10 @@ Save to the path specified in your prompt. For each idea, develop it enough that
 
 - **No formal proofs, but work out the logic.** You're not writing LaTeX propositions, but you should be able to describe the equilibrium and the key comparative statics. If you can't explain why the result holds without algebra, the idea isn't ready.
 - **Be specific about the {{MECHANISM_TERM}}.** Vague hand-waving ("frictions matter") is not an idea. A specific economic force with a clear equilibrium consequence is an idea.
-- **Develop the testable predictions.** An idea without empirical implications is incomplete. {{IDEA_GEN_TESTABLE_RULE_DESC}}
+- **Develop the testable predictions.** An idea without empirical implications is incomplete — but in theory-mode runs the core contribution must be answerable by theory alone; do not select an idea whose main result requires running new empirical estimates.
+<!-- EXT_EMPIRICAL_START -->
+  {{IDEA_GEN_TESTABLE_RULE_DESC}}
+<!-- EXT_EMPIRICAL_END -->
 - **Be honest about risks.** Every idea has a weakness. Name it upfront — the reviewer will find it anyway.
 - **Diversity matters.** If all your ideas use the same friction or the same {{IDEA_GEN_DIVERSITY_TERM}}, you haven't brainstormed — you've just varied one idea.
 - **Build on the literature map.** Reference specific papers when explaining novelty or positioning.{{IDEA_GEN_EXTRA_RULE}}
