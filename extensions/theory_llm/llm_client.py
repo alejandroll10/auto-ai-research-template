@@ -2,12 +2,16 @@
 LLM client for theory_llm papers. Supports multiple backends:
   - UF NaviGator (gpt-oss models, free for UF researchers)
   - DeepInfra (Llama, Qwen, Gemma, etc.)
+  - Local (Ollama, llama.cpp, LM Studio, vLLM — any OpenAI-compatible server)
 
 Setup:
   1. pip install openai python-dotenv
-  2. Create .env with one or both:
+  2. Create .env with one or more:
      UF_API_KEY=your-key       # https://api.ai.it.ufl.edu
-     DEEPINFRA_TOKEN=your-key # https://deepinfra.com
+     DEEPINFRA_TOKEN=your-key  # https://deepinfra.com
+     LOCAL_LLM_BASE_URL=http://localhost:11434/v1   # optional; defaults to Ollama
+     LOCAL_LLM_MODEL=llama3.1:8b                    # required for local backend (any tag you pulled)
+     LOCAL_LLM_API_KEY=ollama                       # optional; most local servers ignore it
 """
 
 import os
@@ -51,6 +55,15 @@ BACKENDS = {
             "google/gemma-2-27b-it",
         ],
     },
+    "local": {
+        # Any OpenAI-compatible local server: Ollama, LM Studio, llama.cpp, vLLM, etc.
+        # base_url + default_model are overridable via env vars (resolved in get_client).
+        "base_url": "http://localhost:11434/v1",  # Ollama default; override with LOCAL_LLM_BASE_URL
+        "api_key_env": "LOCAL_LLM_API_KEY",       # most local servers ignore the key
+        "default_model": None,                    # must be set via LOCAL_LLM_MODEL or model= arg
+        # Models on a local server are whatever you've pulled — this list is purely illustrative.
+        "models": [],
+    },
 }
 
 
@@ -65,22 +78,39 @@ class LLMResponse:
 
 
 def _detect_backend(model: Optional[str] = None) -> str:
-    """Auto-detect which backend to use based on model name or available keys."""
+    """Auto-detect which backend to use based on model name or available keys.
+
+    Routing priority (when `model` is given):
+      1. Exact match against any backend's `models` list or `default_model`
+      2. "/" in name → DeepInfra (org/model format)
+      3. ":" in name → local (Ollama-style "name:tag")
+    Note: a name with both "/" and ":" (e.g. "registry/org/model:tag") routes to
+    DeepInfra; pass `backend="local"` explicitly to override.
+
+    Fallback priority (when `model` is None): UF → DeepInfra → local.
+    Cloud backends win if both a cloud key and LOCAL_LLM_* are set; force the
+    local backend with `backend="local"` if you want it.
+    """
     if model:
         for name, cfg in BACKENDS.items():
             if model in cfg["models"] or model == cfg["default_model"]:
                 return name
-        # If model contains '/' it's probably DeepInfra (org/model format)
         if "/" in model:
             return "deepinfra"
+        if ":" in model:
+            return "local"
 
-    # Fall back to whichever has a key configured
     if os.getenv("UF_API_KEY"):
         return "uf"
     if os.getenv("DEEPINFRA_TOKEN"):
         return "deepinfra"
+    if os.getenv("LOCAL_LLM_BASE_URL") or os.getenv("LOCAL_LLM_MODEL"):
+        return "local"
 
-    raise ValueError("No LLM API key found. Set UF_API_KEY or DEEPINFRA_TOKEN in .env")
+    raise ValueError(
+        "No LLM backend configured. Set UF_API_KEY, DEEPINFRA_TOKEN, "
+        "or LOCAL_LLM_BASE_URL/LOCAL_LLM_MODEL in .env"
+    )
 
 
 def get_client(backend: Optional[str] = None, model: Optional[str] = None) -> tuple[OpenAI, str]:
@@ -93,12 +123,19 @@ def get_client(backend: Optional[str] = None, model: Optional[str] = None) -> tu
         backend = _detect_backend(model)
 
     cfg = BACKENDS[backend]
-    api_key = os.getenv(cfg["api_key_env"])
-    if not api_key:
-        raise ValueError(f"Missing {cfg['api_key_env']} in .env for backend '{backend}'")
+
+    if backend == "local":
+        # Local servers usually don't authenticate; allow override but default to a placeholder.
+        base_url = os.getenv("LOCAL_LLM_BASE_URL", cfg["base_url"])
+        api_key = os.getenv(cfg["api_key_env"], "ollama")
+    else:
+        base_url = cfg["base_url"]
+        api_key = os.getenv(cfg["api_key_env"])
+        if not api_key:
+            raise ValueError(f"Missing {cfg['api_key_env']} in .env for backend '{backend}'")
 
     client = OpenAI(
-        base_url=cfg["base_url"],
+        base_url=base_url,
         api_key=api_key,
         timeout=300.0,
     )
@@ -120,7 +157,7 @@ def call(
         system: System prompt
         user: User message
         model: Model name (auto-detects backend if not specified)
-        backend: Force a specific backend ("uf" or "deepinfra")
+        backend: Force a specific backend ("uf", "deepinfra", or "local")
         max_tokens: Maximum response tokens
         temperature: Sampling temperature
         reasoning_effort: "low", "medium", "high" (UF gpt-oss only)
@@ -128,7 +165,15 @@ def call(
     client, backend_name = get_client(backend, model)
 
     if model is None:
-        model = BACKENDS[backend_name]["default_model"]
+        if backend_name == "local":
+            model = os.getenv("LOCAL_LLM_MODEL") or BACKENDS["local"]["default_model"]
+            if not model:
+                raise ValueError(
+                    "Local backend requires a model. Pass model=... or set LOCAL_LLM_MODEL "
+                    "in .env (e.g. 'llama3.1:8b', 'gemma3:27b', 'qwen2.5:32b' for Ollama)."
+                )
+        else:
+            model = BACKENDS[backend_name]["default_model"]
 
     kwargs = {
         "model": model,
@@ -152,10 +197,15 @@ def call(
     content = msg.content
     reasoning = getattr(msg, "reasoning_content", None) or getattr(msg, "reasoning", None)
 
-    # content can be None for reasoning models — fall back
-    if content is None:
+    # Reasoning models can return content="" (Ollama) or None (DeepInfra) — fall back to reasoning.
+    if not content:
         msg_dict = msg.model_dump() if hasattr(msg, "model_dump") else {}
-        content = msg_dict.get("reasoning_content", "")
+        content = (
+            msg_dict.get("reasoning_content")
+            or msg_dict.get("reasoning")
+            or reasoning
+            or ""
+        )
 
     return LLMResponse(
         content=content,
@@ -186,7 +236,14 @@ if __name__ == "__main__":
 
     try:
         client, detected = get_client(backend)
-        model = BACKENDS[detected]["default_model"]
+        if detected == "local":
+            model = os.getenv("LOCAL_LLM_MODEL") or BACKENDS["local"]["default_model"]
+            if not model:
+                raise ValueError(
+                    "Local backend requires a model. Set LOCAL_LLM_MODEL in .env."
+                )
+        else:
+            model = BACKENDS[detected]["default_model"]
         print(f"Testing {detected} backend with {model}...")
 
         r = call(
