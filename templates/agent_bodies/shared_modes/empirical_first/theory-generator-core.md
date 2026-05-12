@@ -26,7 +26,7 @@ A mechanism document saved to the path specified in your prompt. Structure:
 [The economic channel this paper documents — stated as a causal claim. Not "we show X" but "X causes Y because of Z."]
 
 ## Channel
-[Prose explanation of the economic force linking treatment to outcome. Who responds to what, and why? What's the agent-level reasoning that aggregates to the documented relationship? This is the heart of the mechanism — make it concrete.]
+[Prose explanation of the economic force linking treatment to outcome. Who responds to what, and why? What's the agent-level reasoning that aggregates to the documented relationship? Name the institutional setting (which agents, which market, which regulatory or contractual feature) and state the operative friction or departure from the frictionless benchmark in counterfactual form: absent it, the channel would not produce the documented relationship. This is the heart of the mechanism — make it concrete.]
 
 ### DAG
 [A directed acyclic graph showing the channel structure. Render in ASCII or graphviz-compatible syntax. Nodes: treatment T, outcome Y, mediators M, confounders W, instrument Z (if applicable). Edges: only the causal relationships the mechanism asserts. The DAG must be *consistent with the identification design* — if the design uses an instrument, Z appears with the right exclusion structure; if the design is a difference-in-differences, the DAG shows the parallel-trends assumption as a no-edge between unobserved time-varying confounders and treatment timing.]

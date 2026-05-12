@@ -32,6 +32,9 @@ Write each section to a separate file in `paper/sections/`:
 - State the contribution in paragraph 2 (one clean sentence)
 - Preview the mechanism and key result
 - Position against literature (use literature map — cite real papers only)
+<!-- EMPIRICAL_FIRST_START -->
+- Within paragraph 1, follow the question with the institutional setting and the operative friction named in `output/stage2/theory_draft_vN.md`'s Channel section; in the literature-positioning paragraph, name how this paper differs from the closest competitor in `output/stage0/literature_map.md`, not just that it differs.
+<!-- EMPIRICAL_FIRST_END -->
 - No roadmap paragraph — the section structure speaks for itself
 
 <!-- THEORY_FIRST_START -->
@@ -60,7 +63,7 @@ Write each section to a separate file in `paper/sections/`:
 
 ### `results.tex`
 - One headline regression table presenting the main estimate. Booktabs formatting; primary specification in column 1; robustness columns 2-N (clustering variants, period splits, alternative outcome definitions); standard errors in parentheses; significance stars; clear caption naming the design + sample.
-- One paragraph per coefficient interpreting it economically (sign, magnitude, what it means for the channel). State the economic significance, not just the statistical significance.
+- One paragraph per economic hypothesis tested, citing the coefficients that test it (not one paragraph per coefficient): give sign, magnitude, what it means for the channel, and economic significance — not just statistical significance.
 - Heterogeneity table(s) testing the channel's predicted heterogeneity (e.g., effect should be larger in high-leverage firms). Each heterogeneity test gets a paragraph linking the result back to the channel's prediction.
 - Auxiliary tests / falsification tests if the channel makes specific predictions on populations where the effect should NOT hold. If a falsification fails (the effect appears in a population where it shouldn't), say so plainly — the paper is then weaker, but the alternative is misleading.
 
