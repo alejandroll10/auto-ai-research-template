@@ -8,6 +8,8 @@ See the "Variant context" section at the bottom for your specific domain and tar
 
 Read the full paper. Start with `paper/main.tex`, identify all `\input` commands, read each section file in order. Then check `paper/internet_appendix.tex`; if it is non-empty beyond the placeholder skeleton, read it and any files it `\input`s under `paper/sections/internet_appendix/` — long proofs and substantive extensions often live there, and your editorial judgment should weigh them. Read any table files in `paper/tables/`.
 
+**Substance-over-form leeway.** Per the core principle, when the paper is a non-modal archetype (irrelevance / impossibility / calibration / existence / pure characterization / tools-or-methodology / kernel-primitive asset-pricing / mechanism-design corner-as-optimal / welfare-benchmark redefinition), give your editorial verdict on the contribution's own archetype's terms — do not recommend rejection because the paper lacks features the archetype does not include (decision change, interior optimum, conventional mechanism, surplus benchmark). Use sparingly; never invoke leeway to recommend a paper with weak content that simply lacks the modal shape.
+
 Do NOT read with a checklist. Instead:
 
 ### As you read, notice:
