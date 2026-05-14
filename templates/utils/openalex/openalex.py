@@ -23,6 +23,7 @@ import argparse
 import json
 import os
 import sys
+import textwrap
 import time
 import urllib.parse
 import urllib.request
@@ -57,11 +58,18 @@ VENUE_ALIASES = {
 }
 
 # Default field set we extract from works. Keep small to limit response payload.
+# `abstract_inverted_index` is added on demand by `work_fields(abstracts=True)` —
+# abstracts can be ~250 words × N results, so we don't pay that bandwidth unless
+# the caller asks.
 WORK_FIELDS = (
     "id,doi,title,display_name,publication_year,publication_date,"
     "primary_location,authorships,cited_by_count,referenced_works,"
     "open_access,language,type"
 )
+
+
+def work_fields(abstracts: bool) -> str:
+    return WORK_FIELDS + (",abstract_inverted_index" if abstracts else "")
 
 
 # ── env / http helpers ────────────────────────────────────────────────────────
@@ -142,6 +150,27 @@ def build_filter(venues: list[str], years: str | None, work_type: str | None) ->
 
 # ── projection ────────────────────────────────────────────────────────────────
 
+def reconstruct_abstract(inverted: dict | None) -> str | None:
+    """Rebuild a plain-text abstract from OpenAlex's `abstract_inverted_index`.
+
+    OpenAlex ships abstracts as `{word: [position, ...]}` to dodge licensing
+    around full-text reproduction. We invert that back into a normal string by
+    sorting tokens by position and joining with single spaces. Returns None if
+    the field is missing (paywalled venue, dataset record without an abstract,
+    etc.).
+    """
+    if not inverted:
+        return None
+    tokens: list[tuple[int, str]] = []
+    for word, positions in inverted.items():
+        for pos in positions or []:
+            tokens.append((pos, word))
+    if not tokens:
+        return None
+    tokens.sort(key=lambda t: t[0])
+    return " ".join(w for _, w in tokens)
+
+
 def project(work: dict) -> dict:
     primary = work.get("primary_location") or {}
     src = primary.get("source") or {}
@@ -150,7 +179,7 @@ def project(work: dict) -> dict:
         nm = (au.get("author") or {}).get("display_name")
         if nm:
             authors.append(nm)
-    return {
+    row = {
         "openalex_id": work.get("id"),
         "doi": work.get("doi"),
         "title": work.get("title") or work.get("display_name"),
@@ -165,6 +194,9 @@ def project(work: dict) -> dict:
         "open_access_pdf": (work.get("open_access") or {}).get("oa_url"),
         "n_references": len(work.get("referenced_works") or []),
     }
+    if "abstract_inverted_index" in work:
+        row["abstract"] = reconstruct_abstract(work.get("abstract_inverted_index"))
+    return row
 
 
 # ── output ────────────────────────────────────────────────────────────────────
@@ -190,6 +222,14 @@ def render_human(rows: list[dict], header: str = "") -> str:
         if loc:
             out.append(f"    {loc}")
         out.append(f"    id: {r['openalex_id']}")
+        abstract = r.get("abstract")
+        if abstract:
+            wrapped = textwrap.fill(abstract, width=96, initial_indent="    ", subsequent_indent="    ")
+            out.append(wrapped)
+            out.append("")
+        elif "abstract" in r:  # asked for, not provided by OpenAlex
+            out.append("    (no abstract available)")
+            out.append("")
     return "\n".join(out)
 
 
@@ -224,7 +264,7 @@ def cmd_search(args, mailto: str) -> int:
         "search": args.query,
         "per-page": str(args.top),
         "sort": sort,
-        "select": WORK_FIELDS,
+        "select": work_fields(args.abstracts),
     }
     if flt:
         params["filter"] = flt
@@ -249,7 +289,7 @@ def cmd_cites(args, mailto: str) -> int:
         "filter": ",".join(flt_parts),
         "per-page": str(args.top),
         "sort": "cited_by_count:desc",
-        "select": WORK_FIELDS,
+        "select": work_fields(args.abstracts),
     }
     payload = http_get("/works", params, mailto)
     rows = [project(w) for w in (payload.get("results") or [])]
@@ -267,7 +307,11 @@ def cmd_refs(args, mailto: str) -> int:
         return 0
     refs = refs[: args.top] if args.top else refs
     ids = "|".join(r.rsplit("/", 1)[-1] for r in refs)
-    payload = http_get("/works", {"filter": f"openalex_id:{ids}", "per-page": str(len(refs)), "select": WORK_FIELDS}, mailto)
+    payload = http_get(
+        "/works",
+        {"filter": f"openalex_id:{ids}", "per-page": str(len(refs)), "select": work_fields(args.abstracts)},
+        mailto,
+    )
     rows = [project(w) for w in (payload.get("results") or [])]
     header = f"# Backward references of {target['id'].rsplit('/',1)[-1]} (\"{target.get('title','')}\")  shown={len(rows)}/{len(refs)}"
     emit(rows, args.json, header)
@@ -291,7 +335,7 @@ def cmd_author(args, mailto: str) -> int:
         "filter": ",".join(flt_parts),
         "per-page": str(args.top),
         "sort": "cited_by_count:desc",
-        "select": WORK_FIELDS,
+        "select": work_fields(args.abstracts),
     }
     works_payload = http_get("/works", params, mailto)
     rows = [project(w) for w in (works_payload.get("results") or [])]
@@ -303,7 +347,7 @@ def cmd_author(args, mailto: str) -> int:
 
 def cmd_work(args, mailto: str) -> int:
     wid = normalize_work_id(args.work_id)
-    payload = http_get(f"/works/{wid}", {"select": WORK_FIELDS}, mailto)
+    payload = http_get(f"/works/{wid}", {"select": work_fields(args.abstracts)}, mailto)
     rows = [project(payload)]
     emit(rows, args.json, "")
     return 0
@@ -331,6 +375,7 @@ def main() -> int:
         x.add_argument("--type", help="Work type (article, book-chapter, dataset, ...)"),
         x.add_argument("--top", type=int, default=20, help="Max results (default 20, max 200)"),
         x.add_argument("--json", action="store_true", help="Emit one JSON object per result"),
+        x.add_argument("--abstracts", action="store_true", help="Include reconstructed abstracts in output"),
     )
 
     s = sp.add_parser("search", help="Keyword search over works")
@@ -348,6 +393,7 @@ def main() -> int:
     s.add_argument("work_id", help="OpenAlex W-id, full URL, or doi:10.xxx/...")
     s.add_argument("--top", type=int, default=50, help="Max references to fetch (default 50)")
     s.add_argument("--json", action="store_true")
+    s.add_argument("--abstracts", action="store_true", help="Include reconstructed abstracts in output")
     s.set_defaults(func=cmd_refs)
 
     s = sp.add_parser("author", help="Works by an author (top by citations)")
@@ -358,6 +404,7 @@ def main() -> int:
     s = sp.add_parser("work", help="Full record for one work")
     s.add_argument("work_id", help="OpenAlex W-id, full URL, or doi:10.xxx/...")
     s.add_argument("--json", action="store_true")
+    s.add_argument("--abstracts", action="store_true", help="Include reconstructed abstract in output")
     s.set_defaults(func=cmd_work)
 
     s = sp.add_parser("venues", help="Show resolved venue alias table")

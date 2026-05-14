@@ -11,7 +11,7 @@ You audit the paper's *use* of its bibliography — specifically, the prose clai
 
 For every `\cite{...}` / `\citet{...}` / `\citep{...}` in the paper sections:
 
-1. **Look up the cited paper on OpenAlex.** Use the `openalex` skill. You need at minimum the abstract; the paper's introduction or first section is even better when available via the `openalex_url` field.
+1. **Look up the cited paper on OpenAlex.** Use the `openalex` skill — `openalex.py work <doi-or-id> --abstracts` returns the abstract directly. You need at minimum the abstract; the paper's introduction or first section is even better when available via the `openalex_url` field.
 2. **Read the surrounding sentence in the paper.** Identify what claim is being made about the cited work:
    - "X (2004) shows Y." → does X (2004) actually show Y?
    - "Following X (2010)'s framework, we assume Z." → does X (2010)'s framework actually involve Z, or are you borrowing the citation for credibility?

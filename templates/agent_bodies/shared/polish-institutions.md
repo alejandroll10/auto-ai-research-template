@@ -19,7 +19,7 @@ You verify the paper's claims about the real world: institutional facts, regulat
 
 ## Tools
 
-- **OpenAlex** (skill `openalex`) for retrieving cited paper abstracts and basic metadata. The abstract is usually enough to verify whether a cited paper's mechanism is being characterized faithfully.
+- **OpenAlex** (skill `openalex`) for retrieving cited paper abstracts and basic metadata — `openalex.py work <doi-or-id> --abstracts` returns the abstract directly. The abstract is usually enough to verify whether a cited paper's mechanism is being characterized faithfully.
 - **WebSearch** for regulatory documents (SEC.gov, federal register), industry conventions (Preqin, Pitchbook reports), fee surveys (ILPA), market size aggregates.
 - **WebFetch** for primary regulatory text when needed.
 

@@ -24,17 +24,19 @@ The two are complementary. A good workflow seeds the literature with citation-so
 ## Commands
 
 ```
-openalex.py search <query> [--venue ...] [--years YYYY-YYYY] [--top N] [--sort cited|relevance]
-openalex.py cites <work-id>  [--venue ...] [--years ...] [--top N]
-openalex.py refs  <work-id>  [--top N]
-openalex.py author <name>    [--venue ...] [--years ...] [--top N]
-openalex.py work  <work-id>
+openalex.py search <query> [--venue ...] [--years YYYY-YYYY] [--top N] [--sort cited|relevance] [--abstracts]
+openalex.py cites <work-id>  [--venue ...] [--years ...] [--top N] [--abstracts]
+openalex.py refs  <work-id>  [--top N] [--abstracts]
+openalex.py author <name>    [--venue ...] [--years ...] [--top N] [--abstracts]
+openalex.py work  <work-id>  [--abstracts]
 openalex.py venues
 ```
 
 `<work-id>` accepts `W123...`, `https://openalex.org/W...`, or `doi:10.xxx/yyy`.
 
 Add `--json` to any command to emit one JSON object per result (for piping to scripts).
+
+Add `--abstracts` to pull and reconstruct each work's abstract from OpenAlex's inverted index. The abstract is appended below each entry in the human view, and shows up as an `"abstract"` field in `--json`. Default is off because abstracts add real bandwidth — turn it on when reading what a paper actually says matters (novelty triage, deciding what to cite, comparing a closely-related paper to your contribution); leave it off for citation-graph traversal. Not every record has one: paywalled venues and some pre-2010 papers are missing from OpenAlex; the CLI prints `(no abstract available)` in those cases and emits `"abstract": null` in JSON.
 
 ## Venue aliases
 
@@ -67,6 +69,13 @@ code/utils/openalex/openalex.py refs doi:10.1086/424739 --top 30
 # All works by an author in top venues
 code/utils/openalex/openalex.py author "Stefano Giglio" \
     --venue jf,jfe,rfs,aer,qje,jpe --top 10
+
+# Pull abstracts to actually read what a small shortlist of candidates argues
+code/utils/openalex/openalex.py search "intermediary asset pricing" \
+    --venue jf,jfe,rfs --years 2018-2026 --top 5 --sort cited --abstracts
+
+# Read one paper's abstract (e.g., before citing it in a related-work paragraph)
+code/utils/openalex/openalex.py work doi:10.1093/rfs/hhaa009 --abstracts
 ```
 
 ## Caveats
