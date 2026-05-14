@@ -8,10 +8,26 @@ Read the theory draft. Work out:
 
 - Testable predictions (signed comparative statics, magnitude predictions, qualitative patterns)
 - Comparative statics (how results move with parameters)
+<!-- THEORY_FIRST_START -->
 - Special cases that recover known results (nested baselines)
+<!-- THEORY_FIRST_END -->
 - Economic intuition for each result (in words, not algebra)
 
 Aim for 3–6 distinct implications. Quality over quantity — each should be a sentence a reader could test.
+<!-- EMPIRICAL_FIRST_START -->
+
+**Empirical-first mode.** "The theory draft" here is the Stage 2 mechanism document (`output/stage2/theory_draft_vN.md`) — prose + DAG + ≤2 reduced-form posits, not a structural model. The **headline causal estimate** is already committed: Stage 1's `identification_design.md` pins the estimand and the Stage 2 posits commit to the predicted sign and magnitude. Do not re-derive the headline prediction in Step 1.
+
+Stage 3 under empirical-first has a distinct job: derive **auxiliary** predictions that the mechanism implies and the empiricist will need at Stage 3a beyond the headline coefficient. Focus on:
+
+- **Heterogeneity predictions** — where the channel implies the effect should be stronger / weaker / reverse (e.g., by firm size, by leverage, by exposure intensity, by sub-period). These become the heterogeneity panels at Stage 3a.
+- **Falsification predictions** — sub-populations or settings where the channel predicts *no* effect. These become the placebo tests at Stage 3a.
+- **Alternative-channel discriminators** — patterns the claimed channel predicts that the leading alternative channel does *not* predict (or predicts in the opposite direction). These pin the channel attribution at Stage 3a.
+
+Do not derive "nested baselines / special cases" — the mechanism mode has no model parameters to take limits of. Skip that bullet.
+
+The output schema (Step 4) is unchanged — auxiliary predictions get the same SUPPORTED / NOVEL / PUZZLE-CANDIDATE / DEAD tagging. The empiricist at Stage 3a reads the tagged list and tests the NOVEL ones; the contradiction check fires on any NOVEL prediction the data does not support.
+<!-- EMPIRICAL_FIRST_END -->
 
 ## Step 2: Lit-check each implication
 
@@ -51,6 +67,10 @@ Use this canonical schema so downstream agents (empiricist, paper-writer, scorer
 ## Step 5: Sanity check
 
 If ALL implications come back SUPPORTED, the theory may be reinventing known results. Note this in the file and flag for the scorer at Gate 4 — likely a low Surprise / low Novelty score, possibly grounds for theory revision before paper-writing.
+<!-- EMPIRICAL_FIRST_START -->
+
+Under empirical-first, interpret this flag against the novelty of the **identification design** (Stage 1), not the auxiliary predictions alone. An empirical-first paper's contribution lives in the identified causal estimate; auxiliary predictions (heterogeneity, falsification, channel discriminators) being all-SUPPORTED is consistent with a well-understood mechanism where the novelty rests on the design + sample. Flag the all-SUPPORTED case only when the *identification design itself* is also derivative (a re-application of a well-trodden instrument or natural experiment), not when the auxiliary predictions happen to align with existing literature.
+<!-- EMPIRICAL_FIRST_END -->
 
 If ANY implication is PUZZLE-CANDIDATE, **launch `puzzle-triager` now** with the gap-scout lit-check report(s) as the contradicting evidence — do not wait for Stage 3a/3b. The literature contradiction (sign reversal or order-of-magnitude discrepancy) is itself the contradiction. Follow `docs/stage_puzzle_triage.md`. A literature-grounded contradiction in a well-audited theory is the highest-value pivot opportunity; defaulting to "ship as a noted puzzle" leaves real signal on the table.
 

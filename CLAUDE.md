@@ -37,6 +37,12 @@ If a user asks to create/set up/start a new research project, run `setup.sh` for
 # Finance theory + empirical data (CRSP, Compustat, FRED, WRDS)
 ./setup.sh <project-name> --variant finance --ext empirical
 
+# Empirical-first finance (causal-identification paper). The identification
+# design becomes the primary Stage 1 deliverable; Stage 2 writes a prose+DAG
+# mechanism (no theorem-and-proof structural model); math-auditor is skipped.
+# Auto-implies --ext empirical. Finance variant only in v1.
+./setup.sh <project-name> --variant finance --mode empirical-first
+
 # Macro theory
 ./setup.sh <project-name> --variant macro
 
@@ -69,6 +75,8 @@ If a user asks to create/set up/start a new research project, run `setup.sh` for
 ```
 
 `--manual` is mutually exclusive with `--seed` and `--faithful`. It assembles `core_manual.md` instead of `core.md`, auto-generates an agent/skill catalog from the metadata files, swaps in per-runtime `session_manual.md` files, and skips creating `process_log/pipeline_state.json`, the `output/stage*` subdirs, and `dashboard.html`. Pipeline-only agents (`scribe`, `triager`, `puzzle-triager`, `branch-manager`) are still assembled into `.claude/agents/` etc. but flagged `pipeline_only: true` in metadata so `scripts/generate_catalog.py` hides them from the user-facing catalog.
+
+`--mode empirical-first` flips the pipeline from theory-first to identification-first for empirical papers whose contribution is a causal estimate rather than a theorem. Finance-only in v1 (macro requires identification tooling — see [issue #18](https://github.com/alejandroll10/zeropaper/issues/18)); auto-implies `--ext empirical` (the empirical agents and skills are mandatory for this mode). The flag composes with `--seed` and `--faithful` (a seeded empirical idea or a faithful identification contract is coherent) and with `--light`; it is independent of `--manual` (which skips the autonomous pipeline entirely). Concretely: Stage 1 produces `output/stage1/identification_design.md` as a first-class artifact (the identification-designer fires at Stage 1 Step 4, before any mechanism work); Stage 2 produces a prose + DAG + ≤2 reduced-form posits mechanism document (no derivations, no theorems); Gate 2 (math audit) and Stage 2b (theory exploration) are permanently skipped because mechanism mode has no derivations or equilibria to audit; the scorer's H3 hard requirement swaps from "math audit passed" to "identification audit passed AND empirics audit passed"; Stage 3 derives auxiliary predictions (heterogeneity, falsification, alternative-channel discriminators) rather than the headline causal estimate (already committed in Stage 1); evaluator vocab (scorer, referee, self-attacker, empirics-auditor, referee-mechanism) is recalibrated for the identification-first framing via `templates/agents/finance_modes/empirical_first/vocab.json` and body overrides under `templates/agent_bodies/shared_modes/empirical_first/`. The deployed runtime doc's H1 title becomes "Autonomous Empirical Paper Pipeline" to reflect the route; the body's PAPER_TYPE / DOMAIN_AREAS placeholders are also mode-substituted (`setup.sh:168-186`). An optional `--ext theory` for post-results structural-model support is deferred to v2 — see [issue #26](https://github.com/alejandroll10/zeropaper/issues/26).
 
 `--faithful` is a stricter variant of `--seed`; pass one or the other, not both, and not alongside `--manual` (also mutually exclusive). The flag implies `--seed`'s folder structure (creates `output/seed/`, starts at `seed_triage`) but supersedes its semantics with the faithful contract. At seed_triage the orchestrator extracts `output/seed/mechanism_contract.md` (the seed's named mechanism, structural invariants, theorem-statement constraints, identification strategy, stated contribution); developing agents must respect every invariant. Substitution / pivot / headline-replacement are forbidden; additions on top of the faithfully-implemented contract (extra theorems, comparative statics, robustness checks) are encouraged. Genuine impossibilities get documented in `output/seed/limitations.md` and the paper ships documenting them honestly. Evaluators (scorer, scorer-freeform, math-auditor, math-auditor-freeform, novelty-checker, referee, referee-freeform, referee-mechanism, self-attacker, idea-prototyper, idea-reviewer, branch-manager, plus the extension evaluators empirics-auditor, identification-auditor under `--ext empirical` and experiment-reviewer under `--ext theory_llm`) stay impartial — corrupting the evaluation signal corrupts the paper. The faithful constraint enters at the orchestrator's routing of evaluator verdicts (per `templates/shared/faithful.md`) and via a static "read `mechanism_contract.md` first" pointer appended to each developing agent body. A `process_log/pivot_log.md` is seeded for auditing every potentially-mechanism-affecting routing decision.
 
@@ -182,6 +190,12 @@ test_scripts/                # Skill verification scripts (removed on deploy)
 
 Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory_llm`.
 
+## Supported modes
+
+| Mode | Flag | Status | Variants | Notes |
+|------|------|--------|----------|-------|
+| `empirical-first` | `--mode empirical-first` | Working (v1) | `finance` | Auto-implies `--ext empirical`. Stage 1's identification design is the primary deliverable; Stage 2 produces a prose+DAG mechanism (no theorems); Gate 2 / Stage 2b skipped; scorer H3 = identification+empirics audits; H1 subtitle becomes "Autonomous Empirical Paper Pipeline". Optional `--ext theory` for post-results structural support deferred to v2 ([#26](https://github.com/alejandroll10/zeropaper/issues/26)).
+
 ## Core skills (all variants)
 
 | Skill | Description |
@@ -226,6 +240,19 @@ Legacy: `--variant finance_llm` is shorthand for `--variant finance --ext theory
 3. Create `templates/agents/{variant}/vocab.json` with the per-variant vocabulary keys (scorer calibrations, importance/novelty/surprise rubrics, mechanism term, referee role, etc.) — see `templates/agents/finance/vocab.json` for the full set.
 4. Add variant config to `setup.sh` (paper type, target journals, journal list, domain areas)
 5. Test: `./setup.sh --variant {variant} --local`
+
+## Adding a new mode
+
+A *mode* re-frames the pipeline's orchestration (theory-first → identification-first, or another orientation) without forking a variant. It is layered on top of `--variant {finance|macro|...}` via two overlay mechanisms: a vocab overlay (mode-specific overrides to variant vocab keys) and a body overlay (mode-specific shared-agent bodies that replace the base shared body for that mode). The `empirical-first` mode is the reference implementation.
+
+1. **Choose the slug.** Mode flag is `--mode {slug}`; setup.sh lowercases `-` → `_` for directory lookups (`setup.sh:218`). So `--mode foo-bar` looks under `foo_bar/`.
+2. **Vocab overlay:** create `templates/agents/{variant}_modes/{mode_slug}/vocab.json` with only the keys whose meaning changes under this mode. Loaded by `setup.sh:220` and layered on top of the base variant vocab — later wins on duplicate keys. Reference: `templates/agents/finance_modes/empirical_first/vocab.json`.
+3. **Body overlay (optional):** create `templates/agent_bodies/shared_modes/{mode_slug}/` with per-agent body overrides. Files are named `{agent_id}-core.md` (variant agent overrides) or `{agent_id}.md` (shared agent overrides) — the loader's suffix discrimination at `scripts/agent_body_loader.py:50-95` handles both. Reference: `templates/agent_bodies/shared_modes/empirical_first/{theory-generator-core.md, idea-generator-core.md, idea-prototyper.md, referee-mechanism.md}`.
+4. **Stage-doc guards (optional):** add `<!-- {MODE}_FIRST_START -->` / `<!-- {MODE}_FIRST_END -->` markers in `templates/shared/docs/*.md` for content that should activate under this mode. The marker resolver at `setup.sh:1513-1569` strips the markers under the matching mode and removes the whole block otherwise. A complementary `<!-- THEORY_FIRST_START -->` marker exists for content that should *only* render under the no-mode (theory-first) default. Currently only `EMPIRICAL_FIRST` markers are wired into the resolver; adding a new mode's markers means adding a parallel `else if` branch.
+5. **Mode-conditional descriptors in setup.sh:** add a `case "$VARIANT"` branch in the `if [ "$MODE" = "{mode}" ]; then` block (around `setup.sh:175-186`) that overrides `PAPER_TYPE`, `DOMAIN_AREAS`, `DOC_SUBTITLE`, and any other variant descriptors the mode reframes.
+6. **Validation block in setup.sh:** add the mode to the `case` in the mode-flag validator (~line 117) that decides which `--variant` combinations the mode supports. If the mode implies an extension (as `empirical-first` implies `--ext empirical`), auto-add it with an Info message.
+7. **Tests:** `./setup.sh /tmp/test_{mode} --variant {variant} --mode {mode} --local` should resolve cleanly with `✓ All placeholders resolved` and no `{{KEY}}` leakage. Inspect the deployed CLAUDE.md and `.claude/agents/*.md` for marker leakage (`grep -c '{MODE}_FIRST_START'` should be 0).
+8. **Document:** add a row to the "Supported modes" table above. If the mode has cross-variant compatibility nuances (auto-implied extensions, mutual exclusions with other flags), document them in a prose paragraph in the "Setting up a new project" section parallel to the `--mode empirical-first` paragraph.
 
 ## Architecture: runtime-agnostic core + runtime-specific packaging
 

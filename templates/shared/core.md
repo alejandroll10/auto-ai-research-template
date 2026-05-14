@@ -1,4 +1,4 @@
-# {{RUNTIME_DOC_NAME}} — Autonomous Theory Paper Pipeline
+# {{RUNTIME_DOC_NAME}} — {{RUNTIME_DOC_SUBTITLE}}
 
 {{RUNTIME_DISCIPLINE}}
 

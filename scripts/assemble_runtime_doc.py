@@ -18,6 +18,10 @@ def main():
     parser.add_argument("--tier-list-inline", required=True,
                         help="Variant tier enum as backtick-wrapped comma list (e.g., '`top-5`, `top-3-fin`, `field`, `letters`')")
     parser.add_argument("--doc-name", required=True)
+    parser.add_argument("--doc-subtitle", required=True,
+                        help="H1 subtitle after the runtime doc name (e.g., "
+                             "'Autonomous Theory Paper Pipeline' for the default theory-first "
+                             "deploy, 'Autonomous Empirical Paper Pipeline' under --mode empirical-first).")
     parser.add_argument("--agent-dir", required=True)
     parser.add_argument("--skill-dir", required=True)
     parser.add_argument("--seed-block", default=None,
@@ -55,6 +59,7 @@ def main():
         skill_catalog = Path(args.skill_catalog).read_text().rstrip()
 
     content = content.replace("{{RUNTIME_DOC_NAME}}", args.doc_name)
+    content = content.replace("{{RUNTIME_DOC_SUBTITLE}}", args.doc_subtitle)
     content = content.replace("{{PAPER_TYPE}}", args.paper_type)
     content = content.replace("{{TARGET_JOURNALS}}", args.target_journals)
     content = content.replace("{{DOMAIN_AREAS}}", args.domain_areas)

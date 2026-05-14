@@ -172,6 +172,7 @@ esac
 # accurately describe an empirical-first deploy as such, not as a theory
 # paper. TARGET_JOURNALS does not change (top-3 finance journals publish
 # both theory and empirical work). JOURNAL_LIST also unchanged.
+DOC_SUBTITLE="Autonomous Theory Paper Pipeline"
 if [ "$MODE" = "empirical-first" ]; then
     case "$VARIANT" in
         finance)
@@ -180,6 +181,7 @@ if [ "$MODE" = "empirical-first" ]; then
             # break the default-mode "a finance theory paper" wording.)
             PAPER_TYPE="causal-identification empirical finance paper"
             DOMAIN_AREAS="empirical finance — asset pricing, corporate finance, information economics, market design, financial intermediation, or behavioral finance — with the contribution resting on a credibly-identified causal estimand plus a prose+DAG mechanism"
+            DOC_SUBTITLE="Autonomous Empirical Paper Pipeline"
             ;;
     esac
 fi
@@ -615,6 +617,7 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --tier-ladder-prose "$TIER_LADDER_PROSE" \
     --tier-list-inline "$TIER_LIST_INLINE" \
     --doc-name "CLAUDE.md" \
+    --doc-subtitle "$DOC_SUBTITLE" \
     --agent-dir "$CLAUDE_AGENTS_REL" \
     --skill-dir "$CLAUDE_SKILLS_REL" \
     --session-out "$SESSION_OUT_DIR/start_session_claude.md" \
@@ -637,6 +640,7 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --tier-ladder-prose "$TIER_LADDER_PROSE" \
     --tier-list-inline "$TIER_LIST_INLINE" \
     --doc-name "AGENTS.md" \
+    --doc-subtitle "$DOC_SUBTITLE" \
     --agent-dir "$CODEX_AGENTS_REL" \
     --skill-dir "$CODEX_SKILLS_REL" \
     --session-out "$SESSION_OUT_DIR/start_session_codex.md" \
@@ -660,6 +664,7 @@ python3 "$TEMPLATE_ROOT/scripts/assemble_runtime_doc.py" \
     --tier-ladder-prose "$TIER_LADDER_PROSE" \
     --tier-list-inline "$TIER_LIST_INLINE" \
     --doc-name "GEMINI.md" \
+    --doc-subtitle "$DOC_SUBTITLE" \
     --agent-dir "$GEMINI_AGENTS_REL" \
     --skill-dir "$GEMINI_DIR_REL/skills" \
     --session-out "$SESSION_OUT_DIR/start_session_gemini.md" \
