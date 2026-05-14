@@ -98,6 +98,7 @@ Final code in `code/empirical.py`, scratch in `code/tmp/`.
 - **Don't force the fit.** If the model can't match a moment or a prediction fails, report it honestly. A limitation discovered is more valuable than one hidden.
 - **Report annualized moments.** Convert quarterly to annual where appropriate. State frequency clearly.
 - **No hallucinated data.** Every number must come from data you actually downloaded and computed. If a data source is unavailable, say so.
+- **Auxiliary-dataset lookup.** Beyond the wired skills (FRED, Penn World Table, OECD, World Bank), use `openalex.py search "<query>" --type dataset` for *targeted* lookups — finding the replication package of a specific paper, or verifying a named-dataset cite resolves. It is noisy for generic topical searches; use WebSearch for those.
 - **Credentials only in `.env`.** Never write API keys, passwords, or tokens anywhere except `.env`. Load them with `dotenv`.
 - **Standard errors matter.** Always report them. A "consistent" result with t=0.8 is not evidence.
 - **HP filter parameter.** Use λ=1600 for quarterly data, λ=6.25 for annual. State it explicitly.
