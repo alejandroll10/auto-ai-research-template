@@ -256,6 +256,11 @@ assemble_claude_shared_agents() {
     [ -n "$MODE_BODIES_OVERLAY" ] && bodies_args+=(--bodies-dir "$MODE_BODIES_OVERLAY")
     bodies_args+=(--bodies-dir "$template_root/templates/agent_bodies/shared")
     local vocab_args=()
+    # Shared defaults always come first; the mode overlay (when set) is
+    # layered on top and wins on duplicate keys. The default file supplies
+    # values for keys referenced by shared-agent metadata or bodies in the
+    # no-mode case (e.g., IDEA_PROTOTYPER_DESCRIPTION).
+    vocab_args+=(--vocab "$template_root/templates/agent_bodies/shared/vocab.json")
     [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
 
     python3 "$template_root/scripts/assemble_claude_agents.py" \
@@ -298,6 +303,7 @@ assemble_codex_shared_agents() {
     [ -n "$MODE_BODIES_OVERLAY" ] && bodies_args+=(--bodies-dir "$MODE_BODIES_OVERLAY")
     bodies_args+=(--bodies-dir "$template_root/templates/agent_bodies/shared")
     local vocab_args=()
+    vocab_args+=(--vocab "$template_root/templates/agent_bodies/shared/vocab.json")
     [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
 
     python3 "$template_root/scripts/assemble_codex_subagents.py" \
@@ -336,6 +342,7 @@ assemble_gemini_shared_agents() {
     [ -n "$MODE_BODIES_OVERLAY" ] && bodies_args+=(--bodies-dir "$MODE_BODIES_OVERLAY")
     bodies_args+=(--bodies-dir "$template_root/templates/agent_bodies/shared")
     local vocab_args=()
+    vocab_args+=(--vocab "$template_root/templates/agent_bodies/shared/vocab.json")
     [ -n "$MODE_VOCAB_OVERLAY" ] && vocab_args+=(--vocab "$MODE_VOCAB_OVERLAY")
 
     python3 "$template_root/scripts/assemble_gemini_agents.py" \
@@ -542,11 +549,12 @@ if [ "$MANUAL" = "1" ]; then
         esac
     done
 
-    # Vocab args mirror the assembler convention: base variant vocab first,
-    # then mode overlay (last-write-wins on duplicate keys). Without this the
-    # catalog leaks {{KEY}} tokens like {{THEORY_GEN_DESCRIPTION}} for any
-    # description that's vocab-driven.
-    CATALOG_VOCAB_ARGS=()
+    # Vocab args mirror the assembler convention: shared defaults first, then
+    # base variant vocab, then mode overlay (last-write-wins on duplicate keys).
+    # Without the shared defaults the catalog leaks shared-agent {{KEY}} tokens
+    # like {{IDEA_PROTOTYPER_DESCRIPTION}}; without the variant vocab it leaks
+    # variant-agent {{KEY}} tokens like {{THEORY_GEN_DESCRIPTION}}.
+    CATALOG_VOCAB_ARGS=(--vocab "$TEMPLATE_ROOT/templates/agent_bodies/shared/vocab.json")
     [ -f "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}/vocab.json" ] && \
         CATALOG_VOCAB_ARGS+=(--vocab "$TEMPLATE_ROOT/templates/agents/${AGENT_DIR}/vocab.json")
     [ -n "$MODE_VOCAB_OVERLAY" ] && CATALOG_VOCAB_ARGS+=(--vocab "$MODE_VOCAB_OVERLAY")

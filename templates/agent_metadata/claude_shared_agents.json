@@ -19,7 +19,7 @@
   },
   "idea-prototyper": {
     "name": "idea-prototyper",
-    "description": "Quick mathematical prototype of a selected idea. Launched between idea selection and full theory development to verify tractability. Attempts the key derivation \u2014 if the main result doesn't go through, kills the idea before expensive theory investment.",
+    "description": "{{IDEA_PROTOTYPER_DESCRIPTION}}",
     "category": "evaluator",
     "tools": "Read, Write, Bash",
     "skills": [
