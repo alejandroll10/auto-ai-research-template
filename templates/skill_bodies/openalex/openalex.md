@@ -76,7 +76,12 @@ code/utils/openalex/openalex.py search "intermediary asset pricing" \
 
 # Read one paper's abstract (e.g., before citing it in a related-work paragraph)
 code/utils/openalex/openalex.py work doi:10.1093/rfs/hhaa009 --abstracts
+
+# Find a paper's replication package or a named dataset (use --type dataset)
+code/utils/openalex/openalex.py search "Gopinath Stein trade invoicing" --type dataset --top 5
 ```
+
+**Datasets.** `--type dataset` filters to dataset records (ICPSR replication packages, Fed/government deposits, Harvard Dataverse, Zenodo, etc.). Use it for *targeted* lookups: finding the replication data of a specific paper, or verifying a named-dataset cite resolves. It is noisy for generic topical searches ("find me a dataset on X") — Figshare/PsycEXTRA-uploaded papers are often tagged as datasets and crowd out the canonical ones; use WebSearch for that.
 
 ## Caveats
 

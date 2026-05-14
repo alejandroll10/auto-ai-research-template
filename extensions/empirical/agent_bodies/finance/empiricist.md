@@ -86,6 +86,7 @@ Final code in `code/empirical.py`, scratch in `code/tmp/`.
 - **Don't force the fit.** If the model can't match a moment or a prediction fails, report it honestly. A limitation discovered is more valuable than one hidden.
 - **Report annualized moments.** Convert monthly to annual where appropriate (multiply mean by 12, std by sqrt(12) for returns).
 - **No hallucinated data.** Every number must come from data you actually downloaded and computed. If a data source is unavailable, say so.
+- **Auxiliary-dataset lookup.** Beyond the wired skills (CRSP/Compustat/FRED/WRDS), use `openalex.py search "<query>" --type dataset` for *targeted* lookups — finding the replication package of a specific paper, or verifying a named-dataset cite resolves. It is noisy for generic topical searches; use WebSearch for those.
 - **Credentials only in `.env`.** Never write API keys, passwords, or tokens anywhere except `.env`. Load them with `dotenv`.
 - **Standard errors matter.** Always report them. A "consistent" result with t=0.8 is not evidence.
 - **Reproducible scripts.** Every script must set `np.random.seed(42)` (or equivalent) at the top. Log the input data file paths and date ranges used. Anyone re-running the script should get the same output.

@@ -114,7 +114,7 @@ Pick from this menu when constructing candidates. Each has a current-best-practi
 
 ## Available data variation
 
-[From the data inventory: what's there? Panel structure, time series length, instruments available, policy events, regulatory thresholds, network structure, etc.]
+[From the data inventory: what's there? Panel structure, time series length, instruments available, policy events, regulatory thresholds, network structure, etc. If a strategy hinges on auxiliary data beyond the wired skills (CRSP/Compustat/FRED/WRDS), use `openalex.py search "<query>" --type dataset` to check whether a named replication package or public deposit exists before recommending it.]
 
 ## Strategy menu (ranked)
 
