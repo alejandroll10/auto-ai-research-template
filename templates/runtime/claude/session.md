@@ -29,6 +29,8 @@ The session-start data inventory is *not* sufficient for long-running pipelines:
 
 Subagents can hang indefinitely. Launch web-dependent agents (`literature-scout`, `novelty-checker`) in the background. Check their output file every 5 minutes — if empty or not growing after a few checks, re-launch with the same prompt.
 
+Never background a process with `nohup` (or a detached `&`) — it escapes harness tracking and stall detection. Use a harness-tracked background job instead (the Bash tool's `run_in_background`).
+
 ### Hourly self-check (stall guard + pace reminder)
 
 Right after the data inventory completes and before Stage 0 launches, set up an ~hourly self-loop using the Claude Code `/loop` skill. The loop is local; do not ask for confirmation — skip the cloud offer, do local session. Use **`59m` exactly** — the `/loop` skill triggers a cloud-vs-local cloud-offer prompt at intervals ≥60m, and 59m sidesteps it. If the skill offers to round to 60m, decline; the slight cron unevenness is intentional.

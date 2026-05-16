@@ -780,6 +780,43 @@ inject_faithful_into_agents() {
     done
 }
 
+# `inject_bash_background_into_agents` appends the no-nohup / use-a-harness-
+# tracked-background-job note to every Bash-capable agent. Unconditional (unlike
+# the faithful injector): subagents never see the runtime doc, so a heavy job
+# launched by e.g. theory-explorer/empiricist/experiment-designer would otherwise
+# go unmonitored. Called after core assembly and inside each extension block;
+# the file-existence guards make it a no-op for not-yet-assembled agents.
+inject_bash_background_into_agents() {
+    local _inject_file="$TEMPLATE_ROOT/templates/shared/bash_background.md"
+    if [ ! -f "$_inject_file" ]; then
+        echo "Error: bash-background inject template not found: $_inject_file" >&2
+        exit 1
+    fi
+    local _block
+    _block=$(cat "$_inject_file")
+    local _agent
+    for _agent in "$@"; do
+        if [ -f "$AGENTS_OUT/$_agent.md" ]; then
+            printf '\n%s\n' "$_block" >> "$AGENTS_OUT/$_agent.md"
+        fi
+        if [ -f "$CODEX_AGENTS_OUT/$_agent.toml" ]; then
+            awk -v block="$_block" '
+            { lines[NR] = $0 }
+            /^'\'''\'''\''$/ { last = NR }
+            END {
+                for (i = 1; i <= NR; i++) {
+                    if (i == last) print block
+                    print lines[i]
+                }
+            }' "$CODEX_AGENTS_OUT/$_agent.toml" > "$CODEX_AGENTS_OUT/$_agent.toml.tmp" \
+            && mv "$CODEX_AGENTS_OUT/$_agent.toml.tmp" "$CODEX_AGENTS_OUT/$_agent.toml"
+        fi
+        if [ -f "$GEMINI_AGENTS_OUT/$_agent.md" ]; then
+            printf '\n%s\n' "$_block" >> "$GEMINI_AGENTS_OUT/$_agent.md"
+        fi
+    done
+}
+
 # Core developing agents — list comes from metadata `category: "developing"`,
 # the single source of truth (see scripts/list_agents_by_category.py).
 mapfile -t _core_developing_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
@@ -790,6 +827,14 @@ inject_faithful_into_agents "${_core_developing_agents[@]}"
 if [ "$FAITHFUL" = "1" ]; then
     echo "  ✓ Faithful pointer injected into core developing agents"
 fi
+
+# Bash-capable core agents — list comes from metadata `tools` containing Bash.
+mapfile -t _core_bash_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
+    --has-tool Bash \
+    --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_shared_agents.json" \
+    --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_variant_agents.json")
+inject_bash_background_into_agents "${_core_bash_agents[@]}"
+echo "  ✓ Background-job note injected into Bash-capable core agents"
 
 # ── Create project directories and initial files ──
 echo "Creating project structure..."
@@ -1303,6 +1348,11 @@ PYEOF
                 --metadata "$TEMPLATE_ROOT/extensions/theory_llm/agent_metadata/agents.json")
             inject_faithful_into_agents "${_tllm_developing_agents[@]}"
 
+            mapfile -t _tllm_bash_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
+                --has-tool Bash \
+                --metadata "$TEMPLATE_ROOT/extensions/theory_llm/agent_metadata/agents.json")
+            inject_bash_background_into_agents "${_tllm_bash_agents[@]}"
+
             echo "  ✓ LLM experiment extension applied"
             ;;
         empirical)
@@ -1440,6 +1490,12 @@ PYEOF
                 --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/shared_agents.json" \
                 --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/${AGENT_DIR}_agents.json")
             inject_faithful_into_agents "${_empirical_developing_agents[@]}"
+
+            mapfile -t _empirical_bash_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
+                --has-tool Bash \
+                --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/shared_agents.json" \
+                --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/${AGENT_DIR}_agents.json")
+            inject_bash_background_into_agents "${_empirical_bash_agents[@]}"
 
             echo "  ✓ Empirical extension applied (skills + agents)"
             ;;
