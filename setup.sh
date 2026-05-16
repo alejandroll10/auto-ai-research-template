@@ -823,6 +823,13 @@ mapfile -t _core_developing_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agen
     --category developing \
     --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_shared_agents.json" \
     --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_variant_agents.json")
+# Fail loud: empty here means the lister errored (mapfile masks it under set -e),
+# never a real result — there are always developing agents. Harmless when
+# FAITHFUL=0 (injector is a no-op) but prevents a silent skip under --faithful.
+if [ "${#_core_developing_agents[@]}" -eq 0 ]; then
+    echo "Error: core developing-agent list is empty (lister failed or metadata missing)" >&2
+    exit 1
+fi
 inject_faithful_into_agents "${_core_developing_agents[@]}"
 if [ "$FAITHFUL" = "1" ]; then
     echo "  ✓ Faithful pointer injected into core developing agents"
@@ -833,6 +840,12 @@ mapfile -t _core_bash_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_
     --has-tool Bash \
     --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_shared_agents.json" \
     --metadata "$TEMPLATE_ROOT/templates/agent_metadata/claude_variant_agents.json")
+# Fail loud: mapfile masks python failure under set -e, so an empty list here
+# means the lister errored or metadata is missing — never a real empty result.
+if [ "${#_core_bash_agents[@]}" -eq 0 ]; then
+    echo "Error: Bash-capable core agent list is empty (lister failed or metadata missing)" >&2
+    exit 1
+fi
 inject_bash_background_into_agents "${_core_bash_agents[@]}"
 echo "  ✓ Background-job note injected into Bash-capable core agents"
 
@@ -1346,11 +1359,19 @@ PYEOF
             mapfile -t _tllm_developing_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
                 --category developing \
                 --metadata "$TEMPLATE_ROOT/extensions/theory_llm/agent_metadata/agents.json")
+            if [ "${#_tllm_developing_agents[@]}" -eq 0 ]; then
+                echo "Error: theory_llm developing-agent list is empty (lister failed or metadata missing)" >&2
+                exit 1
+            fi
             inject_faithful_into_agents "${_tllm_developing_agents[@]}"
 
             mapfile -t _tllm_bash_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
                 --has-tool Bash \
                 --metadata "$TEMPLATE_ROOT/extensions/theory_llm/agent_metadata/agents.json")
+            if [ "${#_tllm_bash_agents[@]}" -eq 0 ]; then
+                echo "Error: theory_llm Bash-agent list is empty (lister failed or metadata missing)" >&2
+                exit 1
+            fi
             inject_bash_background_into_agents "${_tllm_bash_agents[@]}"
 
             echo "  ✓ LLM experiment extension applied"
@@ -1489,12 +1510,20 @@ PYEOF
                 --category developing \
                 --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/shared_agents.json" \
                 --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/${AGENT_DIR}_agents.json")
+            if [ "${#_empirical_developing_agents[@]}" -eq 0 ]; then
+                echo "Error: empirical developing-agent list is empty (lister failed or metadata missing)" >&2
+                exit 1
+            fi
             inject_faithful_into_agents "${_empirical_developing_agents[@]}"
 
             mapfile -t _empirical_bash_agents < <(python3 "$TEMPLATE_ROOT/scripts/list_agents_by_category.py" \
                 --has-tool Bash \
                 --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/shared_agents.json" \
                 --metadata "$TEMPLATE_ROOT/extensions/empirical/agent_metadata/${AGENT_DIR}_agents.json")
+            if [ "${#_empirical_bash_agents[@]}" -eq 0 ]; then
+                echo "Error: empirical Bash-agent list is empty (lister failed or metadata missing)" >&2
+                exit 1
+            fi
             inject_bash_background_into_agents "${_empirical_bash_agents[@]}"
 
             echo "  ✓ Empirical extension applied (skills + agents)"
